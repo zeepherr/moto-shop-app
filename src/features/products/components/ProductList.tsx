@@ -95,8 +95,8 @@ export const ProductList: React.FC<{ initialProducts: ProductDTO[]; categories: 
                 <TableRow key={p.id}>
                   <TableCell>
                     <div className="h-9 w-9 rounded-lg bg-muted border border-border flex items-center justify-center overflow-hidden relative">
-                      {p.imageKey ? (
-                        <img src={getR2PublicUrl(p.imageKey)} alt={p.name} className="h-full w-full object-cover" />
+                      {p.imageUrl || p.imageKey ? (
+                        <img src={p.imageUrl || (p.imageKey ? getR2PublicUrl(p.imageKey) : "")} alt={p.name} className="h-full w-full object-cover" />
                       ) : (
                         <Package className="h-4 w-4 text-muted-foreground" />
                       )}

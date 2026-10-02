@@ -9,6 +9,7 @@ export interface ProductDTO {
   stockQuantity: number;
   unit: string;
   imageKey: string | null;
+  imageUrl?: string | null;
   isActive: boolean;
   createdAt: string | Date;
   updatedAt: string | Date;

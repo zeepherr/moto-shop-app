@@ -2,6 +2,7 @@ import React from "react";
 import type { Metadata } from "next";
 import { findAllProducts } from "@/features/products/services/product.service";
 import { findAllCategories } from "@/features/categories/services/category.service";
+import { getR2PublicUrl } from "@/features/products/services/r2.service";
 import { ProductList } from "@/features/products/components/ProductList";
 
 export const metadata: Metadata = {
@@ -28,6 +29,7 @@ export default async function AdminProductsPage() {
     stockQuantity: p.stockQuantity,
     unit: p.unit,
     imageKey: p.imageKey,
+    imageUrl: p.imageKey ? getR2PublicUrl(p.imageKey) : null,
     isActive: p.isActive,
     createdAt: p.createdAt.toISOString(),
     updatedAt: p.updatedAt.toISOString(),

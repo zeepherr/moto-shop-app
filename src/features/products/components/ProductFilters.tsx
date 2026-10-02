@@ -46,14 +46,14 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           placeholder="Search product name or SKU..."
-          className="bg-card pl-9 text-sm"
+          className="h-10 rounded-xl border border-input bg-card pl-9 text-sm text-foreground placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-primary shadow-xs"
         />
       </div>
 
       <select
         value={selectedCategory}
         onChange={(e) => setSelectedCategory(e.target.value)}
-        className="h-9 w-full rounded-xl border border-input bg-card px-3 text-sm text-foreground shadow-xs outline-none focus:ring-2 focus:ring-primary sm:w-44 cursor-pointer"
+        className="h-10 w-full rounded-xl border border-input bg-card px-3 text-sm text-foreground shadow-xs outline-none focus:ring-2 focus:ring-primary sm:w-44 cursor-pointer"
       >
         <option value="all">All categories</option>
         {categories.map((c) => (
@@ -66,7 +66,7 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
       <select
         value={selectedStatus}
         onChange={(e) => setSelectedStatus(e.target.value)}
-        className="h-9 w-full rounded-xl border border-input bg-card px-3 text-sm text-foreground shadow-xs outline-none focus:ring-2 focus:ring-primary sm:w-36 cursor-pointer"
+        className="h-10 w-full rounded-xl border border-input bg-card px-3 text-sm text-foreground shadow-xs outline-none focus:ring-2 focus:ring-primary sm:w-36 cursor-pointer"
       >
         <option value="all">All status</option>
         <option value="active">Active</option>
@@ -79,7 +79,7 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
           variant="ghost"
           size="sm"
           onClick={handleClearFilters}
-          className="cursor-pointer text-muted-foreground hover:text-foreground gap-1.5"
+          className="h-9 px-2.5 text-xs text-muted-foreground hover:text-foreground gap-1.5 cursor-pointer"
         >
           <X className="size-4" />
           Clear

@@ -22,16 +22,5 @@ export default async function AdminMotorBrandsPage() {
     _count: b._count,
   }));
 
-  return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">Motorcycle Brands</h1>
-        <p className="text-sm text-muted-foreground">
-          Manage authorized motorcycle manufacturers supported in your repair shop
-        </p>
-      </div>
-
-      <MotorBrandList initialBrands={brands} />
-    </div>
-  );
+  return <MotorBrandList initialBrands={brands} />;
 }

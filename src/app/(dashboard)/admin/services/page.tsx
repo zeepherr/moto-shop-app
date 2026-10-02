@@ -23,16 +23,5 @@ export default async function AdminServicesPage() {
     updatedAt: s.updatedAt.toISOString(),
   }));
 
-  return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">Repair Services</h1>
-        <p className="text-sm text-muted-foreground">
-          Maintain your shop labor, maintenance packages, and repair service catalog
-        </p>
-      </div>
-
-      <ServiceList initialServices={services} />
-    </div>
-  );
+  return <ServiceList initialServices={services} />;
 }

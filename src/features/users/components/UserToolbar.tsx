@@ -18,21 +18,21 @@ export const UserToolbar: React.FC<UserToolbarProps> = ({
   setRoleFilter,
 }) => {
   return (
-    <div className="flex flex-col gap-3 border-b border-border/60 p-3 sm:flex-row sm:items-center sm:justify-between">
-      <div className="relative w-full sm:max-w-md">
+    <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between pb-1">
+      <div className="relative w-full sm:min-w-64 sm:flex-1 sm:max-w-md">
         <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
         <Input
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           placeholder="Search name, email or phone..."
-          className="h-9 pl-9"
+          className="h-10 rounded-xl border border-input bg-card pl-9 text-sm text-foreground placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-primary shadow-xs"
         />
       </div>
 
       <select
         value={roleFilter}
         onChange={(e) => setRoleFilter(e.target.value)}
-        className="h-9 w-full rounded-xl border border-input bg-card px-3 text-sm text-foreground shadow-xs outline-none focus:ring-2 focus:ring-primary sm:w-40 cursor-pointer"
+        className="h-10 w-full rounded-xl border border-input bg-card px-3 text-sm text-foreground shadow-xs outline-none focus:ring-2 focus:ring-primary sm:w-40 cursor-pointer"
       >
         <option value="ALL">All roles</option>
         <option value="MEMBER">Members</option>

@@ -23,12 +23,11 @@ export const ProductHeader: React.FC<ProductHeaderProps> = ({ onAddProduct }) =>
 
         <Button
           type="button"
-          size="sm"
           onClick={onAddProduct}
-          className="h-8 shrink-0 cursor-pointer gap-1.5 px-3 text-xs sm:h-9 sm:text-sm"
+          className="h-9 rounded-full bg-[#0066cc] hover:bg-[#0071e3] text-white px-4 text-xs sm:text-sm font-medium gap-1.5 shadow-xs active:scale-95 transition-all cursor-pointer"
         >
-          <Plus className="size-3.5 sm:size-4" />
-          Add Product
+          <Plus className="size-4" />
+          <span>Add Product</span>
         </Button>
       </div>
     </div>

@@ -1,130 +1,261 @@
 "use client";
 
-import React, { useState, useTransition } from "react";
-import { Plus, Search, Edit2, Trash2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { MotorBrandModal } from "./MotorBrandModal";
-import { updateBrandAction, deleteBrandAction } from "../actions/motor.actions";
+import React, { useState, useMemo, useTransition } from "react";
+import { toast } from "sonner";
+import { Bike, ShieldAlert } from "lucide-react";
+import { PageHeader } from "@/components/management/PageHeader";
+import { FilterToolbar } from "@/components/management/FilterToolbar";
+import { StatusBadge } from "@/components/management/StatusBadge";
+import { RowActions } from "@/components/management/RowActions";
+import { ItemDialog } from "@/components/management/ItemDialog";
+import { ConfirmActionDialog } from "@/components/ConfirmActionDialog";
+import {
+  createBrandAction,
+  updateBrandAction,
+  deleteBrandAction,
+} from "../actions/motor.actions";
 import type { MotorBrandDTO } from "../types";
 
-export const MotorBrandList: React.FC<{ initialBrands: MotorBrandDTO[] }> = ({ initialBrands }) => {
+export const MotorBrandList: React.FC<{ initialBrands: MotorBrandDTO[] }> = ({
+  initialBrands,
+}) => {
   const [search, setSearch] = useState("");
-  const [modalOpen, setModalOpen] = useState(false);
+  const [status, setStatus] = useState("all");
+  const [createOpen, setCreateOpen] = useState(false);
   const [editingBrand, setEditingBrand] = useState<MotorBrandDTO | null>(null);
-  const [, startTransition] = useTransition();
+  const [statusBrand, setStatusBrand] = useState<MotorBrandDTO | null>(null);
+  const [deletingBrand, setDeletingBrand] = useState<MotorBrandDTO | null>(null);
 
-  const filtered = initialBrands.filter((b) =>
-    b.name.toLowerCase().includes(search.toLowerCase()),
+  const [isPending, startTransition] = useTransition();
+
+  const filtered = useMemo(() => {
+    const term = search.trim().toLowerCase();
+    return initialBrands.filter((b) => {
+      const matchesSearch = !term || b.name.toLowerCase().includes(term);
+      const matchesStatus =
+        status === "all" ||
+        (status === "active" && b.isActive) ||
+        (status === "inactive" && !b.isActive);
+      return matchesSearch && matchesStatus;
+    });
+  }, [initialBrands, search, status]);
+
+  const counts = useMemo(
+    () => ({
+      all: initialBrands.length,
+      active: initialBrands.filter((b) => b.isActive).length,
+      inactive: initialBrands.filter((b) => !b.isActive).length,
+    }),
+    [initialBrands]
   );
 
-  const handleToggleActive = (brand: MotorBrandDTO) => {
+  const handleCreate = (name: string) => {
     startTransition(async () => {
-      await updateBrandAction(brand.id, { isActive: !brand.isActive });
+      const res = await createBrandAction({ name });
+      if (res.success) {
+        toast.success("Motor brand created successfully");
+        setCreateOpen(false);
+      } else {
+        toast.error(res.error || "Failed to create brand");
+      }
     });
   };
 
-  const handleDelete = (id: number) => {
-    if (!confirm("Are you sure you want to delete this brand?")) return;
+  const handleUpdate = (name: string) => {
+    if (!editingBrand) return;
     startTransition(async () => {
-      const res = await deleteBrandAction(id);
-      if (!res.success) alert(res.error);
+      const res = await updateBrandAction(editingBrand.id, { name });
+      if (res.success) {
+        toast.success("Motor brand updated successfully");
+        setEditingBrand(null);
+      } else {
+        toast.error(res.error || "Failed to update brand");
+      }
+    });
+  };
+
+  const handleConfirmStatus = () => {
+    if (!statusBrand) return;
+    startTransition(async () => {
+      const res = await updateBrandAction(statusBrand.id, {
+        isActive: !statusBrand.isActive,
+      });
+      if (res.success) {
+        toast.success(`Brand ${statusBrand.isActive ? "deactivated" : "activated"}`);
+        setStatusBrand(null);
+      } else {
+        toast.error(res.error || "Failed to update status");
+      }
+    });
+  };
+
+  const handleConfirmDelete = () => {
+    if (!deletingBrand) return;
+    startTransition(async () => {
+      const res = await deleteBrandAction(deletingBrand.id);
+      if (res.success) {
+        toast.success("Motor brand deleted successfully");
+        setDeletingBrand(null);
+      } else {
+        toast.error(res.error || "Failed to delete brand");
+      }
     });
   };
 
   return (
     <div className="space-y-4">
-      {/* Toolbar */}
-      <div className="flex flex-col sm:flex-row gap-3 items-center justify-between">
-        <div className="relative w-full sm:w-72">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search brands..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-9 h-10"
-          />
+      <PageHeader
+        title="Motorcycle Brands"
+        description="Manage motorcycle manufacturers and vehicle makes"
+        actionLabel="Add Brand"
+        onAction={() => setCreateOpen(true)}
+      />
+
+      <FilterToolbar
+        search={search}
+        onSearchChange={setSearch}
+        searchPlaceholder="Search brands..."
+        status={status}
+        onStatusChange={setStatus}
+        statusCounts={counts}
+        hasActiveFilters={search.trim() !== "" || status !== "all"}
+        onClearFilters={() => {
+          setSearch("");
+          setStatus("all");
+        }}
+      />
+
+      {/* Unified Table */}
+      <div className="rounded-2xl border border-border/70 bg-card overflow-hidden shadow-xs">
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[650px] text-sm">
+            <thead>
+              <tr className="border-b border-border/60 bg-muted/30">
+                <th className="px-4 py-3 text-left font-medium text-muted-foreground text-xs uppercase tracking-wider">
+                  Brand Name
+                </th>
+                <th className="px-4 py-3 text-left font-medium text-muted-foreground text-xs uppercase tracking-wider">
+                  Models Registered
+                </th>
+                <th className="px-4 py-3 text-left font-medium text-muted-foreground text-xs uppercase tracking-wider">
+                  Status
+                </th>
+                <th className="w-16 px-4 py-3 text-right font-medium text-muted-foreground">
+                  <span className="sr-only">Actions</span>
+                </th>
+              </tr>
+            </thead>
+
+            <tbody className="divide-y divide-border/40">
+              {filtered.length === 0 ? (
+                <tr>
+                  <td colSpan={4} className="h-40 text-center">
+                    <div className="flex flex-col items-center justify-center gap-1.5 py-6">
+                      <Bike className="size-8 text-muted-foreground/50" />
+                      <p className="font-medium text-foreground text-sm">No motorcycle brands found</p>
+                      <p className="text-xs text-muted-foreground">Try clearing filters or add a new brand.</p>
+                    </div>
+                  </td>
+                </tr>
+              ) : (
+                filtered.map((b) => (
+                  <tr key={b.id} className="hover:bg-muted/30 transition-colors">
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-3">
+                        <div className="flex size-9 shrink-0 items-center justify-center rounded-xl border border-border/70 bg-muted/40 font-semibold text-xs text-foreground uppercase">
+                          {b.name.charAt(0)}
+                        </div>
+                        <div className="min-w-0">
+                          <p className="font-medium text-foreground truncate">{b.name}</p>
+                          <p className="text-xs text-muted-foreground">Motorcycle manufacturer</p>
+                        </div>
+                      </div>
+                    </td>
+
+                    <td className="px-4 py-3">
+                      <span className="inline-flex items-center gap-1 text-xs text-muted-foreground font-medium bg-muted/40 px-2 py-0.5 rounded-md border border-border/40">
+                        <Bike className="size-3" />
+                        {b._count?.motors ?? 0} {b._count?.motors === 1 ? "model" : "models"}
+                      </span>
+                    </td>
+
+                    <td className="px-4 py-3">
+                      <StatusBadge isActive={b.isActive} />
+                    </td>
+
+                    <td className="px-4 py-3 text-right">
+                      <RowActions
+                        isActive={b.isActive}
+                        onEdit={() => setEditingBrand(b)}
+                        onStatusChange={() => setStatusBrand(b)}
+                        onDelete={() => setDeletingBrand(b)}
+                        label="brand"
+                      />
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
         </div>
-        <Button
-          onClick={() => {
-            setEditingBrand(null);
-            setModalOpen(true);
-          }}
-          className="gap-2 w-full sm:w-auto"
-        >
-          <Plus className="h-4 w-4" />
-          <span>Add Brand</span>
-        </Button>
       </div>
 
-      {/* Table */}
-      <div className="rounded-2xl border border-border bg-card overflow-hidden shadow-sm">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Brand Name</TableHead>
-              <TableHead>Motor Models</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filtered.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
-                  No brands found.
-                </TableCell>
-              </TableRow>
-            ) : (
-              filtered.map((b) => (
-                <TableRow key={b.id}>
-                  <TableCell className="font-medium text-foreground">{b.name}</TableCell>
-                  <TableCell>{b._count?.motors ?? 0} models</TableCell>
-                  <TableCell>
-                    <button
-                      type="button"
-                      onClick={() => handleToggleActive(b)}
-                      className={`px-2 py-0.5 text-xs font-semibold rounded-md border cursor-pointer transition-colors ${
-                        b.isActive
-                          ? "bg-success/10 text-success border-success/20 hover:bg-success/20"
-                          : "bg-muted text-muted-foreground border-border hover:bg-muted/80"
-                      }`}
-                    >
-                      {b.isActive ? "Active" : "Inactive"}
-                    </button>
-                  </TableCell>
-                  <TableCell className="text-right space-x-1">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => {
-                        setEditingBrand(b);
-                        setModalOpen(true);
-                      }}
-                    >
-                      <Edit2 className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-destructive hover:bg-destructive/10"
-                      onClick={() => handleDelete(b.id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </div>
+      {/* Dialogs */}
+      <ItemDialog
+        open={createOpen}
+        onOpenChange={setCreateOpen}
+        title="Add Motorcycle Brand"
+        description="Add a new motorcycle brand to your shop catalog."
+        label="Brand Name"
+        placeholder="e.g. Honda, Yamaha, Kawasaki, Ducati"
+        submitLabel="Add Brand"
+        onSubmit={handleCreate}
+        isPending={isPending}
+      />
 
-      <MotorBrandModal
-        open={modalOpen}
-        onOpenChange={setModalOpen}
-        brand={editingBrand}
+      <ItemDialog
+        open={Boolean(editingBrand)}
+        onOpenChange={(open) => !open && setEditingBrand(null)}
+        title="Edit Motorcycle Brand"
+        description="Update brand name and details."
+        label="Brand Name"
+        placeholder="e.g. Honda"
+        initialValue={editingBrand?.name || ""}
+        submitLabel="Save Changes"
+        onSubmit={handleUpdate}
+        isPending={isPending}
+      />
+
+      <ConfirmActionDialog
+        open={Boolean(statusBrand)}
+        onOpenChange={(open) => !open && setStatusBrand(null)}
+        title={statusBrand?.isActive ? "Deactivate this brand?" : "Activate this brand?"}
+        description={
+          statusBrand?.isActive
+            ? `Models under "${statusBrand.name}" will remain, but the brand will be marked inactive.`
+            : `"${statusBrand?.name}" will become active and available for model registration.`
+        }
+        confirmLabel={statusBrand?.isActive ? "Deactivate" : "Activate"}
+        cancelLabel="Cancel"
+        variant={statusBrand?.isActive ? "destructive" : "default"}
+        isPending={isPending}
+        onConfirm={handleConfirmStatus}
+      />
+
+      <ConfirmActionDialog
+        open={Boolean(deletingBrand)}
+        onOpenChange={(open) => !open && setDeletingBrand(null)}
+        title="Delete this brand?"
+        description={
+          deletingBrand
+            ? `Are you sure you want to permanently delete "${deletingBrand.name}"? This action cannot be undone.`
+            : ""
+        }
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+        variant="destructive"
+        isPending={isPending}
+        onConfirm={handleConfirmDelete}
       />
     </div>
   );

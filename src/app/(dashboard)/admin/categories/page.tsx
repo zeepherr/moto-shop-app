@@ -22,16 +22,5 @@ export default async function AdminCategoriesPage() {
     _count: c._count,
   }));
 
-  return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">Product Categories</h1>
-        <p className="text-sm text-muted-foreground">
-          Organize your motorcycle parts and merchandise into clean categories
-        </p>
-      </div>
-
-      <CategoryList initialCategories={categories} />
-    </div>
-  );
+  return <CategoryList initialCategories={categories} />;
 }

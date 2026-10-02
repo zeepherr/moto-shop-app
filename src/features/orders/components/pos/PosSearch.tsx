@@ -67,7 +67,7 @@ export const PosSearch: React.FC<PosSearchProps> = ({
           value={searchTerm}
           onChange={(e) => onSearchChange(e.target.value)}
           placeholder="Search products or services..."
-          className="h-9 pl-9"
+          className="h-10 rounded-xl border border-input bg-card pl-9 text-sm text-foreground placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-primary shadow-xs"
         />
       </div>
 
@@ -78,9 +78,9 @@ export const PosSearch: React.FC<PosSearchProps> = ({
           value={sku}
           onChange={(e) => setSku(e.target.value)}
           onKeyDown={handleSkuSubmit}
-          placeholder="Scan or enter SKU"
+          placeholder="Scan or enter SKU (press Enter)"
           autoComplete="off"
-          className="h-9 pl-9"
+          className="h-10 rounded-xl border border-input bg-card pl-9 text-sm text-foreground placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-primary shadow-xs"
         />
       </div>
     </section>

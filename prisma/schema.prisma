@@ -1,0 +1,329 @@
+// Prisma schema for moto-care-app
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ======================================================
+// ENUMS
+// ======================================================
+
+enum PaymentMethod {
+  CASH
+  QR
+}
+
+enum UserRole {
+  ADMIN
+  STAFF
+  MEMBER
+}
+
+enum MotorType {
+  AUTOMATIC
+  MANUAL
+}
+
+enum CustomerType {
+  MEMBER
+  GUEST
+}
+
+enum OrderStatus {
+  PENDING
+  COMPLETED
+  CANCELLED
+}
+
+enum OrderItemType {
+  PRODUCT
+  SERVICE
+}
+
+// ======================================================
+// MODELS
+// ======================================================
+
+// USER
+model User {
+  id   Int      @id @default(autoincrement())
+  role UserRole @default(MEMBER)
+
+  phone String? @unique
+  email String? @unique
+
+  firstName String
+  lastName  String
+  password  String
+
+  isActive        Boolean   @default(true)
+  emailVerifiedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  userInfo   UserInfo?
+  userMotors UserMotor[]
+
+  memberOrders Order[] @relation("MemberOrder")
+  saleOrders   Order[] @relation("Sale")
+
+  authSessions AuthSession[]
+}
+
+// USER INFO
+model UserInfo {
+  id Int @id @default(autoincrement())
+
+  userId   Int     @unique
+  photoUrl String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// AUTH SESSION
+model AuthSession {
+  id Int @id @default(autoincrement())
+
+  userId Int
+
+  refreshToken String @unique
+
+  expiresAt DateTime
+  revokedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+// PENDING REGISTRATION
+model PendingRegistration {
+  id Int @id @default(autoincrement())
+
+  email String @unique
+
+  firstName String
+  lastName  String
+
+  passwordHash String
+  otpHash      String
+
+  expiresAt DateTime
+
+  attempts   Int      @default(0)
+  lastSentAt DateTime @default(now())
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// MOTOR BRAND
+model MotorBrand {
+  id Int @id @default(autoincrement())
+
+  name String @unique
+
+  isActive Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  motors Motor[]
+}
+
+// MOTOR
+model Motor {
+  id Int @id @default(autoincrement())
+
+  motorBrandId Int
+
+  model String
+  type  MotorType
+
+  isActive Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  motorBrand MotorBrand @relation(fields: [motorBrandId], references: [id], onDelete: Restrict)
+
+  userMotors UserMotor[]
+  orders     Order[]
+
+  @@unique([motorBrandId, model])
+  @@index([motorBrandId])
+}
+
+// USER MOTOR
+model UserMotor {
+  id Int @id @default(autoincrement())
+
+  userId  Int
+  motorId Int
+
+  createdAt DateTime @default(now())
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  motor Motor @relation(fields: [motorId], references: [id], onDelete: Restrict)
+
+  @@unique([userId, motorId])
+  @@index([userId])
+  @@index([motorId])
+}
+
+// PRODUCT CATEGORY
+model ProductCategory {
+  id Int @id @default(autoincrement())
+
+  name String @unique
+
+  isActive Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  products Product[]
+}
+
+// PRODUCT
+model Product {
+  id Int @id @default(autoincrement())
+
+  productCategoryId Int
+
+  sku         String  @unique
+  name        String
+  description String?
+
+  costPrice    Decimal @db.Decimal(10, 2)
+  sellingPrice Decimal @db.Decimal(10, 2)
+
+  stockQuantity Int @default(0)
+
+  unit     String
+  imageKey String?
+
+  isActive Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  productCategory ProductCategory @relation(fields: [productCategoryId], references: [id], onDelete: Restrict)
+
+  orderItems OrderItem[]
+
+  @@index([productCategoryId])
+}
+
+// SERVICE
+model Service {
+  id Int @id @default(autoincrement())
+
+  name        String  @unique
+  description String?
+
+  price Decimal @db.Decimal(10, 2)
+
+  isActive Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  orderItems OrderItem[]
+}
+
+// ORDER
+model Order {
+  id Int @id @default(autoincrement())
+
+  orderNumber String @unique
+
+  memberId    Int?
+  handledById Int
+  motorId     Int?
+
+  customerType CustomerType
+
+  subtotal Decimal @db.Decimal(10, 2)
+
+  discountRate   Decimal @default(0) @db.Decimal(5, 2)
+  discountAmount Decimal @default(0) @db.Decimal(10, 2)
+
+  finalTotal Decimal @db.Decimal(10, 2)
+
+  status         OrderStatus    @default(PENDING)
+  paymentMethod  PaymentMethod?
+  receivedAmount Decimal?       @db.Decimal(10, 2)
+
+  createdAt   DateTime  @default(now())
+  completedAt DateTime?
+
+  // Relations
+  member User? @relation("MemberOrder", fields: [memberId], references: [id], onDelete: SetNull)
+
+  handledBy User @relation("Sale", fields: [handledById], references: [id], onDelete: Restrict)
+
+  motor Motor? @relation(fields: [motorId], references: [id], onDelete: SetNull)
+
+  orderItems OrderItem[]
+
+  @@index([memberId])
+  @@index([handledById])
+  @@index([motorId])
+  @@index([createdAt])
+  @@index([status])
+}
+
+// ORDER ITEM
+model OrderItem {
+  id Int @id @default(autoincrement())
+
+  orderId Int
+
+  productId Int?
+  serviceId Int?
+
+  itemType OrderItemType
+
+  itemNameSnapshot String
+
+  quantity Int @default(1)
+
+  unitPrice Decimal @db.Decimal(10, 2)
+  lineTotal Decimal @db.Decimal(10, 2)
+
+  createdAt DateTime @default(now())
+
+  // Relations
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  product Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+
+  service Service? @relation(fields: [serviceId], references: [id], onDelete: SetNull)
+
+  @@index([orderId])
+  @@index([productId])
+  @@index([serviceId])
+}

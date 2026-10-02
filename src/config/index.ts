@@ -1,0 +1,37 @@
+// Centralized typed configuration
+// Reads process.env once with strict fallbacks so no raw process.env calls are scattered in the codebase
+
+export const config = {
+  db: {
+    url: process.env.DATABASE_URL || "",
+    directUrl: process.env.DIRECT_URL || "",
+  },
+  auth: {
+    jwtSecret: process.env.JWT_SECRET || "default_dev_jwt_secret_change_me_in_env_local",
+    otpSecret: process.env.OTP_SECRET || "default_dev_otp_secret",
+    cookieName: "moto_care_session",
+    refreshCookieName: "refreshToken",
+    accessTokenExpiresIn: "15m",
+    refreshTokenExpiresDays: 7,
+  },
+  mail: {
+    user: process.env.MAIL_USER || "",
+    pass: process.env.MAIL_APP_PASSWORD || "",
+    host: process.env.MAIL_HOST || "smtp.gmail.com",
+    port: Number(process.env.MAIL_PORT) || 587,
+  },
+  r2: {
+    accountId: process.env.R2_ACCOUNT_ID || "",
+    accessKeyId: process.env.R2_ACCESS_KEY_ID || "",
+    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY || "",
+    bucketName: process.env.R2_BUCKET_NAME || "",
+    publicUrl: process.env.R2_PUBLIC_URL || "",
+  },
+  app: {
+    url: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
+    env: process.env.NODE_ENV || "development",
+    isProduction: process.env.NODE_ENV === "production",
+  },
+} as const;
+
+export type AppConfig = typeof config;

@@ -1,67 +1,127 @@
-import Image from "next/image";
+import Link from "next/link";
+import { redirect } from "next/navigation";
+import { getCurrentUser } from "@/features/auth/actions/session.action";
+import { Wrench, ArrowRight, ShieldCheck, ShoppingBag, Sparkles } from "lucide-react";
 
-export default function Home() {
+export const dynamic = "force-dynamic";
+
+export default async function HomePage() {
+  const user = await getCurrentUser();
+
+  if (user) {
+    if (user.role === "ADMIN") redirect("/admin");
+    if (user.role === "STAFF") redirect("/staff/pos");
+    redirect("/member/profile");
+  }
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+    <div className="flex min-h-screen flex-col bg-background selection:bg-cyan-500/20">
+      {/* Navbar */}
+      <header className="fixed inset-x-0 top-0 z-50 border-b border-border/40 bg-background/80 backdrop-blur-md">
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center gap-3">
+            <div className="flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/25">
+              <Wrench className="size-5 stroke-[2]" />
+            </div>
+            <span className="font-heading text-xl font-bold tracking-tight text-foreground">
+              Moto<span className="text-cyan-500">Care</span>
+            </span>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <Link
+              href="/login"
+              className="rounded-xl px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground hover:bg-muted/50"
             >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+              Sign In
+            </Link>
+            <Link
+              href="/register"
+              className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-sm transition-all hover:bg-primary/90"
             >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+              Get Started
+              <ArrowRight className="size-4" />
+            </Link>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      </header>
+
+      {/* Hero Section */}
+      <main className="flex-1 pt-24">
+        <div className="relative isolate overflow-hidden px-6 pt-16 lg:px-8">
+          <div className="pointer-events-none absolute -top-40 left-1/2 -z-10 -translate-x-1/2 transform-gpu blur-3xl sm:-top-80">
+            <div className="aspect-[1155/678] w-[68rem] bg-gradient-to-tr from-cyan-400 to-blue-600 opacity-20" />
+          </div>
+
+          <div className="mx-auto max-w-3xl py-20 text-center">
+            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-cyan-500/20 bg-cyan-500/10 px-3.5 py-1 text-xs font-semibold text-cyan-500">
+              <Sparkles className="size-3.5" />
+              Smart Motorcycle Workshop Management
+            </div>
+
+            <h1 className="font-heading text-4xl font-extrabold tracking-tight text-foreground sm:text-6xl">
+              Power Your Repair Shop with{" "}
+              <span className="bg-gradient-to-r from-cyan-400 via-blue-500 to-indigo-500 bg-clip-text text-transparent">
+                Precision POS
+              </span>
+            </h1>
+
+            <p className="mt-6 text-base leading-7 text-muted-foreground sm:text-lg">
+              Manage motorcycle parts, repair tickets, inventory, staff roles, and
+              instant checkout in one unified, real-time operating system.
+            </p>
+
+            <div className="mt-10 flex items-center justify-center gap-4">
+              <Link
+                href="/login"
+                className="inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-md transition-all hover:bg-primary/90"
+              >
+                Launch App
+                <ArrowRight className="size-4" />
+              </Link>
+              <Link
+                href="/register"
+                className="rounded-xl border border-border/80 px-6 py-3 text-sm font-medium text-foreground transition-colors hover:bg-muted"
+              >
+                Register Member
+              </Link>
+            </div>
+          </div>
+
+          {/* Highlights */}
+          <div className="mx-auto max-w-5xl pb-24">
+            <div className="grid gap-6 sm:grid-cols-3">
+              <div className="rounded-2xl border border-border/70 bg-card p-6 shadow-xs">
+                <div className="mb-4 flex size-10 items-center justify-center rounded-xl bg-cyan-500/10 text-cyan-500">
+                  <ShoppingBag className="size-5" />
+                </div>
+                <h3 className="font-semibold text-foreground">Real-time POS</h3>
+                <p className="mt-2 text-xs text-muted-foreground leading-5">
+                  Barcode scanning, inventory sync, ticket holding, and QR payment integration.
+                </p>
+              </div>
+
+              <div className="rounded-2xl border border-border/70 bg-card p-6 shadow-xs">
+                <div className="mb-4 flex size-10 items-center justify-center rounded-xl bg-blue-500/10 text-blue-500">
+                  <Wrench className="size-5" />
+                </div>
+                <h3 className="font-semibold text-foreground">Service Catalog</h3>
+                <p className="mt-2 text-xs text-muted-foreground leading-5">
+                  Pre-configured repair routines, motorcycle model compatibilities, and pricing.
+                </p>
+              </div>
+
+              <div className="rounded-2xl border border-border/70 bg-card p-6 shadow-xs">
+                <div className="mb-4 flex size-10 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-500">
+                  <ShieldCheck className="size-5" />
+                </div>
+                <h3 className="font-semibold text-foreground">Role Security</h3>
+                <p className="mt-2 text-xs text-muted-foreground leading-5">
+                  Granular permission control across Admin, Staff, and Customer Member portals.
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       </main>
     </div>

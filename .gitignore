@@ -39,3 +39,14 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# third-party agent tooling installed by `impeccable` — local tooling only,
+# not project source. Re-create with the installer instead of committing it.
+# AGENTS.md and CLAUDE.md stay tracked on purpose (AGENTS.md is regenerated
+# by `next dev` and committing it keeps the working tree clean).
+/.agent/
+/.agents/
+/.claude/
+/.codex/
+/.gemini/
+/.opencode/

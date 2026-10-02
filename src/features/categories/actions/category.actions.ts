@@ -20,15 +20,19 @@ export const createCategoryAction = async (input: CreateCategoryInput) => {
     return { success: false, error: parsed.error.issues[0]?.message || "Invalid input" };
   }
 
-  const existing = await findCategoryByName(parsed.data.name);
-  if (existing) {
-    return { success: false, error: "A category with this name already exists" };
-  }
+  try {
+    const existing = await findCategoryByName(parsed.data.name);
+    if (existing) {
+      return { success: false, error: "A category with this name already exists" };
+    }
 
-  const category = await createCategory(parsed.data);
-  revalidatePath("/admin/categories");
-  revalidatePath("/admin/products");
-  return { success: true, data: category };
+    await createCategory(parsed.data);
+    revalidatePath("/admin/categories");
+    revalidatePath("/admin/products");
+    return { success: true };
+  } catch {
+    return { success: false, error: "Could not create the category. Please try again." };
+  }
 };
 
 export const updateCategoryAction = async (id: number, input: UpdateCategoryInput) => {
@@ -37,10 +41,20 @@ export const updateCategoryAction = async (id: number, input: UpdateCategoryInpu
     return { success: false, error: parsed.error.issues[0]?.message || "Invalid input" };
   }
 
-  const category = await updateCategory(id, parsed.data);
-  revalidatePath("/admin/categories");
-  revalidatePath("/admin/products");
-  return { success: true, data: category };
+  try {
+    if (parsed.data.name) {
+      const existing = await findCategoryByName(parsed.data.name);
+      if (existing && existing.id !== id) {
+        return { success: false, error: "A category with this name already exists" };
+      }
+    }
+    await updateCategory(id, parsed.data);
+    revalidatePath("/admin/categories");
+    revalidatePath("/admin/products");
+    return { success: true };
+  } catch {
+    return { success: false, error: "Could not update the category. Please try again." };
+  }
 };
 
 export const deleteCategoryAction = async (id: number) => {

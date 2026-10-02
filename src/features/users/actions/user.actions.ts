@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { UserRole } from "@prisma/client";
 import { getCurrentUser } from "@/features/auth/actions/session.action";
 import { searchMembers, findMemberById, updateUserRole } from "../services/user.service";
 
@@ -35,9 +36,9 @@ export const updateUserRoleAction = async (userId: number, role: "STAFF" | "MEMB
   }
 
   try {
-    const updated = await updateUserRole(userId, role as any);
+    await updateUserRole(userId, role === "STAFF" ? UserRole.STAFF : UserRole.MEMBER);
     revalidatePath("/admin/users");
-    return { success: true, data: updated };
+    return { success: true };
   } catch (err: unknown) {
     return { success: false, error: (err as Error).message || "Failed to update user role" };
   }

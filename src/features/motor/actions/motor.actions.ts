@@ -24,14 +24,16 @@ export const createBrandAction = async (input: CreateMotorBrandInput) => {
   if (!parsed.success) {
     return { success: false, error: parsed.error.issues[0]?.message || "Invalid input" };
   }
-  const existing = await findBrandByName(parsed.data.name);
-  if (existing) {
-    return { success: false, error: "A brand with this name already exists" };
+  try {
+    const existing = await findBrandByName(parsed.data.name);
+    if (existing) return { success: false, error: "A brand with this name already exists" };
+    await createBrand(parsed.data);
+    revalidatePath("/admin/motor-brands");
+    revalidatePath("/admin/motors");
+    return { success: true };
+  } catch {
+    return { success: false, error: "Could not create the brand. Please try again." };
   }
-  const brand = await createBrand(parsed.data);
-  revalidatePath("/admin/motor-brands");
-  revalidatePath("/admin/motors");
-  return { success: true, data: brand };
 };
 
 export const updateBrandAction = async (id: number, input: UpdateMotorBrandInput) => {
@@ -39,9 +41,20 @@ export const updateBrandAction = async (id: number, input: UpdateMotorBrandInput
   if (!parsed.success) {
     return { success: false, error: parsed.error.issues[0]?.message || "Invalid input" };
   }
-  const brand = await updateBrand(id, parsed.data);
-  revalidatePath("/admin/motor-brands");
-  return { success: true, data: brand };
+  try {
+    if (parsed.data.name) {
+      const existing = await findBrandByName(parsed.data.name);
+      if (existing && existing.id !== id) {
+        return { success: false, error: "A brand with this name already exists" };
+      }
+    }
+    await updateBrand(id, parsed.data);
+    revalidatePath("/admin/motor-brands");
+    revalidatePath("/admin/motors");
+    return { success: true };
+  } catch {
+    return { success: false, error: "Could not update the brand. Please try again." };
+  }
 };
 
 export const deleteBrandAction = async (id: number) => {
@@ -62,9 +75,13 @@ export const createMotorAction = async (input: CreateMotorInput) => {
   if (!parsed.success) {
     return { success: false, error: parsed.error.issues[0]?.message || "Invalid input" };
   }
-  const motor = await createMotor(parsed.data);
-  revalidatePath("/admin/motors");
-  return { success: true, data: motor };
+  try {
+    await createMotor(parsed.data);
+    revalidatePath("/admin/motors");
+    return { success: true };
+  } catch {
+    return { success: false, error: "Could not create the motorcycle model. Check for a duplicate model." };
+  }
 };
 
 export const updateMotorAction = async (id: number, input: UpdateMotorInput) => {
@@ -72,9 +89,13 @@ export const updateMotorAction = async (id: number, input: UpdateMotorInput) => 
   if (!parsed.success) {
     return { success: false, error: parsed.error.issues[0]?.message || "Invalid input" };
   }
-  const motor = await updateMotor(id, parsed.data);
-  revalidatePath("/admin/motors");
-  return { success: true, data: motor };
+  try {
+    await updateMotor(id, parsed.data);
+    revalidatePath("/admin/motors");
+    return { success: true };
+  } catch {
+    return { success: false, error: "Could not update the motorcycle model. Check for a duplicate model." };
+  }
 };
 
 export const deleteMotorAction = async (id: number) => {

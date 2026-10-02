@@ -105,7 +105,8 @@ src/components/management/
 ├── DockedTableCard.tsx      # Integrated card with search, status tabs, filters & footer
 ├── StatusBadge.tsx          # Emerald/Slate glowing pill badge
 ├── RowActions.tsx           # Accessible, viewport-aware action menu
+├── ActionMenu.tsx           # Shared portal action menu (positioning, keyboard, tones)
 └── ItemDialog.tsx           # Generic single-field item modal
 ```
 
-*Last Updated*: 2026-10-02 (Staff Portal Alignment Completed)
+*Last Updated*: 2026-10-03 (Unified ActionMenu primitive & server-action error hardening)

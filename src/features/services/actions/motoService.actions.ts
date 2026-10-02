@@ -20,17 +20,17 @@ export const createServiceAction = async (input: CreateServiceInput) => {
     return { success: false, error: parsed.error.issues[0]?.message || "Invalid input" };
   }
 
-  const existing = await findServiceByName(parsed.data.name);
-  if (existing) {
-    return { success: false, error: "A service with this name already exists" };
+  try {
+    const existing = await findServiceByName(parsed.data.name);
+    if (existing) {
+      return { success: false, error: "A service with this name already exists" };
+    }
+    await createService(parsed.data);
+    revalidateServicePages();
+    return { success: true };
+  } catch {
+    return { success: false, error: "Could not create the service. Please try again." };
   }
-
-  const service = await createService(parsed.data);
-  revalidatePath("/admin/services");
-  revalidatePath("/admin/pos");
-  revalidatePath("/staff/services");
-  revalidatePath("/staff/pos");
-  return { success: true, data: service };
 };
 
 export const updateServiceAction = async (id: number, input: UpdateServiceInput) => {
@@ -39,21 +39,25 @@ export const updateServiceAction = async (id: number, input: UpdateServiceInput)
     return { success: false, error: parsed.error.issues[0]?.message || "Invalid input" };
   }
 
-  const service = await updateService(id, parsed.data);
-  revalidatePath("/admin/services");
-  revalidatePath("/admin/pos");
-  revalidatePath("/staff/services");
-  revalidatePath("/staff/pos");
-  return { success: true, data: service };
+  try {
+    if (parsed.data.name) {
+      const existing = await findServiceByName(parsed.data.name);
+      if (existing && existing.id !== id) {
+        return { success: false, error: "A service with this name already exists" };
+      }
+    }
+    await updateService(id, parsed.data);
+    revalidateServicePages();
+    return { success: true };
+  } catch {
+    return { success: false, error: "Could not update the service. Please try again." };
+  }
 };
 
 export const deleteServiceAction = async (id: number) => {
   try {
     await deleteService(id);
-    revalidatePath("/admin/services");
-    revalidatePath("/admin/pos");
-    revalidatePath("/staff/services");
-    revalidatePath("/staff/pos");
+    revalidateServicePages();
     return { success: true, message: "Service deleted successfully" };
   } catch {
     return {
@@ -62,3 +66,10 @@ export const deleteServiceAction = async (id: number) => {
     };
   }
 };
+
+function revalidateServicePages() {
+  revalidatePath("/admin/services");
+  revalidatePath("/admin/pos");
+  revalidatePath("/staff/services");
+  revalidatePath("/staff/pos");
+}

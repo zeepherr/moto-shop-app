@@ -32,10 +32,13 @@ export const createProductAction = async (input: CreateProductInput) => {
     return { success: false, error: parsed.error.issues[0]?.message || "Invalid input" };
   }
 
-  const product = await createProduct(parsed.data);
-  revalidatePath("/admin/products");
-  revalidatePath("/admin/pos");
-  return { success: true, data: product };
+  try {
+    await createProduct(parsed.data);
+    revalidateProductPages();
+    return { success: true };
+  } catch {
+    return { success: false, error: "Could not create the product. Check that the SKU is unique." };
+  }
 };
 
 export const updateProductAction = async (id: number, input: UpdateProductInput) => {
@@ -44,26 +47,38 @@ export const updateProductAction = async (id: number, input: UpdateProductInput)
     return { success: false, error: parsed.error.issues[0]?.message || "Invalid input" };
   }
 
-  const product = await updateProduct(id, parsed.data);
-  revalidatePath("/admin/products");
-  revalidatePath("/admin/pos");
-  return { success: true, data: product };
+  try {
+    await updateProduct(id, parsed.data);
+    revalidateProductPages();
+    return { success: true };
+  } catch {
+    return { success: false, error: "Could not update the product. Check that the SKU is unique." };
+  }
 };
 
 export const deleteProductAction = async (id: number) => {
-  const existing = await findProductById(id);
-  if (!existing) return { success: false, error: "Product not found" };
+  try {
+    const existing = await findProductById(id);
+    if (!existing) return { success: false, error: "Product not found" };
 
-  if (existing.imageKey) {
-    try {
-      await deleteImageFromR2(existing.imageKey);
-    } catch {
-      // ignore storage cleanup error if already missing
+    if (existing.imageKey) {
+      try {
+        await deleteImageFromR2(existing.imageKey);
+      } catch {
+        // The database record can still be removed when storage cleanup fails.
+      }
     }
-  }
 
-  await deleteProduct(id);
+    await deleteProduct(id);
+    revalidateProductPages();
+    return { success: true, message: "Product deleted successfully" };
+  } catch {
+    return { success: false, error: "Cannot delete this product because it is linked to existing orders." };
+  }
+};
+
+function revalidateProductPages() {
   revalidatePath("/admin/products");
   revalidatePath("/admin/pos");
-  return { success: true, message: "Product deleted successfully" };
-};
+  revalidatePath("/staff/pos");
+}

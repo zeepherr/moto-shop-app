@@ -3,6 +3,7 @@
 import React, { useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -22,17 +23,26 @@ export const LoginForm: React.FC = () => {
     setError(null);
 
     startTransition(async () => {
-      const res = await loginAction({ email, password });
-      if (!res.success) {
-        setError(res.error || "Failed to log in");
-        return;
-      }
+      try {
+        const res = await loginAction({ email, password });
+        if (!res.success) {
+          const message = res.error || "Failed to log in";
+          setError(message);
+          toast.error(message);
+          return;
+        }
 
-      const role = (res.data as { role?: string })?.role;
-      if (role === ROLES.ADMIN) router.push("/admin");
-      else if (role === ROLES.STAFF) router.push("/staff");
-      else router.push("/member");
-      router.refresh();
+        toast.success(`Welcome back, ${(res.data as { firstName?: string })?.firstName || "there"}`);
+        const role = (res.data as { role?: string })?.role;
+        if (role === ROLES.ADMIN) router.push("/admin");
+        else if (role === ROLES.STAFF) router.push("/staff");
+        else router.push("/member");
+        router.refresh();
+      } catch {
+        const message = "Unable to sign in right now. Please try again.";
+        setError(message);
+        toast.error(message);
+      }
     });
   };
 

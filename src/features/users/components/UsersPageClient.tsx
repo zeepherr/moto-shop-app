@@ -93,6 +93,8 @@ export const UsersPageClient: React.FC<UsersPageClientProps> = ({
       } else {
         toast.error(res.error || "Failed to update user role");
       }
+    } catch {
+      toast.error("Could not update the user role. Please try again.");
     } finally {
       setIsUpdating(false);
     }

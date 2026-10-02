@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
-import { ShieldCheck, UserRound, UsersRound, MoreHorizontal } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import React from "react";
+import { ShieldCheck, UserRound, UsersRound } from "lucide-react";
+import { ActionMenu } from "@/components/management/ActionMenu";
 import { StatusBadge } from "@/components/management/StatusBadge";
 
 export interface UserItem {
@@ -27,8 +27,6 @@ export const UserTable: React.FC<UserTableProps> = ({
   onRoleChange,
   isUpdatingRole = false,
 }) => {
-  const [openDropdownId, setOpenDropdownId] = useState<number | null>(null);
-
   if (users.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center gap-2 py-16 text-center">
@@ -72,8 +70,6 @@ export const UserTable: React.FC<UserTableProps> = ({
         {users.map((user) => {
           const fullName = `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() || "Unnamed user";
           const initials = `${user.firstName?.[0] ?? ""}${user.lastName?.[0] ?? ""}`.toUpperCase() || "U";
-          const isMenuOpen = openDropdownId === user.id;
-
           return (
             <tr key={user.id} className="group hover:bg-muted/30 transition-colors">
               <td className="px-4 py-3.5">
@@ -137,54 +133,24 @@ export const UserTable: React.FC<UserTableProps> = ({
 
               <td className="px-4 py-3.5 text-right">
                 {user.role !== "ADMIN" && (
-                  <div className="relative inline-block text-left">
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      disabled={isUpdatingRole}
-                      onClick={() => setOpenDropdownId(isMenuOpen ? null : user.id)}
-                      className="size-8 p-0 cursor-pointer opacity-60 transition-opacity hover:opacity-100"
-                    >
-                      <MoreHorizontal className="size-4" />
-                    </Button>
-
-                    {isMenuOpen && (
-                      <>
-                        <div
-                          className="fixed inset-0 z-40"
-                          onClick={() => setOpenDropdownId(null)}
-                        />
-                        <div className="absolute right-0 z-50 mt-1 w-44 rounded-xl border border-border bg-popover p-1 shadow-lg text-popover-foreground text-xs animate-in fade-in zoom-in-95 duration-150">
-                          {user.role === "MEMBER" ? (
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setOpenDropdownId(null);
-                                onRoleChange(user, "STAFF");
-                              }}
-                              className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-xs font-medium hover:bg-muted cursor-pointer transition-colors text-foreground"
-                            >
-                              <ShieldCheck className="size-3.5 text-primary" />
-                              Promote to Staff
-                            </button>
-                          ) : (
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setOpenDropdownId(null);
-                                onRoleChange(user, "MEMBER");
-                              }}
-                              className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-xs font-medium hover:bg-muted cursor-pointer transition-colors text-foreground"
-                            >
-                              <UserRound className="size-3.5 text-muted-foreground" />
-                              Change to Member
-                            </button>
-                          )}
-                        </div>
-                      </>
-                    )}
-                  </div>
+                  <ActionMenu
+                    label={fullName}
+                    disabled={isUpdatingRole}
+                    items={[
+                      user.role === "MEMBER"
+                        ? {
+                            label: "Promote to staff",
+                            icon: ShieldCheck,
+                            tone: "success",
+                            onSelect: () => onRoleChange(user, "STAFF"),
+                          }
+                        : {
+                            label: "Change to member",
+                            icon: UserRound,
+                            onSelect: () => onRoleChange(user, "MEMBER"),
+                          },
+                    ]}
+                  />
                 )}
               </td>
             </tr>

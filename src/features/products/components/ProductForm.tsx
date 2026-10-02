@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -28,6 +28,24 @@ export interface ProductFormData {
   image?: File | null;
 }
 
+type ProductFormState = Omit<ProductFormData, "image" | "imageUrl">;
+
+function getInitialFormState(
+  values: Partial<ProductFormData>,
+  fallbackCategoryId: number,
+): ProductFormState {
+  return {
+    productCategoryId: values.productCategoryId ?? fallbackCategoryId,
+    sku: values.sku ?? "",
+    name: values.name ?? "",
+    description: values.description ?? "",
+    costPrice: values.costPrice ?? "",
+    sellingPrice: values.sellingPrice ?? "",
+    stockQuantity: values.stockQuantity ?? "",
+    unit: values.unit ?? "piece",
+  };
+}
+
 interface ProductFormProps {
   categories: ProductCategoryDTO[];
   defaultValues?: Partial<ProductFormData>;
@@ -45,33 +63,13 @@ export const ProductForm: React.FC<ProductFormProps> = ({
   onCancel,
   isPending = false,
 }) => {
-  const [form, setForm] = useState({
-    productCategoryId: defaultValues.productCategoryId ?? categories[0]?.id ?? 0,
-    sku: defaultValues.sku ?? "",
-    name: defaultValues.name ?? "",
-    description: defaultValues.description ?? "",
-    costPrice: defaultValues.costPrice ?? "",
-    sellingPrice: defaultValues.sellingPrice ?? "",
-    stockQuantity: defaultValues.stockQuantity ?? "",
-    unit: defaultValues.unit ?? "piece",
-  });
+  const fallbackCategoryId = categories[0]?.id ?? 0;
+  const [form, setForm] = useState<ProductFormState>(() =>
+    getInitialFormState(defaultValues, fallbackCategoryId),
+  );
 
   const [newImage, setNewImage] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    setForm({
-      productCategoryId: defaultValues.productCategoryId ?? categories[0]?.id ?? 0,
-      sku: defaultValues.sku ?? "",
-      name: defaultValues.name ?? "",
-      description: defaultValues.description ?? "",
-      costPrice: defaultValues.costPrice ?? "",
-      sellingPrice: defaultValues.sellingPrice ?? "",
-      stockQuantity: defaultValues.stockQuantity ?? "",
-      unit: defaultValues.unit ?? "piece",
-    });
-    setNewImage(null);
-  }, [defaultValues, categories]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

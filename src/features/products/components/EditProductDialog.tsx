@@ -40,6 +40,7 @@ export const EditProductDialog: React.FC<EditProductDialogProps> = ({
         </DialogHeader>
 
         <ProductForm
+          key={product.id}
           defaultValues={{
             productCategoryId: product.productCategoryId,
             sku: product.sku || "",

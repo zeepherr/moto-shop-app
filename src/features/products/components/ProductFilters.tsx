@@ -1,0 +1,90 @@
+"use client";
+
+import React from "react";
+import { Search, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import type { ProductDTO } from "../types";
+
+interface ProductFiltersProps {
+  products: ProductDTO[];
+  searchTerm: string;
+  setSearchTerm: (value: string) => void;
+  selectedCategory: string;
+  setSelectedCategory: (value: string) => void;
+  selectedStatus: string;
+  setSelectedStatus: (value: string) => void;
+  hasActiveFilters: boolean;
+  handleClearFilters: () => void;
+}
+
+export const ProductFilters: React.FC<ProductFiltersProps> = ({
+  products,
+  searchTerm,
+  setSearchTerm,
+  selectedCategory,
+  setSelectedCategory,
+  selectedStatus,
+  setSelectedStatus,
+  hasActiveFilters,
+  handleClearFilters,
+}) => {
+  const categories = [
+    ...new Map(
+      products
+        ?.map((p) => p.productCategory)
+        .filter(Boolean)
+        .map((cat) => [cat!.id, cat!]),
+    ).values(),
+  ];
+
+  return (
+    <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+      <div className="relative w-full sm:min-w-64 sm:flex-1 sm:max-w-md">
+        <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+        <Input
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          placeholder="Search product name or SKU..."
+          className="bg-card pl-9 text-sm"
+        />
+      </div>
+
+      <select
+        value={selectedCategory}
+        onChange={(e) => setSelectedCategory(e.target.value)}
+        className="h-9 w-full rounded-xl border border-input bg-card px-3 text-sm text-foreground shadow-xs outline-none focus:ring-2 focus:ring-primary sm:w-44 cursor-pointer"
+      >
+        <option value="all">All categories</option>
+        {categories.map((c) => (
+          <option key={c.id} value={String(c.id)}>
+            {c.name}
+          </option>
+        ))}
+      </select>
+
+      <select
+        value={selectedStatus}
+        onChange={(e) => setSelectedStatus(e.target.value)}
+        className="h-9 w-full rounded-xl border border-input bg-card px-3 text-sm text-foreground shadow-xs outline-none focus:ring-2 focus:ring-primary sm:w-36 cursor-pointer"
+      >
+        <option value="all">All status</option>
+        <option value="active">Active</option>
+        <option value="inactive">Inactive</option>
+      </select>
+
+      {hasActiveFilters && (
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={handleClearFilters}
+          className="cursor-pointer text-muted-foreground hover:text-foreground gap-1.5"
+        >
+          <X className="size-4" />
+          Clear
+        </Button>
+      )}
+    </div>
+  );
+};

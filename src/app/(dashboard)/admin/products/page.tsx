@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { findAllProducts } from "@/features/products/services/product.service";
 import { findAllCategories } from "@/features/categories/services/category.service";
 import { getR2PublicUrl } from "@/features/products/services/r2.service";
-import { ProductList } from "@/features/products/components/ProductList";
+import { ProductPageClient } from "@/features/products/components/ProductPageClient";
 
 export const metadata: Metadata = {
   title: "Products & Inventory - HrungMoto",
@@ -45,16 +45,5 @@ export default async function AdminProductsPage() {
     _count: c._count,
   }));
 
-  return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">Products & Inventory</h1>
-        <p className="text-sm text-muted-foreground">
-          Manage product catalog, pricing, SKU codes, and Cloudflare R2 images
-        </p>
-      </div>
-
-      <ProductList initialProducts={products} categories={categories as any} />
-    </div>
-  );
+  return <ProductPageClient initialProducts={products} categories={categories as any} />;
 }

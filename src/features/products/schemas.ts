@@ -57,11 +57,5 @@ export const updateProductSchema = createProductSchema.partial().extend({
   isActive: z.boolean().optional(),
 });
 
-export const presignedUrlSchema = z.object({
-  fileName: z.string().min(1, "File name is required"),
-  contentType: z.string().regex(/^image\/(jpeg|png|webp|gif|svg\+xml)$/, "Unsupported image format"),
-});
-
 export type CreateProductInput = z.infer<typeof createProductSchema>;
 export type UpdateProductInput = z.infer<typeof updateProductSchema>;
-export type PresignedUrlInput = z.infer<typeof presignedUrlSchema>;

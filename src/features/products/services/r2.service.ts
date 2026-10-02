@@ -1,8 +1,6 @@
 import { S3Client, PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import crypto from "node:crypto";
 import { config } from "@/config";
-import type { PresignedUploadResult } from "../types";
 
 export const r2Client = new S3Client({
   region: "auto",
@@ -19,27 +17,31 @@ export const getR2PublicUrl = (key: string): string => {
   return `${config.r2.publicUrl}/${key}`;
 };
 
-export const createPresignedUploadUrl = async (
-  fileName: string,
-  contentType: string,
-): Promise<PresignedUploadResult> => {
+const buildProductImageKey = (fileName: string): string => {
   const extension = fileName.split(".").pop() || "jpg";
   const uniqueId = crypto.randomUUID().slice(0, 8);
-  const key = `products/${Date.now()}-${uniqueId}.${extension}`;
+  return `products/${Date.now()}-${uniqueId}.${extension}`;
+};
 
-  const command = new PutObjectCommand({
-    Bucket: config.r2.bucketName,
-    Key: key,
-    ContentType: contentType,
-  });
+// Uploads happen server-side so the browser never calls R2 directly — this is
+// what keeps the flow same-origin and free of any bucket CORS configuration.
+export const uploadImageToR2 = async (
+  buffer: Buffer,
+  fileName: string,
+  contentType: string,
+): Promise<{ key: string; publicUrl: string }> => {
+  const key = buildProductImageKey(fileName);
 
-  const uploadUrl = await getSignedUrl(r2Client, command, { expiresIn: 3600 });
+  await r2Client.send(
+    new PutObjectCommand({
+      Bucket: config.r2.bucketName,
+      Key: key,
+      Body: buffer,
+      ContentType: contentType,
+    }),
+  );
 
-  return {
-    uploadUrl,
-    key,
-    publicUrl: getR2PublicUrl(key),
-  };
+  return { key, publicUrl: getR2PublicUrl(key) };
 };
 
 export const deleteImageFromR2 = async (key: string): Promise<void> => {

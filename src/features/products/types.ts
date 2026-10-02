@@ -19,8 +19,3 @@ export interface ProductDTO {
   };
 }
 
-export interface PresignedUploadResult {
-  uploadUrl: string;
-  key: string;
-  publicUrl: string;
-}

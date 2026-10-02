@@ -14,7 +14,6 @@ import {
   createProductAction,
   updateProductAction,
   deleteProductAction,
-  getPresignedUploadUrlAction,
 } from "../actions/product.actions";
 import type { ProductDTO } from "../types";
 import type { ProductCategoryDTO } from "@/features/categories/types";
@@ -96,24 +95,21 @@ export const ProductPageClient: React.FC<ProductPageClientProps> = ({
 
   const uploadImage = async (file: File): Promise<string | null> => {
     try {
-      const presigned = await getPresignedUploadUrlAction({
-        fileName: file.name,
-        contentType: file.type,
-      });
-      if (!presigned.success || !presigned.data) {
-        toast.error(presigned.error || "Failed to get image upload URL");
+      const formData = new FormData();
+      formData.append("image", file);
+
+      const res = await fetch("/api/upload", { method: "POST", body: formData });
+      const json = (await res.json().catch(() => null)) as {
+        success?: boolean;
+        error?: string;
+        data?: { key?: string };
+      } | null;
+
+      if (!res.ok || !json?.success || !json.data?.key) {
+        toast.error(json?.error || "Failed to upload image to storage");
         return null;
       }
-      const res = await fetch(presigned.data.uploadUrl, {
-        method: "PUT",
-        headers: { "Content-Type": file.type },
-        body: file,
-      });
-      if (!res.ok) {
-        toast.error("Failed to upload image to storage");
-        return null;
-      }
-      return presigned.data.key;
+      return json.data.key;
     } catch {
       toast.error("An error occurred while uploading image");
       return null;

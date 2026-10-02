@@ -4,10 +4,8 @@ import { revalidatePath } from "next/cache";
 import {
   createProductSchema,
   updateProductSchema,
-  presignedUrlSchema,
   type CreateProductInput,
   type UpdateProductInput,
-  type PresignedUrlInput,
 } from "../schemas";
 import {
   createProduct,
@@ -15,16 +13,7 @@ import {
   deleteProduct,
   findProductById,
 } from "../services/product.service";
-import { createPresignedUploadUrl, deleteImageFromR2 } from "../services/r2.service";
-
-export const getPresignedUploadUrlAction = async (input: PresignedUrlInput) => {
-  const parsed = presignedUrlSchema.safeParse(input);
-  if (!parsed.success) {
-    return { success: false, error: parsed.error.issues[0]?.message || "Invalid input" };
-  }
-  const result = await createPresignedUploadUrl(parsed.data.fileName, parsed.data.contentType);
-  return { success: true, data: result };
-};
+import { deleteImageFromR2 } from "../services/r2.service";
 
 export const createProductAction = async (input: CreateProductInput) => {
   const parsed = createProductSchema.safeParse(input);

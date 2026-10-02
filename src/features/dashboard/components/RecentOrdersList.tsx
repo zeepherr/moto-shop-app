@@ -1,5 +1,6 @@
 import React from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import Link from "next/link";
+import { ArrowRight, ShoppingCart } from "lucide-react";
 
 interface OrderItem {
   id: number;
@@ -18,35 +19,69 @@ interface OrderSummary {
 
 export const RecentOrdersList: React.FC<{ orders: OrderSummary[] }> = ({ orders }) => {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-base font-semibold">Recent Transactions</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
+    <div className="rounded-2xl border border-border/70 bg-card/60 backdrop-blur-md p-5 transition-all">
+      <div className="flex items-center justify-between pb-4 border-b border-border/40">
+        <div>
+          <h2 className="text-base font-semibold tracking-tight text-foreground">
+            Recent Activity
+          </h2>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Latest completed customer orders
+          </p>
+        </div>
+        <Link
+          href="/admin/orders"
+          className="inline-flex items-center gap-1 text-xs font-medium text-[#2997ff] hover:underline"
+        >
+          <span>View all</span>
+          <ArrowRight className="h-3 w-3" />
+        </Link>
+      </div>
+
+      <div className="divide-y divide-border/40 pt-1">
         {orders.length === 0 ? (
-          <p className="text-sm text-muted-foreground py-4 text-center">No completed orders yet</p>
+          <div className="flex flex-col items-center justify-center py-10 text-center">
+            <ShoppingCart className="h-8 w-8 text-muted-foreground/40 mb-2" />
+            <p className="text-sm font-medium text-foreground">No recent transactions</p>
+            <p className="text-xs text-muted-foreground mt-0.5">Completed POS orders will appear here</p>
+          </div>
         ) : (
           orders.map((order) => {
             const customerName = order.member
               ? `${order.member.firstName} ${order.member.lastName}`
-              : "Guest Customer";
+              : "Walk-in Customer";
+
+            const initials = order.member
+              ? `${order.member.firstName[0] || ""}${order.member.lastName[0] || ""}`.toUpperCase()
+              : "WC";
+
             return (
-              <div key={order.id} className="flex items-center justify-between border-b border-border/50 pb-3 last:border-0 last:pb-0">
-                <div className="space-y-1">
-                  <p className="text-sm font-medium leading-none text-foreground">{customerName}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {order.orderNumber} • {order.orderItems.length} {order.orderItems.length === 1 ? "item" : "items"}
-                  </p>
+              <div key={order.id} className="flex items-center justify-between py-3">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="flex size-9 shrink-0 items-center justify-center rounded-full border border-border/80 bg-muted/50 text-xs font-semibold text-foreground">
+                    {initials}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-foreground truncate">{customerName}</p>
+                    <p className="text-xs text-muted-foreground truncate">
+                      {order.orderNumber} • {order.orderItems.length} {order.orderItems.length === 1 ? "item" : "items"}
+                    </p>
+                  </div>
                 </div>
-                <div className="text-right">
-                  <p className="text-sm font-bold text-foreground">฿{Number(order.finalTotal).toLocaleString()}</p>
-                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-success/10 text-success font-medium">Completed</span>
+
+                <div className="text-right shrink-0 ml-3">
+                  <p className="text-sm font-semibold text-foreground tabular-nums">
+                    ฿{Number(order.finalTotal).toLocaleString()}
+                  </p>
+                  <span className="inline-block mt-0.5 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-medium text-emerald-400 border border-emerald-500/20">
+                    Paid
+                  </span>
                 </div>
               </div>
             );
           })
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };

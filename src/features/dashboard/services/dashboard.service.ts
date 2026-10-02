@@ -2,7 +2,7 @@ import { db as defaultDb } from "@/lib/db";
 import { OrderStatus, UserRole } from "@prisma/client";
 
 export const getDashboardSummary = async (db = defaultDb) => {
-  const [revenueAgg, completedOrdersCount, lowStockCount, membersCount, recentOrders] =
+  const [revenueAgg, completedOrdersCount, lowStockCount, membersCount, recentOrders, lowStockProducts] =
     await Promise.all([
       db.order.aggregate({
         where: { status: OrderStatus.COMPLETED },
@@ -26,6 +26,12 @@ export const getDashboardSummary = async (db = defaultDb) => {
           orderItems: true,
         },
       }),
+      db.product.findMany({
+        where: { stockQuantity: { lte: 5 }, isActive: true },
+        take: 4,
+        select: { id: true, name: true, sku: true, stockQuantity: true, unit: true },
+        orderBy: { stockQuantity: "asc" },
+      }),
     ]);
 
   const totalRevenue = Number(revenueAgg._sum.finalTotal || 0);
@@ -38,5 +44,6 @@ export const getDashboardSummary = async (db = defaultDb) => {
     lowStockCount,
     membersCount,
     recentOrders,
+    lowStockProducts,
   };
 };

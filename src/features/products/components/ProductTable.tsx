@@ -23,9 +23,7 @@ export const ProductTable: React.FC<ProductTableProps> = ({
   onDelete,
 }) => {
   return (
-    <div className="overflow-hidden rounded-xl border border-border/70 bg-card">
-      <div className="overflow-x-auto">
-        <table className="w-full min-w-[750px] text-sm">
+    <table className="w-full min-w-[750px] text-sm">
           <thead>
             <tr className="border-b border-border/60 bg-muted/30">
               <TableHeading label="Product" sortKey="name" sort={sort} onSort={onSort} />
@@ -67,8 +65,6 @@ export const ProductTable: React.FC<ProductTableProps> = ({
             )}
           </tbody>
         </table>
-      </div>
-    </div>
   );
 };
 

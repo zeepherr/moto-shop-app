@@ -6,6 +6,7 @@ import { MetricCard } from "@/features/dashboard/components/MetricCard";
 import { RevenueTrendChart } from "@/features/dashboard/components/RevenueTrendChart";
 import { RecentOrdersList } from "@/features/dashboard/components/RecentOrdersList";
 import { InventoryAlertWidget } from "@/features/dashboard/components/InventoryAlertWidget";
+import { ManagementLayout } from "@/components/management/ManagementLayout";
 import { DollarSign, ShoppingBag, AlertTriangle, Users } from "lucide-react";
 
 export const metadata: Metadata = {
@@ -19,7 +20,7 @@ export default async function AdminDashboardPage() {
   const summary = await getDashboardSummary();
 
   return (
-    <div className="space-y-6">
+    <ManagementLayout>
       <DashboardHeader />
 
       {/* Apple-styled KPI Grid */}
@@ -72,6 +73,6 @@ export default async function AdminDashboardPage() {
           <InventoryAlertWidget items={summary.lowStockProducts} />
         </div>
       </div>
-    </div>
+    </ManagementLayout>
   );
 }

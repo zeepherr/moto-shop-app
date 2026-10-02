@@ -2,13 +2,13 @@
 
 import React, { useState, useMemo, useTransition } from "react";
 import { toast } from "sonner";
-import { Wrench } from "lucide-react";
+import { ManagementLayout } from "@/components/management/ManagementLayout";
 import { PageHeader } from "@/components/management/PageHeader";
-import { FilterToolbar } from "@/components/management/FilterToolbar";
-import { StatusBadge } from "@/components/management/StatusBadge";
-import { RowActions } from "@/components/management/RowActions";
-import { ServiceDialog } from "./ServiceDialog";
+import { DockedTableCard } from "@/components/management/DockedTableCard";
 import { ConfirmActionDialog } from "@/components/ConfirmActionDialog";
+import { ServiceStats } from "./ServiceStats";
+import { ServiceTable } from "./ServiceTable";
+import { ServiceDialog } from "./ServiceDialog";
 import {
   createServiceAction,
   updateServiceAction,
@@ -52,7 +52,11 @@ export const ServiceList: React.FC<{ initialServices: MotoServiceDTO[] }> = ({
     [initialServices]
   );
 
-  const handleCreate = (values: { name: string; description?: string; price: number }) => {
+  const handleCreate = (values: {
+    name: string;
+    description?: string;
+    price: number;
+  }) => {
     startTransition(async () => {
       const res = await createServiceAction(values);
       if (res.success) {
@@ -64,7 +68,11 @@ export const ServiceList: React.FC<{ initialServices: MotoServiceDTO[] }> = ({
     });
   };
 
-  const handleUpdate = (values: { name: string; description?: string; price: number }) => {
+  const handleUpdate = (values: {
+    name: string;
+    description?: string;
+    price: number;
+  }) => {
     if (!editingService) return;
     startTransition(async () => {
       const res = await updateServiceAction(editingService.id, values);
@@ -84,7 +92,9 @@ export const ServiceList: React.FC<{ initialServices: MotoServiceDTO[] }> = ({
         isActive: !statusService.isActive,
       });
       if (res.success) {
-        toast.success(`Service ${statusService.isActive ? "deactivated" : "activated"}`);
+        toast.success(
+          `Service ${statusService.isActive ? "deactivated" : "activated"}`
+        );
         setStatusService(null);
       } else {
         toast.error(res.error || "Failed to update status");
@@ -106,15 +116,18 @@ export const ServiceList: React.FC<{ initialServices: MotoServiceDTO[] }> = ({
   };
 
   return (
-    <div className="space-y-4">
+    <ManagementLayout>
       <PageHeader
         title="Workshop Services"
         description="Manage repair labor, maintenance packages, and diagnostic rates"
+        count={initialServices.length}
         actionLabel="Add Service"
         onAction={() => setCreateOpen(true)}
       />
 
-      <FilterToolbar
+      <ServiceStats services={initialServices} />
+
+      <DockedTableCard
         search={search}
         onSearchChange={setSearch}
         searchPlaceholder="Search services or scope..."
@@ -126,92 +139,18 @@ export const ServiceList: React.FC<{ initialServices: MotoServiceDTO[] }> = ({
           setSearch("");
           setStatus("all");
         }}
-      />
+        totalFiltered={filtered.length}
+        totalAll={initialServices.length}
+        entityName="services"
+      >
+        <ServiceTable
+          services={filtered}
+          onEdit={setEditingService}
+          onToggleStatus={setStatusService}
+          onDelete={setDeletingService}
+        />
+      </DockedTableCard>
 
-      {/* Unified Table */}
-      <div className="rounded-2xl border border-border/70 bg-card overflow-hidden shadow-xs">
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[700px] text-sm">
-            <thead>
-              <tr className="border-b border-border/60 bg-muted/30">
-                <th className="px-4 py-3 text-left font-medium text-muted-foreground text-xs uppercase tracking-wider">
-                  Service Name
-                </th>
-                <th className="px-4 py-3 text-left font-medium text-muted-foreground text-xs uppercase tracking-wider">
-                  Scope & Description
-                </th>
-                <th className="px-4 py-3 text-left font-medium text-muted-foreground text-xs uppercase tracking-wider">
-                  Price (THB)
-                </th>
-                <th className="px-4 py-3 text-left font-medium text-muted-foreground text-xs uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="w-16 px-4 py-3 text-right font-medium text-muted-foreground">
-                  <span className="sr-only">Actions</span>
-                </th>
-              </tr>
-            </thead>
-
-            <tbody className="divide-y divide-border/40">
-              {filtered.length === 0 ? (
-                <tr>
-                  <td colSpan={5} className="h-40 text-center">
-                    <div className="flex flex-col items-center justify-center gap-1.5 py-6">
-                      <Wrench className="size-8 text-muted-foreground/50" />
-                      <p className="font-medium text-foreground text-sm">No services found</p>
-                      <p className="text-xs text-muted-foreground">Try clearing filters or add a new repair service.</p>
-                    </div>
-                  </td>
-                </tr>
-              ) : (
-                filtered.map((serv) => (
-                  <tr key={serv.id} className="hover:bg-muted/30 transition-colors">
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-3">
-                        <div className="flex size-9 shrink-0 items-center justify-center rounded-xl border border-border/70 bg-muted/40 font-semibold text-xs text-foreground uppercase">
-                          <Wrench className="size-4 text-muted-foreground" />
-                        </div>
-                        <div className="min-w-0">
-                          <p className="font-medium text-foreground truncate">{serv.name}</p>
-                          <p className="text-xs text-muted-foreground">Repair & maintenance</p>
-                        </div>
-                      </div>
-                    </td>
-
-                    <td className="px-4 py-3">
-                      <p className="text-xs text-muted-foreground max-w-xs truncate">
-                        {serv.description || "—"}
-                      </p>
-                    </td>
-
-                    <td className="px-4 py-3">
-                      <span className="font-semibold text-foreground">
-                        ฿{Number(serv.price).toLocaleString()}
-                      </span>
-                    </td>
-
-                    <td className="px-4 py-3">
-                      <StatusBadge isActive={serv.isActive} />
-                    </td>
-
-                    <td className="px-4 py-3 text-right">
-                      <RowActions
-                        isActive={serv.isActive}
-                        onEdit={() => setEditingService(serv)}
-                        onStatusChange={() => setStatusService(serv)}
-                        onDelete={() => setDeletingService(serv)}
-                        label="service"
-                      />
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* Dialogs */}
       <ServiceDialog
         open={createOpen}
         onOpenChange={setCreateOpen}
@@ -233,8 +172,8 @@ export const ServiceList: React.FC<{ initialServices: MotoServiceDTO[] }> = ({
         title={statusService?.isActive ? "Deactivate this service?" : "Activate this service?"}
         description={
           statusService?.isActive
-            ? `"${statusService.name}" will no longer appear as an available service in POS.`
-            : `"${statusService?.name}" will become active and available in POS.`
+            ? `"${statusService.name}" will no longer appear as an available item in the POS service catalog.`
+            : `"${statusService?.name}" will become active and available for technician orders.`
         }
         confirmLabel={statusService?.isActive ? "Deactivate" : "Activate"}
         cancelLabel="Cancel"
@@ -258,6 +197,6 @@ export const ServiceList: React.FC<{ initialServices: MotoServiceDTO[] }> = ({
         isPending={isPending}
         onConfirm={handleConfirmDelete}
       />
-    </div>
+    </ManagementLayout>
   );
 };

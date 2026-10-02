@@ -2,13 +2,13 @@
 
 import React, { useState, useMemo, useTransition } from "react";
 import { toast } from "sonner";
-import { Bike, ShieldAlert } from "lucide-react";
+import { ManagementLayout } from "@/components/management/ManagementLayout";
 import { PageHeader } from "@/components/management/PageHeader";
-import { FilterToolbar } from "@/components/management/FilterToolbar";
-import { StatusBadge } from "@/components/management/StatusBadge";
-import { RowActions } from "@/components/management/RowActions";
+import { DockedTableCard } from "@/components/management/DockedTableCard";
 import { ItemDialog } from "@/components/management/ItemDialog";
 import { ConfirmActionDialog } from "@/components/ConfirmActionDialog";
+import { MotorBrandStats } from "./MotorBrandStats";
+import { MotorBrandTable } from "./MotorBrandTable";
 import {
   createBrandAction,
   updateBrandAction,
@@ -81,7 +81,9 @@ export const MotorBrandList: React.FC<{ initialBrands: MotorBrandDTO[] }> = ({
         isActive: !statusBrand.isActive,
       });
       if (res.success) {
-        toast.success(`Brand ${statusBrand.isActive ? "deactivated" : "activated"}`);
+        toast.success(
+          `Brand ${statusBrand.isActive ? "deactivated" : "activated"}`
+        );
         setStatusBrand(null);
       } else {
         toast.error(res.error || "Failed to update status");
@@ -103,18 +105,21 @@ export const MotorBrandList: React.FC<{ initialBrands: MotorBrandDTO[] }> = ({
   };
 
   return (
-    <div className="space-y-4">
+    <ManagementLayout>
       <PageHeader
         title="Motorcycle Brands"
         description="Manage motorcycle manufacturers and vehicle makes"
+        count={initialBrands.length}
         actionLabel="Add Brand"
         onAction={() => setCreateOpen(true)}
       />
 
-      <FilterToolbar
+      <MotorBrandStats brands={initialBrands} />
+
+      <DockedTableCard
         search={search}
         onSearchChange={setSearch}
-        searchPlaceholder="Search brands..."
+        searchPlaceholder="Search brands by name..."
         status={status}
         onStatusChange={setStatus}
         statusCounts={counts}
@@ -123,84 +128,18 @@ export const MotorBrandList: React.FC<{ initialBrands: MotorBrandDTO[] }> = ({
           setSearch("");
           setStatus("all");
         }}
-      />
+        totalFiltered={filtered.length}
+        totalAll={initialBrands.length}
+        entityName="brands"
+      >
+        <MotorBrandTable
+          brands={filtered}
+          onEdit={setEditingBrand}
+          onToggleStatus={setStatusBrand}
+          onDelete={setDeletingBrand}
+        />
+      </DockedTableCard>
 
-      {/* Unified Table */}
-      <div className="rounded-2xl border border-border/70 bg-card overflow-hidden shadow-xs">
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[650px] text-sm">
-            <thead>
-              <tr className="border-b border-border/60 bg-muted/30">
-                <th className="px-4 py-3 text-left font-medium text-muted-foreground text-xs uppercase tracking-wider">
-                  Brand Name
-                </th>
-                <th className="px-4 py-3 text-left font-medium text-muted-foreground text-xs uppercase tracking-wider">
-                  Models Registered
-                </th>
-                <th className="px-4 py-3 text-left font-medium text-muted-foreground text-xs uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="w-16 px-4 py-3 text-right font-medium text-muted-foreground">
-                  <span className="sr-only">Actions</span>
-                </th>
-              </tr>
-            </thead>
-
-            <tbody className="divide-y divide-border/40">
-              {filtered.length === 0 ? (
-                <tr>
-                  <td colSpan={4} className="h-40 text-center">
-                    <div className="flex flex-col items-center justify-center gap-1.5 py-6">
-                      <Bike className="size-8 text-muted-foreground/50" />
-                      <p className="font-medium text-foreground text-sm">No motorcycle brands found</p>
-                      <p className="text-xs text-muted-foreground">Try clearing filters or add a new brand.</p>
-                    </div>
-                  </td>
-                </tr>
-              ) : (
-                filtered.map((b) => (
-                  <tr key={b.id} className="hover:bg-muted/30 transition-colors">
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-3">
-                        <div className="flex size-9 shrink-0 items-center justify-center rounded-xl border border-border/70 bg-muted/40 font-semibold text-xs text-foreground uppercase">
-                          {b.name.charAt(0)}
-                        </div>
-                        <div className="min-w-0">
-                          <p className="font-medium text-foreground truncate">{b.name}</p>
-                          <p className="text-xs text-muted-foreground">Motorcycle manufacturer</p>
-                        </div>
-                      </div>
-                    </td>
-
-                    <td className="px-4 py-3">
-                      <span className="inline-flex items-center gap-1 text-xs text-muted-foreground font-medium bg-muted/40 px-2 py-0.5 rounded-md border border-border/40">
-                        <Bike className="size-3" />
-                        {b._count?.motors ?? 0} {b._count?.motors === 1 ? "model" : "models"}
-                      </span>
-                    </td>
-
-                    <td className="px-4 py-3">
-                      <StatusBadge isActive={b.isActive} />
-                    </td>
-
-                    <td className="px-4 py-3 text-right">
-                      <RowActions
-                        isActive={b.isActive}
-                        onEdit={() => setEditingBrand(b)}
-                        onStatusChange={() => setStatusBrand(b)}
-                        onDelete={() => setDeletingBrand(b)}
-                        label="brand"
-                      />
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* Dialogs */}
       <ItemDialog
         open={createOpen}
         onOpenChange={setCreateOpen}
@@ -257,6 +196,6 @@ export const MotorBrandList: React.FC<{ initialBrands: MotorBrandDTO[] }> = ({
         isPending={isPending}
         onConfirm={handleConfirmDelete}
       />
-    </div>
+    </ManagementLayout>
   );
 };

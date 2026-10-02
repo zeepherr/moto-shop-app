@@ -1,12 +1,15 @@
 "use client";
 
-import React, { useState, useEffect, useTransition } from "react";
+import React, { useState, useEffect, useMemo, useTransition } from "react";
 import { toast } from "sonner";
-import { ProductHeader } from "./ProductHeader";
-import { ProductGrid } from "./ProductGrid";
+import { ManagementLayout } from "@/components/management/ManagementLayout";
+import { PageHeader } from "@/components/management/PageHeader";
+import { DockedTableCard } from "@/components/management/DockedTableCard";
+import { ConfirmActionDialog } from "@/components/ConfirmActionDialog";
+import { ProductStats } from "./ProductStats";
+import { ProductTable } from "./ProductTable";
 import { CreateProductDialog } from "./CreateProductDialog";
 import { EditProductDialog } from "./EditProductDialog";
-import { ConfirmActionDialog } from "@/components/ConfirmActionDialog";
 import {
   createProductAction,
   updateProductAction,
@@ -27,6 +30,14 @@ export const ProductPageClient: React.FC<ProductPageClientProps> = ({
   categories,
 }) => {
   const [products, setProducts] = useState(initialProducts);
+  const [search, setSearch] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [status, setStatus] = useState("all");
+  const [sort, setSort] = useState<{ key: string; direction: "asc" | "desc" }>({
+    key: "name",
+    direction: "asc",
+  });
+
   const [createOpen, setCreateOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<ProductDTO | null>(null);
   const [editOpen, setEditOpen] = useState(false);
@@ -40,6 +51,48 @@ export const ProductPageClient: React.FC<ProductPageClientProps> = ({
   useEffect(() => {
     setProducts(initialProducts);
   }, [initialProducts]);
+
+  const filteredProducts = useMemo(() => {
+    const term = search.trim().toLowerCase();
+    const filtered = products.filter((product) => {
+      const matchesSearch =
+        !term ||
+        product.name.toLowerCase().includes(term) ||
+        product.sku.toLowerCase().includes(term) ||
+        product.description?.toLowerCase().includes(term);
+
+      const matchesCat =
+        selectedCategory === "all" ||
+        String(product.productCategoryId) === selectedCategory;
+
+      const matchesStatus =
+        status === "all" ||
+        (status === "active" && product.isActive) ||
+        (status === "inactive" && !product.isActive);
+
+      return matchesSearch && matchesCat && matchesStatus;
+    });
+
+    return filtered.sort((a: any, b: any) => {
+      const aVal = a[sort.key];
+      const bVal = b[sort.key];
+      if (typeof aVal === "string") {
+        const res = aVal.localeCompare(String(bVal));
+        return sort.direction === "asc" ? res : -res;
+      }
+      const res = Number(aVal || 0) - Number(bVal || 0);
+      return sort.direction === "asc" ? res : -res;
+    });
+  }, [products, search, selectedCategory, status, sort]);
+
+  const counts = useMemo(
+    () => ({
+      all: products.length,
+      active: products.filter((p) => p.isActive).length,
+      inactive: products.filter((p) => !p.isActive).length,
+    }),
+    [products]
+  );
 
   const uploadImage = async (file: File): Promise<string | null> => {
     try {
@@ -114,7 +167,7 @@ export const ProductPageClient: React.FC<ProductPageClientProps> = ({
         sellingPrice: Number(values.sellingPrice),
         stockQuantity: Number(values.stockQuantity),
         unit: values.unit,
-        ...(imageKey ? { imageKey } : {}),
+        imageKey: imageKey === undefined ? undefined : imageKey,
       });
 
       if (res.success) {
@@ -134,7 +187,9 @@ export const ProductPageClient: React.FC<ProductPageClientProps> = ({
         isActive: !statusProduct.isActive,
       });
       if (res.success) {
-        toast.success(`Product ${statusProduct.isActive ? "deactivated" : "activated"}`);
+        toast.success(
+          `Product ${statusProduct.isActive ? "deactivated" : "activated"}`
+        );
         setStatusConfirmOpen(false);
         setStatusProduct(null);
       } else {
@@ -158,24 +213,76 @@ export const ProductPageClient: React.FC<ProductPageClientProps> = ({
   };
 
   return (
-    <div className="space-y-4 mt-2 sm:px-2.5 pr-1.5">
-      <ProductHeader onAddProduct={() => setCreateOpen(true)} />
-
-      <ProductGrid
-        products={products}
-        onEdit={(prod) => {
-          setEditingProduct(prod);
-          setEditOpen(true);
-        }}
-        onStatusChange={(prod) => {
-          setStatusProduct(prod);
-          setStatusConfirmOpen(true);
-        }}
-        onDelete={(prod) => {
-          setDeletingProduct(prod);
-          setDeleteConfirmOpen(true);
-        }}
+    <ManagementLayout>
+      <PageHeader
+        title="Products & Inventory"
+        description="Manage stock inventory, pricing, catalog categories, and SKU barcodes"
+        count={products.length}
+        actionLabel="Add Product"
+        onAction={() => setCreateOpen(true)}
       />
+
+      <ProductStats products={products} />
+
+      <DockedTableCard
+        search={search}
+        onSearchChange={setSearch}
+        searchPlaceholder="Search product by name, SKU or description..."
+        status={status}
+        onStatusChange={setStatus}
+        statusCounts={counts}
+        filterSlot={
+          <select
+            value={selectedCategory}
+            onChange={(e) => setSelectedCategory(e.target.value)}
+            className="h-9.5 rounded-xl border border-input/80 bg-background/50 px-3 text-xs sm:text-sm text-foreground shadow-2xs outline-none focus:ring-1 focus:ring-primary sm:w-44 cursor-pointer"
+          >
+            <option value="all">All Categories</option>
+            {categories.map((c) => (
+              <option key={c.id} value={String(c.id)}>
+                {c.name}
+              </option>
+            ))}
+          </select>
+        }
+        hasActiveFilters={
+          search.trim() !== "" ||
+          selectedCategory !== "all" ||
+          status !== "all"
+        }
+        onClearFilters={() => {
+          setSearch("");
+          setSelectedCategory("all");
+          setStatus("all");
+        }}
+        totalFiltered={filteredProducts.length}
+        totalAll={products.length}
+        entityName="products"
+      >
+        <ProductTable
+          products={filteredProducts}
+          sort={sort}
+          onSort={(key) =>
+            setSort((curr) => ({
+              key,
+              direction:
+                curr.key === key && curr.direction === "asc" ? "desc" : "asc",
+            }))
+          }
+          onEdit={(prod) => {
+            setEditingProduct(prod);
+            setEditOpen(true);
+          }}
+          onStatusChange={(prod) => {
+            setStatusProduct(prod);
+            setStatusConfirmOpen(true);
+          }}
+          onDelete={(prod) => {
+            setDeletingProduct(prod);
+            setDeleteConfirmOpen(true);
+          }}
+        />
+      </DockedTableCard>
 
       <CreateProductDialog
         open={createOpen}
@@ -200,8 +307,8 @@ export const ProductPageClient: React.FC<ProductPageClientProps> = ({
         title={statusProduct?.isActive ? "Deactivate this product?" : "Activate this product?"}
         description={
           statusProduct?.isActive
-            ? `${statusProduct.name} will no longer be available for active use.`
-            : `${statusProduct?.name} will become available for use again.`
+            ? `${statusProduct.name} will no longer be available for sale in the POS.`
+            : `${statusProduct?.name} will become available for sale again.`
         }
         confirmLabel={statusProduct?.isActive ? "Deactivate" : "Activate"}
         cancelLabel="Cancel"
@@ -228,6 +335,6 @@ export const ProductPageClient: React.FC<ProductPageClientProps> = ({
         isPending={isPending}
         onConfirm={handleConfirmDelete}
       />
-    </div>
+    </ManagementLayout>
   );
 };

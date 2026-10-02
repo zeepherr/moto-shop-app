@@ -2,13 +2,13 @@
 
 import React, { useState, useMemo, useTransition } from "react";
 import { toast } from "sonner";
-import { FolderTree, Package } from "lucide-react";
+import { ManagementLayout } from "@/components/management/ManagementLayout";
 import { PageHeader } from "@/components/management/PageHeader";
-import { FilterToolbar } from "@/components/management/FilterToolbar";
-import { StatusBadge } from "@/components/management/StatusBadge";
-import { RowActions } from "@/components/management/RowActions";
+import { DockedTableCard } from "@/components/management/DockedTableCard";
 import { ItemDialog } from "@/components/management/ItemDialog";
 import { ConfirmActionDialog } from "@/components/ConfirmActionDialog";
+import { CategoryStats } from "./CategoryStats";
+import { CategoryTable } from "./CategoryTable";
 import {
   createCategoryAction,
   updateCategoryAction,
@@ -16,9 +16,9 @@ import {
 } from "../actions/category.actions";
 import type { ProductCategoryDTO } from "../types";
 
-export const CategoryList: React.FC<{ initialCategories: ProductCategoryDTO[] }> = ({
-  initialCategories,
-}) => {
+export const CategoryList: React.FC<{
+  initialCategories: ProductCategoryDTO[];
+}> = ({ initialCategories }) => {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("all");
   const [createOpen, setCreateOpen] = useState(false);
@@ -81,7 +81,9 @@ export const CategoryList: React.FC<{ initialCategories: ProductCategoryDTO[] }>
         isActive: !statusCategory.isActive,
       });
       if (res.success) {
-        toast.success(`Category ${statusCategory.isActive ? "deactivated" : "activated"}`);
+        toast.success(
+          `Category ${statusCategory.isActive ? "deactivated" : "activated"}`
+        );
         setStatusCategory(null);
       } else {
         toast.error(res.error || "Failed to update status");
@@ -103,18 +105,21 @@ export const CategoryList: React.FC<{ initialCategories: ProductCategoryDTO[] }>
   };
 
   return (
-    <div className="space-y-4">
+    <ManagementLayout>
       <PageHeader
         title="Product Categories"
-        description="Organize parts, fluids, and accessories into catalog groupings"
+        description="Organize spare parts, consumables, fluids, and accessories catalog"
+        count={initialCategories.length}
         actionLabel="Add Category"
         onAction={() => setCreateOpen(true)}
       />
 
-      <FilterToolbar
+      <CategoryStats categories={initialCategories} />
+
+      <DockedTableCard
         search={search}
         onSearchChange={setSearch}
-        searchPlaceholder="Search categories..."
+        searchPlaceholder="Search categories by name..."
         status={status}
         onStatusChange={setStatus}
         statusCounts={counts}
@@ -123,91 +128,25 @@ export const CategoryList: React.FC<{ initialCategories: ProductCategoryDTO[] }>
           setSearch("");
           setStatus("all");
         }}
-      />
+        totalFiltered={filtered.length}
+        totalAll={initialCategories.length}
+        entityName="categories"
+      >
+        <CategoryTable
+          categories={filtered}
+          onEdit={setEditingCategory}
+          onToggleStatus={setStatusCategory}
+          onDelete={setDeletingCategory}
+        />
+      </DockedTableCard>
 
-      {/* Unified Apple-Styled Table */}
-      <div className="rounded-2xl border border-border/70 bg-card overflow-hidden shadow-xs">
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[650px] text-sm">
-            <thead>
-              <tr className="border-b border-border/60 bg-muted/30">
-                <th className="px-4 py-3 text-left font-medium text-muted-foreground text-xs uppercase tracking-wider">
-                  Category Name
-                </th>
-                <th className="px-4 py-3 text-left font-medium text-muted-foreground text-xs uppercase tracking-wider">
-                  Products Count
-                </th>
-                <th className="px-4 py-3 text-left font-medium text-muted-foreground text-xs uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="w-16 px-4 py-3 text-right font-medium text-muted-foreground">
-                  <span className="sr-only">Actions</span>
-                </th>
-              </tr>
-            </thead>
-
-            <tbody className="divide-y divide-border/40">
-              {filtered.length === 0 ? (
-                <tr>
-                  <td colSpan={4} className="h-40 text-center">
-                    <div className="flex flex-col items-center justify-center gap-1.5 py-6">
-                      <FolderTree className="size-8 text-muted-foreground/50" />
-                      <p className="font-medium text-foreground text-sm">No categories found</p>
-                      <p className="text-xs text-muted-foreground">Try clearing filters or add a new category.</p>
-                    </div>
-                  </td>
-                </tr>
-              ) : (
-                filtered.map((cat) => (
-                  <tr key={cat.id} className="hover:bg-muted/30 transition-colors">
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-3">
-                        <div className="flex size-9 shrink-0 items-center justify-center rounded-xl border border-border/70 bg-muted/40 font-semibold text-xs text-foreground uppercase">
-                          {cat.name.charAt(0)}
-                        </div>
-                        <div className="min-w-0">
-                          <p className="font-medium text-foreground truncate">{cat.name}</p>
-                          <p className="text-xs text-muted-foreground">Product catalog group</p>
-                        </div>
-                      </div>
-                    </td>
-
-                    <td className="px-4 py-3">
-                      <span className="inline-flex items-center gap-1 text-xs text-muted-foreground font-medium bg-muted/40 px-2 py-0.5 rounded-md border border-border/40">
-                        <Package className="size-3" />
-                        {cat._count?.products ?? 0} {cat._count?.products === 1 ? "product" : "products"}
-                      </span>
-                    </td>
-
-                    <td className="px-4 py-3">
-                      <StatusBadge isActive={cat.isActive} />
-                    </td>
-
-                    <td className="px-4 py-3 text-right">
-                      <RowActions
-                        isActive={cat.isActive}
-                        onEdit={() => setEditingCategory(cat)}
-                        onStatusChange={() => setStatusCategory(cat)}
-                        onDelete={() => setDeletingCategory(cat)}
-                        label="category"
-                      />
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* Dialogs */}
       <ItemDialog
         open={createOpen}
         onOpenChange={setCreateOpen}
-        title="Add Category"
-        description="Create a new catalog category for organizing products."
+        title="Add Product Category"
+        description="Add a new classification category for inventory items."
         label="Category Name"
-        placeholder="e.g. Engine Oil, Brake Pads, Tires"
+        placeholder="e.g. Engine Oil, Brake Pads, Tires, Filters"
         submitLabel="Add Category"
         onSubmit={handleCreate}
         isPending={isPending}
@@ -216,7 +155,7 @@ export const CategoryList: React.FC<{ initialCategories: ProductCategoryDTO[] }>
       <ItemDialog
         open={Boolean(editingCategory)}
         onOpenChange={(open) => !open && setEditingCategory(null)}
-        title="Edit Category"
+        title="Edit Product Category"
         description="Update category name and details."
         label="Category Name"
         placeholder="e.g. Engine Oil"
@@ -232,8 +171,8 @@ export const CategoryList: React.FC<{ initialCategories: ProductCategoryDTO[] }>
         title={statusCategory?.isActive ? "Deactivate this category?" : "Activate this category?"}
         description={
           statusCategory?.isActive
-            ? `Products under "${statusCategory.name}" will remain, but the category will be marked inactive.`
-            : `"${statusCategory?.name}" will become active and available for product assignment.`
+            ? `Products in "${statusCategory.name}" will remain, but this category will be marked inactive.`
+            : `"${statusCategory?.name}" will become active and available for product assignments.`
         }
         confirmLabel={statusCategory?.isActive ? "Deactivate" : "Activate"}
         cancelLabel="Cancel"
@@ -257,6 +196,6 @@ export const CategoryList: React.FC<{ initialCategories: ProductCategoryDTO[] }>
         isPending={isPending}
         onConfirm={handleConfirmDelete}
       />
-    </div>
+    </ManagementLayout>
   );
 };

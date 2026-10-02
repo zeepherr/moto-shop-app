@@ -1,57 +1,74 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
-import { UserHeader } from "./UserHeader";
-import { UserSummary } from "./UserSummary";
-import { UserToolbar } from "./UserToolbar";
-import { UserTable } from "./UserTable";
-import { Dialog, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { updateUserRoleAction } from "../actions/user.actions";
 import { toast } from "sonner";
-
-interface UserItem {
-  id: number;
-  firstName: string;
-  lastName: string;
-  email: string | null;
-  phone: string | null;
-  role: "ADMIN" | "STAFF" | "MEMBER";
-  isActive: boolean;
-  createdAt: Date | string;
-}
+import { ManagementLayout } from "@/components/management/ManagementLayout";
+import { PageHeader } from "@/components/management/PageHeader";
+import { DockedTableCard } from "@/components/management/DockedTableCard";
+import { ConfirmActionDialog } from "@/components/ConfirmActionDialog";
+import { UserStats } from "./UserStats";
+import { UserTable, type UserItem } from "./UserTable";
+import { updateUserRoleAction } from "../actions/user.actions";
 
 interface UsersPageClientProps {
   initialUsers: UserItem[];
 }
 
-export const UsersPageClient: React.FC<UsersPageClientProps> = ({ initialUsers }) => {
+export const UsersPageClient: React.FC<UsersPageClientProps> = ({
+  initialUsers,
+}) => {
   const [users, setUsers] = useState<UserItem[]>(initialUsers);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState("ALL");
+  const [status, setStatus] = useState("all");
 
   const [roleUser, setRoleUser] = useState<UserItem | null>(null);
   const [nextRole, setNextRole] = useState<"STAFF" | "MEMBER">("STAFF");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
 
-  const memberCount = useMemo(() => users.filter((u) => u.role === "MEMBER").length, [users]);
-  const staffCount = useMemo(() => users.filter((u) => u.role === "STAFF").length, [users]);
+  const adminCount = useMemo(
+    () => users.filter((u) => u.role === "ADMIN").length,
+    [users]
+  );
+  const staffCount = useMemo(
+    () => users.filter((u) => u.role === "STAFF").length,
+    [users]
+  );
+  const memberCount = useMemo(
+    () => users.filter((u) => u.role === "MEMBER").length,
+    [users]
+  );
 
   const filteredUsers = useMemo(() => {
-    const term = searchTerm.trim().toLowerCase();
+    const term = search.trim().toLowerCase();
     return users.filter((u) => {
       const matchesSearch =
         !term ||
-        u.firstName.toLowerCase().includes(term) ||
-        u.lastName.toLowerCase().includes(term) ||
+        u.firstName?.toLowerCase().includes(term) ||
+        u.lastName?.toLowerCase().includes(term) ||
         u.email?.toLowerCase().includes(term) ||
         u.phone?.includes(term);
 
       const matchesRole = roleFilter === "ALL" || u.role === roleFilter;
-      return matchesSearch && matchesRole;
+
+      const matchesStatus =
+        status === "all" ||
+        (status === "active" && u.isActive) ||
+        (status === "inactive" && !u.isActive);
+
+      return matchesSearch && matchesRole && matchesStatus;
     });
-  }, [users, searchTerm, roleFilter]);
+  }, [users, search, roleFilter, status]);
+
+  const counts = useMemo(
+    () => ({
+      all: users.length,
+      active: users.filter((u) => u.isActive).length,
+      inactive: users.filter((u) => !u.isActive).length,
+    }),
+    [users]
+  );
 
   const handleRoleChange = (user: UserItem, role: "STAFF" | "MEMBER") => {
     setRoleUser(user);
@@ -65,13 +82,16 @@ export const UsersPageClient: React.FC<UsersPageClientProps> = ({ initialUsers }
     try {
       const res = await updateUserRoleAction(roleUser.id, nextRole);
       if (res.success) {
-        toast.success(`Role updated to ${nextRole}`);
+        toast.success(`User role updated to ${nextRole}`);
         setUsers((prev) =>
-          prev.map((u) => (u.id === roleUser.id ? { ...u, role: nextRole } : u)),
+          prev.map((u) =>
+            u.id === roleUser.id ? { ...u, role: nextRole } : u
+          )
         );
         setDialogOpen(false);
+        setRoleUser(null);
       } else {
-        toast.error(res.error || "Failed to update role");
+        toast.error(res.error || "Failed to update user role");
       }
     } finally {
       setIsUpdating(false);
@@ -79,58 +99,76 @@ export const UsersPageClient: React.FC<UsersPageClientProps> = ({ initialUsers }
   };
 
   return (
-    <div className="mt-2 space-y-4 sm:px-2.5 pr-1.5">
-      <UserHeader totalUsers={users.length} />
-
-      <UserSummary
-        totalUsers={users.length}
-        memberCount={memberCount}
-        staffCount={staffCount}
+    <ManagementLayout>
+      <PageHeader
+        title="User Management"
+        description="Manage customer accounts, technician staff privileges, and administrator access"
+        count={users.length}
       />
 
-      <div className="overflow-hidden rounded-xl border border-border/70 bg-card">
-        <UserToolbar
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-          roleFilter={roleFilter}
-          setRoleFilter={setRoleFilter}
-        />
+      <UserStats
+        total={users.length}
+        adminCount={adminCount}
+        staffCount={staffCount}
+        memberCount={memberCount}
+      />
 
+      <DockedTableCard
+        search={search}
+        onSearchChange={setSearch}
+        searchPlaceholder="Search by name, email, or phone..."
+        status={status}
+        onStatusChange={setStatus}
+        statusCounts={counts}
+        filterSlot={
+          <select
+            value={roleFilter}
+            onChange={(e) => setRoleFilter(e.target.value)}
+            className="h-9.5 rounded-xl border border-input/80 bg-background/50 px-3 text-xs sm:text-sm text-foreground shadow-2xs outline-none focus:ring-1 focus:ring-primary sm:w-40 cursor-pointer"
+          >
+            <option value="ALL">All Roles</option>
+            <option value="ADMIN">Admins</option>
+            <option value="STAFF">Staff</option>
+            <option value="MEMBER">Members</option>
+          </select>
+        }
+        hasActiveFilters={
+          search.trim() !== "" || roleFilter !== "ALL" || status !== "all"
+        }
+        onClearFilters={() => {
+          setSearch("");
+          setRoleFilter("ALL");
+          setStatus("all");
+        }}
+        totalFiltered={filteredUsers.length}
+        totalAll={users.length}
+        entityName="users"
+      >
         <UserTable
           users={filteredUsers}
-          totalUsers={users.length}
           onRoleChange={handleRoleChange}
           isUpdatingRole={isUpdating}
         />
-      </div>
+      </DockedTableCard>
 
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogClose onClose={() => setDialogOpen(false)} />
-        <DialogHeader>
-          <DialogTitle>
-            {nextRole === "STAFF" ? "Promote this member to staff?" : "Change this staff member to member?"}
-          </DialogTitle>
-          <DialogDescription>
-            {roleUser &&
-              (nextRole === "STAFF"
-                ? `${roleUser.firstName} ${roleUser.lastName} will receive staff access to the shop management system.`
-                : `${roleUser.firstName} ${roleUser.lastName} will lose staff access and become a regular member.`)}
-          </DialogDescription>
-        </DialogHeader>
-        <DialogFooter>
-          <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
-            Cancel
-          </Button>
-          <Button
-            type="button"
-            variant={nextRole === "STAFF" ? "default" : "destructive"}
-            disabled={isUpdating}
-            onClick={handleConfirmRole}
-          >
-            {isUpdating ? "Updating..." : nextRole === "STAFF" ? "Promote to Staff" : "Change to Member"}
-          </Button>
-        </DialogFooter>
-      </Dialog>
-    </div>
+      <ConfirmActionDialog
+        open={dialogOpen}
+        onOpenChange={(open) => {
+          setDialogOpen(open);
+          if (!open) setRoleUser(null);
+        }}
+        title={`Change role to ${nextRole}?`}
+        description={
+          roleUser
+            ? `Are you sure you want to change "${roleUser.firstName} ${roleUser.lastName}" from ${roleUser.role} to ${nextRole}? This will immediately alter their system permissions.`
+            : ""
+        }
+        confirmLabel={`Confirm ${nextRole}`}
+        cancelLabel="Cancel"
+        variant="default"
+        isPending={isUpdating}
+        onConfirm={handleConfirmRole}
+      />
+    </ManagementLayout>
   );
 };

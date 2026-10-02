@@ -5,8 +5,9 @@ export interface PosCartItem {
   itemType: OrderItemType;
   name: string;
   price: number;
+  unitPrice?: number;
   quantity: number;
-  maxQuantity?: number;
+  maxQuantity?: number | null;
   imageKey?: string | null;
 }
 

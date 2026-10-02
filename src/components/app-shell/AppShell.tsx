@@ -12,6 +12,7 @@ import {
   Tags,
   Bike,
   Wrench,
+  Users,
   User,
 } from "lucide-react";
 import { ROLES } from "@/features/auth/constants";
@@ -69,6 +70,7 @@ export const AppShell: React.FC<AppShellProps> = ({
     { label: "Motor Brands", href: "/admin/motor-brands", icon: Bike },
     { label: "Motorcycles", href: "/admin/motors", icon: Bike },
     { label: "Services", href: "/admin/services", icon: Wrench },
+    { label: "Users", href: "/admin/users", icon: Users },
     { label: "Dashboard", href: "/admin", icon: LayoutDashboard, end: true },
   ];
 

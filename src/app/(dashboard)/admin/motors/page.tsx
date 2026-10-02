@@ -9,11 +9,33 @@ export const metadata: Metadata = {
   description: "Manage motorcycle models catalog",
 };
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminMotorsPage() {
-  const [motors, brands] = await Promise.all([
+  const [rawMotors, rawBrands] = await Promise.all([
     findAllMotors(),
     findAllBrands({ isActive: true }),
   ]);
+
+  const motors = rawMotors.map((m) => ({
+    id: m.id,
+    motorBrandId: m.motorBrandId,
+    model: m.model,
+    type: m.type,
+    isActive: m.isActive,
+    createdAt: m.createdAt.toISOString(),
+    updatedAt: m.updatedAt.toISOString(),
+    motorBrand: m.motorBrand,
+  }));
+
+  const brands = rawBrands.map((b) => ({
+    id: b.id,
+    name: b.name,
+    isActive: b.isActive,
+    createdAt: b.createdAt.toISOString(),
+    updatedAt: b.updatedAt.toISOString(),
+    _count: b._count,
+  }));
 
   return (
     <div className="space-y-6">

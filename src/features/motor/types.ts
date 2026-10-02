@@ -4,8 +4,8 @@ export interface MotorBrandDTO {
   id: number;
   name: string;
   isActive: boolean;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string | Date;
+  updatedAt: string | Date;
   _count?: {
     motors: number;
   };
@@ -17,8 +17,8 @@ export interface MotorDTO {
   model: string;
   type: MotorType;
   isActive: boolean;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string | Date;
+  updatedAt: string | Date;
   motorBrand?: {
     id: number;
     name: string;

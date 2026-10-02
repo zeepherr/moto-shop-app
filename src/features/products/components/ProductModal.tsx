@@ -179,7 +179,7 @@ export const ProductModal: React.FC<Props> = ({ open, onOpenChange, product, cat
           <div className="flex items-center gap-3">
             {form.imageKey ? (
               <div className="relative h-16 w-16 rounded-xl border border-border overflow-hidden bg-muted">
-                <Image src={getR2PublicUrl(form.imageKey)} alt="Preview" fill className="object-cover" />
+                <img src={getR2PublicUrl(form.imageKey)} alt="Preview" className="h-full w-full object-cover" />
                 <button type="button" onClick={() => setForm({ ...form, imageKey: null })} className="absolute top-1 right-1 p-0.5 rounded-full bg-black/60 text-white hover:bg-black">
                   <X className="h-3 w-3" />
                 </button>

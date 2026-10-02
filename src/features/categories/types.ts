@@ -2,8 +2,8 @@ export interface ProductCategoryDTO {
   id: number;
   name: string;
   isActive: boolean;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string | Date;
+  updatedAt: string | Date;
   _count?: {
     products: number;
   };

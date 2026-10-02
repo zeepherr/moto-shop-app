@@ -8,8 +8,19 @@ export const metadata: Metadata = {
   description: "Manage product categories catalog",
 };
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminCategoriesPage() {
-  const categories = await findAllCategories();
+  const rawCategories = await findAllCategories();
+
+  const categories = rawCategories.map((c) => ({
+    id: c.id,
+    name: c.name,
+    isActive: c.isActive,
+    createdAt: c.createdAt.toISOString(),
+    updatedAt: c.updatedAt.toISOString(),
+    _count: c._count,
+  }));
 
   return (
     <div className="space-y-6">

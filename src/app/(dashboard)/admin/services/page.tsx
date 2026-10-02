@@ -8,8 +8,20 @@ export const metadata: Metadata = {
   description: "Manage motorcycle repair and maintenance services",
 };
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminServicesPage() {
-  const services = await findAllServices();
+  const rawServices = await findAllServices();
+
+  const services = rawServices.map((s) => ({
+    id: s.id,
+    name: s.name,
+    description: s.description,
+    price: Number(s.price),
+    isActive: s.isActive,
+    createdAt: s.createdAt.toISOString(),
+    updatedAt: s.updatedAt.toISOString(),
+  }));
 
   return (
     <div className="space-y-6">

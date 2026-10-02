@@ -8,8 +8,19 @@ export const metadata: Metadata = {
   description: "Manage motorcycle brands and manufacturers",
 };
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminMotorBrandsPage() {
-  const brands = await findAllBrands();
+  const rawBrands = await findAllBrands();
+
+  const brands = rawBrands.map((b) => ({
+    id: b.id,
+    name: b.name,
+    isActive: b.isActive,
+    createdAt: b.createdAt.toISOString(),
+    updatedAt: b.updatedAt.toISOString(),
+    _count: b._count,
+  }));
 
   return (
     <div className="space-y-6">

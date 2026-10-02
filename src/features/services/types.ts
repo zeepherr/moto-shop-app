@@ -1,11 +1,9 @@
-import type { Prisma } from "@prisma/client";
-
 export interface MotoServiceDTO {
   id: number;
   name: string;
   description: string | null;
-  price: number | string | Prisma.Decimal;
+  price: number;
   isActive: boolean;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string | Date;
+  updatedAt: string | Date;
 }

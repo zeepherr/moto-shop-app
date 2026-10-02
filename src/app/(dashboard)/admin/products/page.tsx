@@ -9,11 +9,39 @@ export const metadata: Metadata = {
   description: "Manage products, inventory stock, and pricing",
 };
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminProductsPage() {
-  const [products, categories] = await Promise.all([
+  const [rawProducts, rawCategories] = await Promise.all([
     findAllProducts(),
     findAllCategories({ isActive: true }),
   ]);
+
+  const products = rawProducts.map((p) => ({
+    id: p.id,
+    productCategoryId: p.productCategoryId,
+    sku: p.sku,
+    name: p.name,
+    description: p.description,
+    costPrice: Number(p.costPrice),
+    sellingPrice: Number(p.sellingPrice),
+    stockQuantity: p.stockQuantity,
+    unit: p.unit,
+    imageKey: p.imageKey,
+    isActive: p.isActive,
+    createdAt: p.createdAt.toISOString(),
+    updatedAt: p.updatedAt.toISOString(),
+    productCategory: p.productCategory,
+  }));
+
+  const categories = rawCategories.map((c) => ({
+    id: c.id,
+    name: c.name,
+    isActive: c.isActive,
+    createdAt: c.createdAt.toISOString(),
+    updatedAt: c.updatedAt.toISOString(),
+    _count: c._count,
+  }));
 
   return (
     <div className="space-y-6">
@@ -24,7 +52,7 @@ export default async function AdminProductsPage() {
         </p>
       </div>
 
-      <ProductList initialProducts={products} categories={categories} />
+      <ProductList initialProducts={products} categories={categories as any} />
     </div>
   );
 }

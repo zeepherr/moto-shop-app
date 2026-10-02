@@ -42,9 +42,10 @@
 
 ### A. Global Shell & Surface System (100% Complete)
 - [x] **`AppShell` & Layout**: Responsive container bounded to `max-w-7xl mx-auto` for management screens to eliminate widescreen voids on 1440p/4K monitors.
-- [x] **`AppHeader`**: Light/Dark adaptive frosted glass with breadcrumbs, brand identity, mobile toggle, and theme switch.
+- [x] **`AppHeader`**: Compact light/dark adaptive utility bar with role-aware breadcrumbs, mobile navigation, and theme switch.
 - [x] **`AppSidebar`**: Collapsible desktop & mobile drawer with Apple Action Blue active state navigation.
-- [x] **Sidebar User Profile Dropup**: Hover/tap revealed dropup menu with user info, role badge, and session-revoking Logout button.
+- [x] **Sidebar Preference Persistence**: Collapse state is stored in a cookie and applied during server rendering so reloads do not flash or reset the sidebar width.
+- [x] **Sidebar User Profile Menu**: Account control adapts to expanded/collapsed layouts; its viewport-level menu supports hover, click, keyboard dismissal, and session-revoking logout.
 - [x] **Theme Tokens**: Aligned `--primary` to `#0066cc` (light) / `#2997ff` (dark), `--background` to `#f6f8fc` (light) / `#090b13` (dark).
 
 ### B. Admin Management Modules (100% Complete & Unified)
@@ -74,19 +75,21 @@
 - [x] Customer/member lookup and vehicle association.
 - [x] Cash & QR payment processing (manual verification model).
 
+### D. Staff Portal (100% Complete & Unified)
+- [x] **Staff POS (`/staff/pos`)**: Shares the production POS workspace and active catalog data with the admin terminal.
+- [x] **Staff Services (`/staff/services`)**: Read-only searchable catalog of active workshop services and standard rates.
+- [x] **Staff Profile (`/staff/profile`)**: Role-appropriate account center for staff identity, contact details, and access status.
+
 ---
 
 ## 5. Known Gaps & Next Priority Tasks (Per Obsidian Vault)
 
-1. **Staff Portal UI Alignment**:
-   - Align `/staff/pos` and `/staff/profile` with the unified layout and Apple design language.
-   - Enable Staff Services catalog browsing access (per Vault Gap: "Staff Services page access still needs to be made available").
-2. **Member / Customer Portal**:
+1. **Member / Customer Portal**:
    - Refactor `/member/profile` into an Apple-quality account center with vehicle history and service logs.
    - Implement self-management endpoints (`/users/me` profile update).
-3. **POS Terminal Refinements**:
+2. **POS Terminal Refinements**:
    - Polish receipt printing/preview modal, scanner autofocus behavior, and hold-order drawer.
-4. **Automated Testing & Deployment Preparation**:
+3. **Automated Testing & Deployment Preparation**:
    - Vitest / Playwright test scaffolding.
    - Verification for Cloudflare Pages (Frontend) + Railway (Backend/Database).
 
@@ -97,12 +100,12 @@
 ```text
 src/components/management/
 ├── ManagementLayout.tsx     # Bounded container (max-w-7xl mx-auto space-y-6)
-├── PageHeader.tsx           # Sticky blurred header with count badge & primary CTA
+├── PageHeader.tsx           # Structured page heading with count badge & primary CTA
 ├── QuickStatCard.tsx        # Standard Apple-style operational metric card
 ├── DockedTableCard.tsx      # Integrated card with search, status tabs, filters & footer
 ├── StatusBadge.tsx          # Emerald/Slate glowing pill badge
-├── RowActions.tsx           # Accessible 3-dots action dropdown
+├── RowActions.tsx           # Accessible, viewport-aware action menu
 └── ItemDialog.tsx           # Generic single-field item modal
 ```
 
-*Last Updated*: 2026-10-02 (Admin Redesign & Light/Dark Theme Fix Completed)
+*Last Updated*: 2026-10-02 (Staff Portal Alignment Completed)

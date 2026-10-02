@@ -48,11 +48,17 @@ export const SidebarNavigation: React.FC<SidebarNavigationProps> = ({
 
   return (
     <motion.nav
-      className="min-h-0 flex-1 space-y-1 overflow-y-auto overflow-x-hidden p-1.5 sm:p-2.5"
+      aria-label="Main navigation"
+      className={`min-h-0 flex-1 overflow-y-auto overflow-x-hidden px-2 py-4 ${collapsed ? "space-y-1.5" : "space-y-1"}`}
       variants={navigationVariants}
       initial="hidden"
       animate="visible"
     >
+      {!collapsed && (
+        <p className="px-3 pb-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground/75">
+          Workspace
+        </p>
+      )}
       {navigation.map((item) => {
         const Icon = item.icon;
         const isActive = item.end
@@ -71,14 +77,17 @@ export const SidebarNavigation: React.FC<SidebarNavigationProps> = ({
               href={item.href}
               onClick={onNavigate}
               title={collapsed ? item.label : undefined}
+              aria-current={isActive ? "page" : undefined}
               className={cn(
-                "group/nav relative flex h-10 min-w-0 items-center gap-3 rounded-xl px-3 border border-transparent text-sm transition-all duration-150",
+                "group/nav relative flex h-10 min-w-0 items-center rounded-xl text-sm transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                collapsed ? "justify-center px-0" : "gap-3 px-3",
                 isActive
-                  ? "border-[#0066cc]/25 bg-[#0066cc]/10 font-semibold text-[#0066cc] shadow-2xs [&>svg]:text-[#0066cc] dark:border-[#0066cc]/30 dark:bg-[#0066cc]/20 dark:text-[#2997ff] dark:[&>svg]:text-[#2997ff]"
-                  : "text-muted-foreground hover:bg-muted/70 hover:text-foreground dark:hover:bg-white/[0.05] dark:hover:text-foreground",
+                  ? "bg-sidebar-accent font-semibold text-sidebar-accent-foreground [&>svg]:text-sidebar-primary"
+                  : "text-muted-foreground hover:bg-sidebar-accent/65 hover:text-sidebar-foreground",
               )}
             >
-              <Icon className="size-4 shrink-0 stroke-[1.8]" />
+              {isActive && <span className="absolute inset-y-2 left-0 w-0.5 rounded-full bg-sidebar-primary" />}
+              <Icon className="size-[18px] shrink-0 stroke-[1.8]" />
 
               <AnimatePresence initial={false}>
                 {!collapsed && (

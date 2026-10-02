@@ -28,6 +28,8 @@ export const createServiceAction = async (input: CreateServiceInput) => {
   const service = await createService(parsed.data);
   revalidatePath("/admin/services");
   revalidatePath("/admin/pos");
+  revalidatePath("/staff/services");
+  revalidatePath("/staff/pos");
   return { success: true, data: service };
 };
 
@@ -40,6 +42,8 @@ export const updateServiceAction = async (id: number, input: UpdateServiceInput)
   const service = await updateService(id, parsed.data);
   revalidatePath("/admin/services");
   revalidatePath("/admin/pos");
+  revalidatePath("/staff/services");
+  revalidatePath("/staff/pos");
   return { success: true, data: service };
 };
 
@@ -48,6 +52,8 @@ export const deleteServiceAction = async (id: number) => {
     await deleteService(id);
     revalidatePath("/admin/services");
     revalidatePath("/admin/pos");
+    revalidatePath("/staff/services");
+    revalidatePath("/staff/pos");
     return { success: true, message: "Service deleted successfully" };
   } catch {
     return {

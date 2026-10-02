@@ -23,6 +23,7 @@ interface AppShellProps {
   user: AuthUserDTO | null;
   section?: string;
   workspace?: string;
+  initialSidebarCollapsed?: boolean;
   children: React.ReactNode;
 }
 
@@ -30,30 +31,21 @@ export const AppShell: React.FC<AppShellProps> = ({
   user,
   section = "Shop Management",
   workspace = "Shop management",
+  initialSidebarCollapsed = false,
   children,
 }) => {
   const pathname = usePathname();
-
-  const [collapsed, setCollapsed] = useState(() => {
-    if (typeof window !== "undefined") {
-      return localStorage.getItem("sidebar-collapsed") === "true";
-    }
-    return false;
-  });
+  const [collapsed, setCollapsed] = useState(initialSidebarCollapsed);
 
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const toggleSidebar = () => {
     setCollapsed((prev) => {
       const next = !prev;
-      localStorage.setItem("sidebar-collapsed", String(next));
+      document.cookie = `sidebar-collapsed=${next}; path=/; max-age=31536000; samesite=lax`;
       return next;
     });
   };
-
-  useEffect(() => {
-    setMobileOpen(false);
-  }, [pathname]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -76,6 +68,7 @@ export const AppShell: React.FC<AppShellProps> = ({
 
   const staffNavigation: NavItem[] = [
     { label: "POS", href: "/staff/pos", icon: ShoppingCart, end: true },
+    { label: "Services", href: "/staff/services", icon: Wrench },
     { label: "Profile", href: "/staff/profile", icon: User },
   ];
 
@@ -157,7 +150,7 @@ export const AppShell: React.FC<AppShellProps> = ({
           onMenuClick={() => setMobileOpen(true)}
         />
 
-        <main className="relative mt-[76px] min-h-0 min-w-0 flex-1 overflow-y-auto scroll-smooth px-2 pb-3 sm:px-3 sm:pb-4 lg:px-5 lg:pb-5 [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+        <main className="relative mt-16 min-h-0 min-w-0 flex-1 overflow-y-auto scroll-smooth px-2 pb-3 sm:px-3 sm:pb-4 lg:px-5 lg:pb-5 [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
           {children}
         </main>
       </div>

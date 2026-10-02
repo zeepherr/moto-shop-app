@@ -113,3 +113,23 @@ export const getUserProfile = async (userId: number, db = defaultDb) => {
     },
   };
 };
+
+export const getUserAccountProfile = async (userId: number, db = defaultDb) => {
+  return await db.user.findUnique({
+    where: { id: userId },
+    select: {
+      id: true,
+      role: true,
+      firstName: true,
+      lastName: true,
+      email: true,
+      phone: true,
+      isActive: true,
+      emailVerifiedAt: true,
+      createdAt: true,
+      userInfo: {
+        select: { photoUrl: true },
+      },
+    },
+  });
+};

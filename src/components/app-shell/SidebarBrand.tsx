@@ -18,21 +18,24 @@ export const SidebarBrand: React.FC<SidebarBrandProps> = ({
 }) => {
   return (
     <div className="flex h-16 shrink-0 items-center overflow-hidden border-b border-border/70 px-3 transition-colors dark:border-white/[0.06]">
-      {/* Brand icon */}
-      <button
-        type="button"
-        onClick={onToggle}
-        aria-label={collapsed ? "Expand sidebar" : "Home"}
-        className="group relative flex size-9 shrink-0 items-center justify-center rounded-xl cursor-pointer"
-      >
-        <div className="flex size-9 items-center justify-center rounded-xl bg-[#0066cc] text-sm font-semibold text-white shadow-xs transition-all duration-150 group-hover:scale-95">
+      {collapsed ? (
+        <button
+          type="button"
+          onClick={onToggle}
+          aria-label="Expand sidebar"
+          title="Expand sidebar"
+          className="group relative flex size-9 shrink-0 items-center justify-center rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-ring cursor-pointer"
+        >
+          <span className="flex size-9 items-center justify-center rounded-xl bg-[#0066cc] text-sm font-semibold text-white shadow-xs transition-all duration-150 group-hover:opacity-0">
+            H
+          </span>
+          <PanelLeftOpen className="absolute size-5 text-foreground opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-focus-visible:opacity-100" />
+        </button>
+      ) : (
+        <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-[#0066cc] text-sm font-semibold text-white shadow-xs">
           H
         </div>
-
-        {collapsed && (
-          <PanelLeftOpen className="absolute size-5 opacity-0 transition-opacity duration-150 group-hover:opacity-100 text-foreground" />
-        )}
-      </button>
+      )}
 
       {/* Brand text */}
       <AnimatePresence initial={false}>

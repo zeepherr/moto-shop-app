@@ -56,62 +56,62 @@
   --card-foreground: #0b1026;
   --popover: #ffffff;
   --popover-foreground: #0b1026;
-  --primary: #d71945;
+  --primary: #0066cc;
   --primary-foreground: #ffffff;
   --secondary: #edf2fb;
   --secondary-foreground: #111a38;
   --muted: #eef3f9;
   --muted-foreground: #66728f;
-  --accent: #0891b2;
+  --accent: #0066cc;
   --accent-foreground: #ffffff;
   --success: #16a36a;
   --success-foreground: #ffffff;
   --destructive: #dc3545;
   --border: #d9e1ef;
   --input: #dce5f2;
-  --ring: #0ea5e9;
+  --ring: #0066cc;
   --radius: 0.625rem;
 
   --sidebar: #fbfcff;
   --sidebar-foreground: #111832;
-  --sidebar-primary: #d71945;
+  --sidebar-primary: #0066cc;
   --sidebar-primary-foreground: #ffffff;
   --sidebar-accent: #e9f3fb;
   --sidebar-accent-foreground: #0c1838;
   --sidebar-border: #d8e1ee;
-  --sidebar-ring: #0ea5e9;
+  --sidebar-ring: #0066cc;
 }
 
 .dark {
-  --background: #020518;
+  --background: #090b13;
   --foreground: #f5f7ff;
-  --card: #070c24;
+  --card: #0f1322;
   --card-foreground: #f5f7ff;
-  --popover: #0b1230;
+  --popover: #121729;
   --popover-foreground: #f5f7ff;
-  --primary: #e11d48;
+  --primary: #2997ff;
   --primary-foreground: #ffffff;
   --secondary: #101938;
   --secondary-foreground: #e8eeff;
-  --muted: #0e1734;
+  --muted: #141a30;
   --muted-foreground: #8f9fc4;
-  --accent: #22d3ee;
-  --accent-foreground: #021218;
+  --accent: #2997ff;
+  --accent-foreground: #ffffff;
   --success: #2dd4a4;
   --success-foreground: #031b15;
   --destructive: #fb4b63;
-  --border: #1c2b58;
-  --input: #111c40;
-  --ring: #38bdf8;
+  --border: #1e2640;
+  --input: #141b33;
+  --ring: #2997ff;
 
-  --sidebar: #03071d;
+  --sidebar: #090b13;
   --sidebar-foreground: #edf3ff;
-  --sidebar-primary: #e11d48;
+  --sidebar-primary: #2997ff;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #0e1b3f;
+  --sidebar-accent: #141b36;
   --sidebar-accent-foreground: #ffffff;
-  --sidebar-border: #13224b;
-  --sidebar-ring: #38bdf8;
+  --sidebar-border: #192038;
+  --sidebar-ring: #2997ff;
 }
 
 body {

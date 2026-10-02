@@ -29,32 +29,25 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
   return (
     <aside
       className={cn(
-        `group relative flex h-full w-full min-h-0 flex-col overflow-hidden border-r border-cyan-300/[0.10]
-        bg-[linear-gradient(180deg,rgba(7,12,36,0.88),rgba(3,7,29,0.82))]
-        shadow-[14px_0_40px_rgba(0,0,0,0.16),inset_-1px_0_0_rgba(255,255,255,0.025)]
-        backdrop-blur-[16px] backdrop-saturate-[125%]`,
+        `group relative flex h-full w-full min-h-0 flex-col overflow-hidden border-r border-border/80
+        bg-card shadow-xs backdrop-blur-xl transition-colors
+        dark:border-white/[0.08]
+        dark:bg-[linear-gradient(180deg,rgba(7,12,36,0.88),rgba(3,7,29,0.82))]
+        dark:shadow-[14px_0_40px_rgba(0,0,0,0.16),inset_-1px_0_0_rgba(255,255,255,0.025)]`,
         mobile &&
-          `rounded-[22px] border border-white/[0.08]
-          shadow-[0_24px_80px_rgba(0,0,0,0.45),0_0_40px_rgba(34,211,238,0.035),inset_0_1px_0_rgba(255,255,255,0.08)]
-          backdrop-blur-[20px]`,
+          `rounded-[22px] border border-border/80 shadow-xl
+          dark:border-white/[0.08]
+          dark:shadow-[0_24px_80px_rgba(0,0,0,0.45)]`,
       )}
     >
-      {/* Cyan refraction */}
+      {/* Dark mode subtle ambient glows */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_0%_12%,rgba(34,211,238,0.055),transparent_30%)]"
+        className="pointer-events-none absolute inset-0 hidden bg-[radial-gradient(circle_at_0%_12%,rgba(0,102,204,0.08),transparent_30%)] dark:block"
       />
-
-      {/* Blue bottom glow */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_15%_90%,rgba(59,130,246,0.055),transparent_28%)]"
-      />
-
-      {/* Top glass reflection */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-x-4 top-0 z-10 h-px bg-gradient-to-r from-transparent via-white/15 to-transparent"
+        className="pointer-events-none absolute inset-x-4 top-0 z-10 hidden h-px bg-gradient-to-r from-transparent via-white/15 to-transparent dark:block"
       />
 
       {/* Content */}

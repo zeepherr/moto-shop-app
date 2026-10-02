@@ -17,7 +17,7 @@ export const SidebarBrand: React.FC<SidebarBrandProps> = ({
   onToggle,
 }) => {
   return (
-    <div className="flex h-16 shrink-0 items-center overflow-hidden border-b border-white/[0.06] px-3">
+    <div className="flex h-16 shrink-0 items-center overflow-hidden border-b border-border/70 px-3 transition-colors dark:border-white/[0.06]">
       {/* Brand icon */}
       <button
         type="button"
@@ -25,7 +25,7 @@ export const SidebarBrand: React.FC<SidebarBrandProps> = ({
         aria-label={collapsed ? "Expand sidebar" : "Home"}
         className="group relative flex size-9 shrink-0 items-center justify-center rounded-xl cursor-pointer"
       >
-        <div className="flex size-9 items-center justify-center rounded-xl bg-primary text-sm font-semibold text-primary-foreground transition-all duration-150 group-hover:scale-90 group-hover:opacity-0 shadow-sm">
+        <div className="flex size-9 items-center justify-center rounded-xl bg-[#0066cc] text-sm font-semibold text-white shadow-xs transition-all duration-150 group-hover:scale-95">
           H
         </div>
 
@@ -61,9 +61,9 @@ export const SidebarBrand: React.FC<SidebarBrandProps> = ({
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
             transition={{ duration: 0.12 }}
-            className="ml-auto flex size-9 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground cursor-pointer"
+            className="ml-auto flex size-8 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground cursor-pointer"
           >
-            <PanelLeftClose className="size-5" />
+            <PanelLeftClose className="size-4" />
           </motion.button>
         )}
       </AnimatePresence>

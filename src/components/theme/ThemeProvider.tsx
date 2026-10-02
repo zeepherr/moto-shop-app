@@ -9,27 +9,35 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType | null>(null);
 
+function applyThemeToDocument(theme: string) {
+  const isDark =
+    theme === "dark" ||
+    (theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+
+  const root = document.documentElement;
+  root.classList.toggle("dark", isDark);
+  root.style.colorScheme = isDark ? "dark" : "light";
+}
+
 export const ThemeProvider: React.FC<{
   children: React.ReactNode;
   defaultTheme?: string;
   storageKey?: string;
 }> = ({ children, defaultTheme = "dark", storageKey = "motor-theme" }) => {
-  const [theme, setCurrentTheme] = useState<string>(() => {
-    if (typeof window !== "undefined") {
-      return localStorage.getItem(storageKey) || defaultTheme;
-    }
-    return defaultTheme;
-  });
+  // Must render the same value on the server and on the first client render,
+  // otherwise hydration mismatches. The stored theme is read after mount.
+  const [theme, setCurrentTheme] = useState<string>(defaultTheme);
+  const [isHydrated, setIsHydrated] = useState(false);
 
   useEffect(() => {
-    const root = document.documentElement;
-    const isDark =
-      theme === "dark" ||
-      (theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+    setCurrentTheme(localStorage.getItem(storageKey) || defaultTheme);
+    setIsHydrated(true);
+  }, [storageKey, defaultTheme]);
 
-    root.classList.toggle("dark", isDark);
-    root.style.colorScheme = isDark ? "dark" : "light";
-  }, [theme]);
+  useEffect(() => {
+    if (!isHydrated) return;
+    applyThemeToDocument(theme);
+  }, [theme, isHydrated]);
 
   const setTheme = (newTheme: string) => {
     localStorage.setItem(storageKey, newTheme);

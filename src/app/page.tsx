@@ -61,7 +61,7 @@ export default async function HomePage() {
 
             <h1 className="font-heading text-4xl font-extrabold tracking-tight text-foreground sm:text-6xl">
               Power Your Repair Shop with{" "}
-              <span className="bg-gradient-to-r from-cyan-400 via-blue-500 to-indigo-500 bg-clip-text text-transparent">
+              <span className="text-[#2997ff]">
                 Precision POS
               </span>
             </h1>

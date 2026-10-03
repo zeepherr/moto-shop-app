@@ -15,6 +15,7 @@ import { checkoutOrderAction, holdOrderAction, cancelPendingOrderAction } from "
 import { getOrderByIdAction } from "../../actions/order-query.actions";
 import { buildCheckoutPayload, buildHoldPayload, pendingOrderToCartItems } from "../../utils/cart.util";
 import { toast } from "sonner";
+import type { OrderDTO } from "../../types";
 
 export const PosCart: React.FC = () => {
   const cartItems = usePosStore((store) => store.cartItems);
@@ -115,9 +116,9 @@ export const PosCart: React.FC = () => {
     try {
       const res = await getOrderByIdAction(orderId);
       if (res.success && res.data) {
-        const order = res.data;
-        setCartItems(pendingOrderToCartItems(order.orderItems as any));
-        setSelectedMember(order.member as any);
+        const order: OrderDTO = res.data;
+        setCartItems(pendingOrderToCartItems(order.orderItems));
+        setSelectedMember(order.member ?? null);
         setPaymentMethod(order.paymentMethod || PaymentMethod.CASH);
         setReceivedAmount("");
         setPendingOrderId(order.id);

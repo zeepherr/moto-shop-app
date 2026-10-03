@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowLeft, Banknote, Boxes, ChartNoAxesCombined, CircleDollarSign, ReceiptText, Wrench } from "lucide-react";
+import { ArrowLeft, Banknote, Boxes, ChartNoAxesCombined, CircleDollarSign, Percent, ReceiptText } from "lucide-react";
 import { ManagementLayout } from "@/components/management/ManagementLayout";
 import { PageHeader } from "@/components/management/PageHeader";
 import { QuickStatCard } from "@/components/management/QuickStatCard";
 import { RevenueReportCharts } from "@/features/dashboard/components/RevenueReportCharts";
 import { getRevenueReport, type RevenuePeriod } from "@/features/dashboard/services/revenue-report.service";
 
-export const metadata: Metadata = { title: "Revenue Details - HrungMoto", description: "Revenue, product cost, and labor sales reporting" };
+export const metadata: Metadata = { title: "Revenue Details - HrungMoto", description: "Revenue, costs, and estimated profit reporting" };
 export const dynamic = "force-dynamic";
 
 const periods: Array<{ value: RevenuePeriod; label: string }> = [
@@ -26,7 +26,7 @@ export default async function RevenueDetailsPage({ searchParams }: { searchParam
 
   return (
     <ManagementLayout>
-      <PageHeader title="Revenue Details" description="Completed sales, product cost, labor revenue, and payment performance">
+      <PageHeader title="Revenue Details" description="Completed sales, estimated costs, profit, and payment performance">
         <Link href="/admin" className="inline-flex h-10 items-center gap-2 rounded-xl border border-border bg-card px-3 text-sm font-medium text-foreground transition-colors hover:bg-muted">
           <ArrowLeft className="size-4" /> Dashboard
         </Link>
@@ -41,19 +41,19 @@ export default async function RevenueDetailsPage({ searchParams }: { searchParam
       </nav>
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        <QuickStatCard label="Net revenue" value={money(metrics.revenue)} subtext={`${metrics.orderCount} completed orders`} icon={<CircleDollarSign className="size-4" />} tone="blue" />
+        <QuickStatCard label="Sales revenue" value={money(metrics.revenue)} subtext={`${metrics.orderCount} completed orders`} icon={<CircleDollarSign className="size-4" />} tone="blue" />
         <QuickStatCard label="Estimated product cost" value={money(metrics.estimatedProductCost)} subtext="Current catalog cost × quantity sold" icon={<Boxes className="size-4" />} tone="warning" />
-        <QuickStatCard label="Gross profit before labor" value={money(metrics.grossProfitBeforeLabor)} subtext="Revenue minus estimated product cost" icon={<ChartNoAxesCombined className="size-4" />} tone="success" />
-        <QuickStatCard label="Labor service revenue" value={money(metrics.laborRevenue)} subtext="Service lines sold in this period" icon={<Wrench className="size-4" />} tone="blue" />
+        <QuickStatCard label="Estimated gross profit" value={money(metrics.estimatedGrossProfit)} subtext="Revenue minus estimated product cost" icon={<ChartNoAxesCombined className="size-4" />} tone="success" />
+        <QuickStatCard label="Estimated gross margin" value={`${metrics.estimatedGrossMargin.toFixed(1)}%`} subtext="Estimated gross profit ÷ revenue" icon={<Percent className="size-4" />} tone="success" />
+        <QuickStatCard label="Service revenue" value={money(metrics.serviceRevenue)} subtext="Revenue from service lines" icon={<Banknote className="size-4" />} tone="blue" />
         <QuickStatCard label="Average order" value={money(metrics.averageOrder)} subtext={`${money(metrics.discounts)} discounts recorded`} icon={<ReceiptText className="size-4" />} />
-        <QuickStatCard label="Product revenue" value={money(metrics.productRevenue)} subtext="Sales from inventory items" icon={<Banknote className="size-4" />} />
       </div>
 
       <div className="rounded-xl border border-amber-500/25 bg-amber-500/10 px-4 py-3 text-sm text-amber-800 dark:text-amber-300">
-        Labor cost is not recorded in the current database. Gross profit excludes technician wages and overhead; product cost uses the current catalog cost because historical cost is not stored on order items.
+        Profit is estimated from sales revenue minus product cost. Operating expenses are not recorded, and product cost uses the current catalog value because historical cost is not stored on order items.
       </div>
 
-      <RevenueReportCharts period={period} trend={report.trend} productRevenue={metrics.productRevenue} laborRevenue={metrics.laborRevenue} cashRevenue={report.paymentMix.cash} qrRevenue={report.paymentMix.qr} />
+      <RevenueReportCharts period={period} trend={report.trend} productRevenue={metrics.productRevenue} serviceRevenue={metrics.serviceRevenue} cashRevenue={report.paymentMix.cash} qrRevenue={report.paymentMix.qr} />
 
       <section className="overflow-hidden rounded-2xl border border-border/70 bg-card">
         <div className="border-b border-border/60 px-5 py-4">

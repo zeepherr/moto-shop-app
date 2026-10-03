@@ -1,6 +1,27 @@
 import { db as defaultDb } from "@/lib/db";
-import { OrderStatus, CustomerType, OrderItemType, type PaymentMethod } from "@prisma/client";
+import {
+  OrderStatus,
+  CustomerType,
+  OrderItemType,
+  type PaymentMethod,
+  type Prisma,
+} from "@prisma/client";
 import type { OrderItemInput } from "../schemas";
+
+async function lockPendingOrder(
+  tx: Prisma.TransactionClient,
+  orderId: number,
+  complete = false,
+) {
+  const result = await tx.order.updateMany({
+    where: { id: orderId, status: OrderStatus.PENDING },
+    data: { status: complete ? OrderStatus.COMPLETED : OrderStatus.PENDING },
+  });
+
+  if (result.count === 0) {
+    throw new Error("Pending order is no longer available");
+  }
+}
 
 export const findPendingOrders = async (db = defaultDb) => {
   return await db.order.findMany({
@@ -22,12 +43,19 @@ export const findPendingOrders = async (db = defaultDb) => {
 };
 
 export const findOrderById = async (id: number, db = defaultDb) => {
-  return await db.order.findUnique({
-    where: { id },
+  return await db.order.findFirst({
+    where: { id, status: OrderStatus.PENDING },
     include: {
       orderItems: true,
-      member: true,
-      handledBy: { select: { id: true, firstName: true, lastName: true } },
+      member: {
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          email: true,
+          phone: true,
+        },
+      },
     },
   });
 };
@@ -86,6 +114,8 @@ export const holdPendingOrder = async (
     const customerType = data.memberId ? CustomerType.MEMBER : CustomerType.GUEST;
 
     if (data.orderId) {
+      await lockPendingOrder(tx, data.orderId);
+
       // Update existing pending order
       return await tx.order.update({
         where: { id: data.orderId },
@@ -137,6 +167,10 @@ export const executeCheckoutTx = async (
   db = defaultDb,
 ) => {
   return await db.$transaction(async (tx) => {
+    if (data.pendingOrderId) {
+      await lockPendingOrder(tx, data.pendingOrderId, true);
+    }
+
     let subtotal = 0;
     const preparedItems = [];
 

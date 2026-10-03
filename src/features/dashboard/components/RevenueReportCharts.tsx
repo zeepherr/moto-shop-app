@@ -18,7 +18,7 @@ interface RevenueReportChartsProps {
   period: RevenuePeriod;
   trend: Array<{ label: string; value: number }>;
   productRevenue: number;
-  laborRevenue: number;
+  serviceRevenue: number;
   cashRevenue: number;
   qrRevenue: number;
 }
@@ -95,7 +95,7 @@ export function RevenueReportCharts(props: RevenueReportChartsProps) {
       <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-1">
         <DonutCard title="Revenue mix" data={[
           { name: "Products", value: props.productRevenue, color: "#2997ff" },
-          { name: "Labor services", value: props.laborRevenue, color: "#7a7a7a" },
+          { name: "Services", value: props.serviceRevenue, color: "#7a7a7a" },
         ]} />
         <DonutCard title="Payment mix" data={[
           { name: "Cash", value: props.cashRevenue, color: "#2997ff" },

@@ -1,4 +1,4 @@
-import type { OrderStatus, PaymentMethod, CustomerType, OrderItemType, Prisma } from "@prisma/client";
+import type { OrderStatus, PaymentMethod, CustomerType, OrderItemType } from "@prisma/client";
 
 export interface PosCartItem {
   id: number;
@@ -27,8 +27,8 @@ export interface OrderItemDTO {
   itemType: OrderItemType;
   itemNameSnapshot: string;
   quantity: number;
-  unitPrice: number | string | Prisma.Decimal;
-  lineTotal: number | string | Prisma.Decimal;
+  unitPrice: number;
+  lineTotal: number;
 }
 
 export interface OrderDTO {
@@ -38,15 +38,15 @@ export interface OrderDTO {
   handledById: number;
   motorId: number | null;
   customerType: CustomerType;
-  subtotal: number | string | Prisma.Decimal;
-  discountRate: number | string | Prisma.Decimal;
-  discountAmount: number | string | Prisma.Decimal;
-  finalTotal: number | string | Prisma.Decimal;
+  subtotal: number;
+  discountRate: number;
+  discountAmount: number;
+  finalTotal: number;
   status: OrderStatus;
   paymentMethod: PaymentMethod | null;
-  receivedAmount: number | string | Prisma.Decimal | null;
-  createdAt: Date;
-  completedAt: Date | null;
+  receivedAmount: number | null;
+  createdAt: string;
+  completedAt: string | null;
   orderItems: OrderItemDTO[];
   member?: SelectedMember | null;
 }

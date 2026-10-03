@@ -1,7 +1,6 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { getCurrentUser } from "@/features/auth/actions/session.action";
 import {
   checkoutOrderSchema,
   holdOrderSchema,
@@ -13,9 +12,10 @@ import {
   holdPendingOrder,
   cancelPendingOrder,
 } from "../services/order.service";
+import { getPosOperator } from "./pos-auth";
 
 export const checkoutOrderAction = async (input: CheckoutOrderInput) => {
-  const user = await getCurrentUser();
+  const user = await getPosOperator();
   if (!user) return { success: false, error: "Unauthorized" };
 
   const parsed = checkoutOrderSchema.safeParse(input);
@@ -24,7 +24,7 @@ export const checkoutOrderAction = async (input: CheckoutOrderInput) => {
   }
 
   try {
-    const order = await executeCheckoutTx({
+    await executeCheckoutTx({
       ...parsed.data,
       handledById: user.id,
     });
@@ -32,14 +32,14 @@ export const checkoutOrderAction = async (input: CheckoutOrderInput) => {
     revalidatePath("/admin/pos");
     revalidatePath("/staff/pos");
     revalidatePath("/admin/products");
-    return { success: true, data: order };
+    return { success: true };
   } catch (err: unknown) {
     return { success: false, error: (err as Error).message || "Checkout failed" };
   }
 };
 
 export const holdOrderAction = async (input: HoldOrderInput) => {
-  const user = await getCurrentUser();
+  const user = await getPosOperator();
   if (!user) return { success: false, error: "Unauthorized" };
 
   const parsed = holdOrderSchema.safeParse(input);
@@ -48,24 +48,27 @@ export const holdOrderAction = async (input: HoldOrderInput) => {
   }
 
   try {
-    const order = await holdPendingOrder({
+    await holdPendingOrder({
       ...parsed.data,
       handledById: user.id,
     });
 
     revalidatePath("/admin/pos");
     revalidatePath("/staff/pos");
-    return { success: true, data: order };
+    return { success: true };
   } catch (err: unknown) {
     return { success: false, error: (err as Error).message || "Failed to hold order" };
   }
 };
 
 export const cancelPendingOrderAction = async (orderId: number) => {
-  const user = await getCurrentUser();
+  const user = await getPosOperator();
   if (!user) return { success: false, error: "Unauthorized" };
 
-  await cancelPendingOrder(orderId);
+  const result = await cancelPendingOrder(orderId);
+  if (result.count === 0) {
+    return { success: false, error: "Pending order is no longer available" };
+  }
   revalidatePath("/admin/pos");
   revalidatePath("/staff/pos");
   return { success: true, message: "Order cancelled successfully" };

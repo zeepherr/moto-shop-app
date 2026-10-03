@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { Clock3, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getPendingOrdersAction } from "../../actions/order-query.actions";
+import type { OrderDTO } from "../../types";
 
 interface PendingOrdersProps {
   onSelectOrder: (orderId: number) => void;
@@ -14,7 +15,7 @@ export const PendingOrders: React.FC<PendingOrdersProps> = ({
   onSelectOrder,
   isSelecting = false,
 }) => {
-  const [orders, setOrders] = useState<any[]>([]);
+  const [orders, setOrders] = useState<OrderDTO[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
 

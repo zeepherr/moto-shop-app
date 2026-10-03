@@ -3,11 +3,14 @@
 import { revalidatePath } from "next/cache";
 import { UserRole } from "@prisma/client";
 import { getCurrentUser } from "@/features/auth/actions/session.action";
+import { ROLES } from "@/features/auth/constants";
 import { searchMembers, findMemberById, updateUserRole } from "../services/user.service";
 
 export const searchMembersAction = async (query: string) => {
   const user = await getCurrentUser();
-  if (!user) return { success: false, error: "Unauthorized" };
+  if (!user || (user.role !== ROLES.ADMIN && user.role !== ROLES.STAFF)) {
+    return { success: false, error: "Unauthorized" };
+  }
 
   try {
     const members = await searchMembers(query);
@@ -19,7 +22,9 @@ export const searchMembersAction = async (query: string) => {
 
 export const getMemberByIdAction = async (id: number) => {
   const user = await getCurrentUser();
-  if (!user) return { success: false, error: "Unauthorized" };
+  if (!user || (user.role !== ROLES.ADMIN && user.role !== ROLES.STAFF)) {
+    return { success: false, error: "Unauthorized" };
+  }
 
   try {
     const member = await findMemberById(id);

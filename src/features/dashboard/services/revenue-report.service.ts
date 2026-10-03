@@ -80,7 +80,7 @@ export async function getRevenueReport(period: RevenuePeriod, db = defaultDb) {
 
   let revenue = 0;
   let productRevenue = 0;
-  let laborRevenue = 0;
+  let serviceRevenue = 0;
   let estimatedProductCost = 0;
   let discounts = 0;
   const paymentMix = { cash: 0, qr: 0 };
@@ -102,7 +102,7 @@ export async function getRevenueReport(period: RevenuePeriod, db = defaultDb) {
         productRevenue += lineTotal;
         if (item.product) estimatedProductCost += Number(item.product.costPrice) * item.quantity;
       } else {
-        laborRevenue += lineTotal;
+        serviceRevenue += lineTotal;
       }
     }
   }
@@ -115,9 +115,10 @@ export async function getRevenueReport(period: RevenuePeriod, db = defaultDb) {
       orderCount: orders.length,
       averageOrder: orders.length ? revenue / orders.length : 0,
       productRevenue,
-      laborRevenue,
+      serviceRevenue,
       estimatedProductCost,
-      grossProfitBeforeLabor: revenue - estimatedProductCost,
+      estimatedGrossProfit: revenue - estimatedProductCost,
+      estimatedGrossMargin: revenue ? ((revenue - estimatedProductCost) / revenue) * 100 : 0,
       discounts,
     },
     trend: Array.from(buckets, ([label, value]) => ({ label, value })),

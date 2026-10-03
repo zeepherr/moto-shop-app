@@ -52,6 +52,7 @@
 - [ ] **Admin Dashboard (`/admin`) — operational expansion in progress**
   - [x] Baseline: real-data metric cards, recent transactions, inventory alerts, revenue and completed-order drilldowns.
   - [x] Detail reports: `/admin/revenue` supports Today / Week / Month / Year; `/admin/orders` supports operational filters and order details.
+  - [x] Revenue terminology correction: the detail report presents costs and estimated profits, including estimated gross margin; service sales are labeled as service revenue rather than labor cost/revenue.
   - [x] Milestone 1: headline revenue and completed-order KPIs use the current Bangkok calendar month and compare with the previous calendar month.
   - [x] Milestone 2: Today’s Operations shows today revenue, completed today, pending orders, cancelled today, and today average order value.
   - [x] Milestone 3: Action Center surfaces pending orders, out-of-stock inventory, low stock, and today’s cancellations with filtered management links.
@@ -99,7 +100,18 @@
    - Refactor `/member/profile` into an Apple-quality account center with vehicle history and service logs.
    - Implement self-management endpoints (`/users/me` profile update).
 2. **POS Terminal Refinements**:
-   - Polish receipt printing/preview modal, scanner autofocus behavior, and hold-order drawer.
+   - **POS hardening review, 2026-10-03 — do before visual expansion**:
+     - [x] P0: Restrict every POS server action to ADMIN or STAFF. Route middleware is not sufficient protection for direct server-action calls.
+     - [x] P0: Resume, update, and checkout operations must require the target order to still be PENDING, using an atomic status-aware update. The current ID-only updates can modify a completed order after a stale or malicious resume request.
+     - [x] P0: Replace the full member include in order retrieval with an explicit safe selection, and build a DTO without spreading the Prisma record. The current serializer can expose member fields that the POS does not need.
+     - [ ] P1: Add vehicle selection after a member is chosen. The schema supports motorId, but the POS never sends it; service work cannot be reliably tied to a motorcycle.
+     - [ ] P1: Add QR payment confirmation and a receipt/printable completed-sale result. Selecting QR currently permits immediate completion without a cashier confirmation step.
+     - [ ] P1: Add confirmation and a reason for cancelling held orders, plus ownership or concurrency protection for pending tickets used by multiple staff.
+     - [ ] P2: Revalidate product availability when resuming a held ticket, then cap cart quantities by current stock before checkout.
+     - [ ] P2: Add discounts only with an approved role/approval rule; discount fields already exist in the schema but the POS has no controlled discount flow.
+     - [ ] P2: Improve POS keyboard and touch operation: scanner autofocus/shortcut, 44px minimum touch targets, semantic product/service add controls, and no nested interactive elements.
+     - [ ] P2: Add a bounded/filterable pending-ticket list and accessible chart-free text alternatives where required.
+   - Polish receipt printing/preview modal, scanner autofocus behavior, and hold-order drawer after the hardening items above.
 3. **Automated Testing & Deployment Preparation**:
    - Vitest / Playwright test scaffolding.
    - Verification for Cloudflare Pages (Frontend) + Railway (Backend/Database).
@@ -117,6 +129,8 @@
 - **Time zone/business reporting boundary**: calculate calendar-day and calendar-month ranges in `Asia/Bangkok`.
 - **Last committed baseline**: `ad80f15 feat(admin): add dashboard reporting drilldowns`.
 - **Implementation state**: milestones 1–6 complete and required validation passed. Changes are uncommitted.
+- **Verified hydration note**: `cz-shortcut-listen` is injected onto `<body>` by a browser extension before React hydrates. Root layout suppresses hydration warnings on both `<html>` and `<body>`; this does not mask application content mismatches below those elements.
+- **POS boundary fix**: Pending-order server actions serialize Prisma Decimal fields before returning data to client components. Checkout and hold actions return success state only because their Prisma records are unused by the client. TypeScript and focused ESLint passed.
 
 ---
 

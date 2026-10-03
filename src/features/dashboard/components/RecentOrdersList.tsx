@@ -30,7 +30,7 @@ export const RecentOrdersList: React.FC<{ orders: OrderSummary[] }> = ({ orders 
           </p>
         </div>
         <Link
-          href="/admin/orders"
+          href="/admin/orders?status=COMPLETED"
           className="inline-flex items-center gap-1 text-xs font-medium text-[#2997ff] hover:underline"
         >
           <span>View all</span>
@@ -56,7 +56,7 @@ export const RecentOrdersList: React.FC<{ orders: OrderSummary[] }> = ({ orders 
               : "WC";
 
             return (
-              <div key={order.id} className="flex items-center justify-between py-3">
+              <Link key={order.id} href={`/admin/orders?status=COMPLETED&search=${encodeURIComponent(order.orderNumber)}`} className="flex items-center justify-between rounded-lg py-3 transition-colors hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
                 <div className="flex items-center gap-3 min-w-0">
                   <div className="flex size-9 shrink-0 items-center justify-center rounded-full border border-border/80 bg-muted/50 text-xs font-semibold text-foreground">
                     {initials}
@@ -77,7 +77,7 @@ export const RecentOrdersList: React.FC<{ orders: OrderSummary[] }> = ({ orders 
                     Paid
                   </span>
                 </div>
-              </div>
+              </Link>
             );
           })
         )}

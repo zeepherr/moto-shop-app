@@ -3,6 +3,38 @@ import { OrderStatus, UserRole } from "@prisma/client";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const TREND_WINDOW_DAYS = 30;
+const CHART_WINDOW_DAYS = 90;
+const SHOP_TIME_ZONE = "Asia/Bangkok";
+
+const toShopDateKey = (date: Date) => {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: SHOP_TIME_ZONE,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(date);
+  const value = (type: Intl.DateTimeFormatPartTypes) =>
+    parts.find((part) => part.type === type)?.value ?? "";
+  return `${value("year")}-${value("month")}-${value("day")}`;
+};
+
+const buildRevenueTrend = (
+  orders: Array<{ completedAt: Date | null; finalTotal: unknown }>,
+  now: Date,
+) => {
+  const revenueByDay = new Map<string, number>();
+  for (const order of orders) {
+    if (!order.completedAt) continue;
+    const key = toShopDateKey(order.completedAt);
+    revenueByDay.set(key, (revenueByDay.get(key) ?? 0) + Number(order.finalTotal));
+  }
+
+  return Array.from({ length: CHART_WINDOW_DAYS }, (_, index) => {
+    const date = new Date(now.getTime() - (CHART_WINDOW_DAYS - 1 - index) * DAY_MS);
+    const key = toShopDateKey(date);
+    return { date: key, revenue: revenueByDay.get(key) ?? 0 };
+  });
+};
 
 /** Percent change between two periods; null when there is no baseline to compare. */
 const percentChange = (current: number, previous: number): number | null => {
@@ -30,6 +62,7 @@ export const getDashboardSummary = async (db = defaultDb) => {
     currentPeriod,
     previousPeriod,
     newMembersCount,
+    chartOrders,
   ] = await Promise.all([
     db.order.aggregate({
       where: { status: OrderStatus.COMPLETED },
@@ -37,7 +70,7 @@ export const getDashboardSummary = async (db = defaultDb) => {
     }),
     db.order.count({ where: { status: OrderStatus.COMPLETED } }),
     db.product.count({ where: { stockQuantity: { lte: 5 }, isActive: true } }),
-    db.user.count({ where: { role: UserRole.MEMBER } }),
+    db.user.count({ where: { role: UserRole.MEMBER, isActive: true } }),
     db.order.findMany({
       where: { status: OrderStatus.COMPLETED },
       take: 5,
@@ -64,7 +97,15 @@ export const getDashboardSummary = async (db = defaultDb) => {
       _count: { _all: true },
     }),
     db.user.count({
-      where: { role: UserRole.MEMBER, createdAt: { gte: currentStart } },
+      where: { role: UserRole.MEMBER, isActive: true, createdAt: { gte: currentStart } },
+    }),
+    db.order.findMany({
+      where: {
+        status: OrderStatus.COMPLETED,
+        completedAt: { gte: new Date(now.getTime() - CHART_WINDOW_DAYS * DAY_MS) },
+      },
+      select: { completedAt: true, finalTotal: true },
+      orderBy: { completedAt: "asc" },
     }),
   ]);
 
@@ -89,6 +130,7 @@ export const getDashboardSummary = async (db = defaultDb) => {
     membersCount,
     recentOrders,
     lowStockProducts,
+    revenueTrend: buildRevenueTrend(chartOrders, now),
     trends,
   };
 };

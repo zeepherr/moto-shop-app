@@ -36,6 +36,7 @@ export default async function AdminDashboardPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <MetricCard
           label="Total Revenue"
+          href="/admin/revenue"
           value={`฿${summary.totalRevenue.toLocaleString()}`}
           subtext={`Last ${trends.windowDays}d vs previous ${trends.windowDays}d`}
           trend={toTrend(trends.revenueChange)}
@@ -44,6 +45,7 @@ export default async function AdminDashboardPage() {
         />
         <MetricCard
           label="Completed Orders"
+          href="/admin/orders?status=COMPLETED"
           value={summary.completedOrdersCount.toString()}
           subtext={`Avg. ฿${Math.round(summary.avgOrderValue).toLocaleString()}`}
           trend={toTrend(trends.ordersChange)}
@@ -52,6 +54,7 @@ export default async function AdminDashboardPage() {
         />
         <MetricCard
           label="Low Stock Alert"
+          href="/admin/products"
           value={summary.lowStockCount.toString()}
           subtext="Items <= 5 in inventory"
           trend={
@@ -64,6 +67,7 @@ export default async function AdminDashboardPage() {
         />
         <MetricCard
           label="Registered Members"
+          href="/admin/users"
           value={summary.membersCount.toString()}
           subtext="Active customer profiles"
           trend={
@@ -79,7 +83,7 @@ export default async function AdminDashboardPage() {
       {/* Main Analytics & Activity Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
-          <RevenueTrendChart />
+          <RevenueTrendChart data={summary.revenueTrend} />
         </div>
         <div className="space-y-6">
           <RecentOrdersList orders={summary.recentOrders} />

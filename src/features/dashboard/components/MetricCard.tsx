@@ -1,4 +1,6 @@
 import React from "react";
+import Link from "next/link";
+import { ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface MetricCardProps {
@@ -11,6 +13,7 @@ interface MetricCardProps {
   };
   tone?: "primary" | "blue" | "warning" | "success";
   icon?: React.ReactNode;
+  href?: string;
 }
 
 export const MetricCard: React.FC<MetricCardProps> = ({
@@ -20,6 +23,7 @@ export const MetricCard: React.FC<MetricCardProps> = ({
   trend,
   tone = "blue",
   icon,
+  href,
 }) => {
   const iconTones = {
     primary: "bg-[#0066cc]/10 text-[#2997ff] border-[#0066cc]/20",
@@ -28,22 +32,25 @@ export const MetricCard: React.FC<MetricCardProps> = ({
     success: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
   };
 
-  return (
+  const card = (
     <div className="group relative rounded-2xl border border-border/70 bg-card/60 backdrop-blur-md p-5 transition-all duration-200 hover:border-border hover:bg-card/80">
       <div className="flex items-center justify-between">
         <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
           {label}
         </span>
-        {icon && (
-          <div
-            className={cn(
-              "flex size-9 items-center justify-center rounded-full border transition-transform duration-200 group-hover:scale-105",
-              iconTones[tone]
-            )}
-          >
-            {icon}
-          </div>
-        )}
+        <div className="flex items-center gap-2">
+          {icon && (
+            <div
+              className={cn(
+                "flex size-9 items-center justify-center rounded-full border transition-transform duration-200 group-hover:scale-105",
+                iconTones[tone]
+              )}
+            >
+              {icon}
+            </div>
+          )}
+          {href && <ChevronRight className="size-4 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-foreground" />}
+        </div>
       </div>
 
       <div className="mt-3">
@@ -73,4 +80,6 @@ export const MetricCard: React.FC<MetricCardProps> = ({
       </div>
     </div>
   );
+
+  return href ? <Link href={href} className="block rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{card}</Link> : card;
 };

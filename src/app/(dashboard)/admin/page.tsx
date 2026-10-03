@@ -18,6 +18,15 @@ export const dynamic = "force-dynamic";
 
 export default async function AdminDashboardPage() {
   const summary = await getDashboardSummary();
+  const { trends } = summary;
+
+  const toTrend = (change: number | null) =>
+    change === null
+      ? undefined
+      : {
+          value: `${change >= 0 ? "+" : ""}${change.toFixed(1)}%`,
+          isPositive: change >= 0,
+        };
 
   return (
     <ManagementLayout>
@@ -28,8 +37,8 @@ export default async function AdminDashboardPage() {
         <MetricCard
           label="Total Revenue"
           value={`฿${summary.totalRevenue.toLocaleString()}`}
-          subtext="vs previous cycle"
-          trend={{ value: "+12.4%", isPositive: true }}
+          subtext={`Last ${trends.windowDays}d vs previous ${trends.windowDays}d`}
+          trend={toTrend(trends.revenueChange)}
           tone="blue"
           icon={<DollarSign className="size-4" />}
         />
@@ -37,7 +46,7 @@ export default async function AdminDashboardPage() {
           label="Completed Orders"
           value={summary.completedOrdersCount.toString()}
           subtext={`Avg. ฿${Math.round(summary.avgOrderValue).toLocaleString()}`}
-          trend={{ value: "+8.1%", isPositive: true }}
+          trend={toTrend(trends.ordersChange)}
           tone="blue"
           icon={<ShoppingBag className="size-4" />}
         />
@@ -57,7 +66,11 @@ export default async function AdminDashboardPage() {
           label="Registered Members"
           value={summary.membersCount.toString()}
           subtext="Active customer profiles"
-          trend={{ value: "+4 this month", isPositive: true }}
+          trend={
+            trends.newMembersCount > 0
+              ? { value: `+${trends.newMembersCount} in ${trends.windowDays}d`, isPositive: true }
+              : undefined
+          }
           tone="success"
           icon={<Users className="size-4" />}
         />

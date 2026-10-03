@@ -55,7 +55,7 @@ export const MetricCard: React.FC<MetricCardProps> = ({
           {trend && (
             <span
               className={cn(
-                "inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium border",
+                "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium border",
                 trend.isPositive
                   ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
                   : "bg-destructive/10 text-destructive border-destructive/20"

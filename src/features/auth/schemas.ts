@@ -36,8 +36,6 @@ export const resendVerificationSchema = z.object({
 
 export const adminEnrollmentSchema = z.object({
   email: z.string().trim().toLowerCase().email("Please enter a valid email address"),
-  firstName: z.string().trim().min(1, "First name is required").max(80),
-  lastName: z.string().trim().min(1, "Last name is required").max(80),
   role: z.enum(["MEMBER", "STAFF"]),
   method: z.enum(["SELF_SERVICE", "ASSISTED"]),
 });

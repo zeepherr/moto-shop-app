@@ -29,6 +29,7 @@ import {
   getOtpCooldownSeconds,
   hashOtp,
   sendPasswordSetupEmail,
+  sendRegistrationLinkEmail,
   sendRegistrationOtpEmail,
 } from "../services/otp.service";
 import { MAX_OTP_ATTEMPTS, OTP_TTL_MS } from "../constants";
@@ -58,6 +59,7 @@ async function sendPasswordSetupLink(enrollmentId: number, email: string) {
   await sendPasswordSetupEmail(
     email,
     `${config.app.url}/set-password?token=${encodeURIComponent(token)}`,
+    `${config.app.url}/login`,
   );
   return { success: true };
 }
@@ -76,9 +78,12 @@ export const createEnrollmentAction = async (input: AdminEnrollmentInput) => {
 
   const isAssisted = data.method === EnrollmentMethod.ASSISTED;
   const otp = isAssisted ? generateOtp() : undefined;
+  const defaultName = data.role === "STAFF" ? "New Staff" : "New Member";
 
-  await createEnrollment({
+  const enrollment = await createEnrollment({
     ...data,
+    firstName: "New",
+    lastName: defaultName.replace("New ", ""),
     method: data.method,
     createdById: admin.id,
     expiresAt: new Date(Date.now() + ENROLLMENT_TTL_MS),
@@ -86,23 +91,28 @@ export const createEnrollmentAction = async (input: AdminEnrollmentInput) => {
     otpExpiresAt: otp ? new Date(Date.now() + OTP_TTL_MS) : undefined,
   });
 
-  if (otp) {
-    try {
+  try {
+    if (otp) {
       await sendRegistrationOtpEmail(data.email, otp);
-    } catch {
-      return {
-        success: false,
-        error: "Enrollment was saved, but the verification email could not be sent. Try resending it.",
-      };
+    } else {
+      await sendRegistrationLinkEmail(data.email, `${config.app.url}/register`);
     }
+  } catch {
+    return {
+      success: false,
+      error: otp
+        ? "Enrollment was saved, but the verification email could not be sent. Try resending it."
+        : "Enrollment was saved, but the registration link email could not be sent. Try again.",
+    };
   }
 
   revalidateUsers();
   return {
     success: true,
+    data: { id: enrollment.id },
     message: isAssisted
       ? "Verification code sent to the customer’s email."
-      : "Self-registration approval is active for 24 hours.",
+      : "Registration link sent to the customer’s email.",
   };
 };
 
@@ -151,7 +161,7 @@ export const verifyAssistedEnrollmentOtpAction = async (input: AssistedOtpInput)
   }
 
   revalidateUsers();
-  return { success: true, message: "Email verified. A password setup link was sent to the customer." };
+  return { success: true, message: "Email verified. Password setup and login links were sent to the customer." };
 };
 
 export const resendAssistedEnrollmentOtpAction = async (enrollmentId: number) => {

@@ -12,7 +12,6 @@ import { cancelEnrollmentAction, resendAssistedEnrollmentOtpAction, resendPasswo
 import { UserStats } from "./UserStats";
 import { UserTable, type UserItem } from "./UserTable";
 import { EnrollmentDialog } from "./EnrollmentDialog";
-import { AssistedVerificationDialog } from "./AssistedVerificationDialog";
 import { EnrollmentTable, type EnrollmentItem } from "./EnrollmentTable";
 import { updateUserRoleAction } from "../actions/user.actions";
 
@@ -28,7 +27,6 @@ export function UsersPageClient({ initialUsers, initialEnrollments }: Props) {
   const [status, setStatus] = useState("all");
   const [enrollmentStatus, setEnrollmentStatus] = useState("ALL");
   const [method, setMethod] = useState<"SELF_SERVICE" | "ASSISTED" | null>(null);
-  const [verification, setVerification] = useState<EnrollmentItem | null>(null);
   const [roleUser, setRoleUser] = useState<UserItem | null>(null);
   const [nextRole, setNextRole] = useState<"STAFF" | "MEMBER">("STAFF");
   const [isPending, setIsPending] = useState(false);
@@ -74,10 +72,9 @@ export function UsersPageClient({ initialUsers, initialEnrollments }: Props) {
       {(["accounts", "enrollments"] as const).map((item) => <button key={item} type="button" role="tab" aria-selected={view === item} onClick={() => setView(item)} className={`border-b-2 px-3 py-2 text-sm font-medium capitalize ${view === item ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"}`}>{item}{item === "enrollments" ? ` (${enrollments.length})` : ""}</button>)}
     </div>
     <DockedTableCard search={search} onSearchChange={setSearch} searchPlaceholder={view === "accounts" ? "Search by name, email, or phone..." : "Search enrollments..."} status={view === "accounts" ? status : undefined} onStatusChange={view === "accounts" ? setStatus : undefined} statusCounts={counts} filterSlot={<select value={view === "accounts" ? roleFilter : enrollmentStatus} onChange={(event) => view === "accounts" ? setRoleFilter(event.target.value) : setEnrollmentStatus(event.target.value)} className="h-9.5 rounded-xl border border-input/80 bg-background/50 px-3 text-xs text-foreground outline-none focus:ring-1 focus:ring-primary sm:w-44">{view === "accounts" ? <><option value="ALL">All roles</option><option value="ADMIN">Admins</option><option value="STAFF">Staff</option><option value="MEMBER">Members</option></> : <><option value="ALL">All enrollment states</option><option value="APPROVED">Ready to register</option><option value="AWAITING_OTP">Awaiting OTP</option><option value="AWAITING_PASSWORD_SETUP">Password setup sent</option></>}</select>} hasActiveFilters={hasFilters} onClearFilters={clearFilters} totalFiltered={view === "accounts" ? filteredUsers.length : filteredEnrollments.length} totalAll={view === "accounts" ? users.length : enrollments.length} entityName={view === "accounts" ? "accounts" : "enrollments"}>
-      {view === "accounts" ? <UserTable users={filteredUsers} onRoleChange={(user, role) => { setRoleUser(user); setNextRole(role); }} isUpdatingRole={isPending} /> : <EnrollmentTable enrollments={filteredEnrollments} isPending={isPending} onVerify={setVerification} onResendOtp={(item) => runEnrollmentAction(() => resendAssistedEnrollmentOtpAction(item.id))} onResendPasswordLink={(item) => runEnrollmentAction(() => resendPasswordSetupLinkAction(item.id))} onCancel={(item) => runEnrollmentAction(() => cancelEnrollmentAction(item.id))} />}
+      {view === "accounts" ? <UserTable users={filteredUsers} onRoleChange={(user, role) => { setRoleUser(user); setNextRole(role); }} isUpdatingRole={isPending} /> : <EnrollmentTable enrollments={filteredEnrollments} isPending={isPending} onVerify={(item) => router.push(`/admin/users/enrollments/${item.id}/verify`)} onResendOtp={(item) => runEnrollmentAction(() => resendAssistedEnrollmentOtpAction(item.id))} onResendPasswordLink={(item) => runEnrollmentAction(() => resendPasswordSetupLinkAction(item.id))} onCancel={(item) => runEnrollmentAction(() => cancelEnrollmentAction(item.id))} />}
     </DockedTableCard>
     <EnrollmentDialog method={method} onOpenChange={(open) => !open && setMethod(null)} onCreated={refresh} />
-    <AssistedVerificationDialog enrollment={verification} onOpenChange={(open) => !open && setVerification(null)} onComplete={refresh} />
     <ConfirmActionDialog open={roleUser !== null} onOpenChange={(open) => !open && setRoleUser(null)} title={`Change role to ${nextRole}?`} description={roleUser ? `Change ${roleUser.firstName} ${roleUser.lastName}'s account role to ${nextRole}. Their permissions will update immediately.` : ""} confirmLabel={`Confirm ${nextRole}`} cancelLabel="Cancel" variant="default" isPending={isPending} onConfirm={updateRole} />
   </ManagementLayout>;
 }

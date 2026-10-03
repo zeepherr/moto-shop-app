@@ -65,19 +65,41 @@ export const sendRegistrationOtpEmail = async (email: string, otp: string): Prom
   });
 };
 
-export const sendPasswordSetupEmail = async (email: string, setupUrl: string): Promise<void> => {
+export const sendRegistrationLinkEmail = async (email: string, registrationUrl: string): Promise<void> => {
+  const transporter = createMailTransporter();
+
+  await transporter.sendMail({
+    from: `"HrungMoto" <${config.mail.user}>`,
+    to: email,
+    subject: "Complete your HrungMoto registration",
+    text: `The shop has approved your registration. Complete it within 24 hours at: ${registrationUrl}`,
+    html: `
+      <h2>Complete your registration</h2>
+      <p>The shop has approved this email address for registration.</p>
+      <p><a href="${registrationUrl}">Create your HrungMoto account</a></p>
+      <p>Use this same email address. Approval expires in 24 hours.</p>
+    `,
+  });
+};
+
+export const sendPasswordSetupEmail = async (
+  email: string,
+  setupUrl: string,
+  loginUrl: string,
+): Promise<void> => {
   const transporter = createMailTransporter();
 
   await transporter.sendMail({
     from: `"HrungMoto" <${config.mail.user}>`,
     to: email,
     subject: "Set your HrungMoto password",
-    text: `Your email has been verified. Set your password using this link within 24 hours: ${setupUrl}`,
+    text: `Your email has been verified. Set your password within 24 hours: ${setupUrl}\n\nAfterward, sign in at: ${loginUrl}`,
     html: `
       <h2>Set your password</h2>
       <p>Your email has been verified at the shop.</p>
       <p><a href="${setupUrl}">Set your password</a></p>
       <p>This single-use link expires in 24 hours.</p>
+      <p>After setting your password, <a href="${loginUrl}">sign in to HrungMoto</a>.</p>
     `,
   });
 };

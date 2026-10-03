@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -24,8 +25,9 @@ interface EnrollmentDialogProps {
 }
 
 export function EnrollmentDialog({ method, onOpenChange, onCreated }: EnrollmentDialogProps) {
+  const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const [form, setForm] = useState({ firstName: "", lastName: "", email: "", role: "MEMBER" as "MEMBER" | "STAFF" });
+  const [form, setForm] = useState({ email: "", role: "MEMBER" as "MEMBER" | "STAFF" });
   const isAssisted = method === "ASSISTED";
 
   const submit = (event: React.FormEvent) => {
@@ -39,8 +41,12 @@ export function EnrollmentDialog({ method, onOpenChange, onCreated }: Enrollment
         return;
       }
       toast.success(result.message || "Enrollment created.");
-      setForm({ firstName: "", lastName: "", email: "", role: "MEMBER" });
+      setForm({ email: "", role: "MEMBER" });
       onOpenChange(false);
+      if (isAssisted && "data" in result && result.data) {
+        router.push(`/admin/users/enrollments/${result.data.id}/verify`);
+        return;
+      }
       onCreated();
     });
   };
@@ -53,21 +59,11 @@ export function EnrollmentDialog({ method, onOpenChange, onCreated }: Enrollment
           <DialogDescription>
             {isAssisted
               ? "A verification code will be emailed to the customer. Confirm it here before sending their password setup link."
-              : "The customer can use this approved email at /register within the next 24 hours."}
+              : "A registration link to /register will be emailed to the customer and remains valid for 24 hours."}
           </DialogDescription>
         </DialogHeader>
 
         <form className="space-y-4" onSubmit={submit}>
-          <div className="grid gap-3 sm:grid-cols-2">
-            <div className="space-y-1.5">
-              <Label htmlFor="enrollment-first-name">First name</Label>
-              <Input id="enrollment-first-name" required value={form.firstName} onChange={(event) => setForm((current) => ({ ...current, firstName: event.target.value }))} />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="enrollment-last-name">Last name</Label>
-              <Input id="enrollment-last-name" required value={form.lastName} onChange={(event) => setForm((current) => ({ ...current, lastName: event.target.value }))} />
-            </div>
-          </div>
           <div className="space-y-1.5">
             <Label htmlFor="enrollment-email">Email address</Label>
             <Input id="enrollment-email" type="email" required value={form.email} onChange={(event) => setForm((current) => ({ ...current, email: event.target.value }))} />
@@ -78,10 +74,11 @@ export function EnrollmentDialog({ method, onOpenChange, onCreated }: Enrollment
               <option value="MEMBER">Member</option>
               <option value="STAFF">Staff</option>
             </select>
+            <p className="text-xs text-muted-foreground">The account starts as “New {form.role === "STAFF" ? "Staff" : "Member"}”. The person can update this later in their profile.</p>
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isPending}>Cancel</Button>
-            <Button type="submit" disabled={isPending}>{isPending ? "Saving…" : isAssisted ? "Send verification code" : "Approve registration"}</Button>
+            <Button type="submit" disabled={isPending}>{isPending ? "Saving…" : isAssisted ? "Send invitation code" : "Send registration link"}</Button>
           </DialogFooter>
         </form>
       </DialogContent>

@@ -77,13 +77,29 @@
 - [x] **Products & Inventory (`/admin/products`)**:
   - `ProductStats`: Total SKUs, Stock Health %, Low Stock Warning ($\le 5$ units), Inventory Valuation (THB).
   - `ProductTable`: Image thumbnails with R2 fallbacks, sortable columns, category dropdown filter, low stock alerts, R2 presigned image upload flow.
-- [x] **User Management (`/admin/users`) — controlled enrollment redesign complete**:
-  - Existing baseline: `UserStats` and `UserTable` provide account counts, contact details, role badges, and member/staff role changes.
-  - [x] Public self-registration now requires a pre-approved, unexpired Admin enrollment. Public marketing and login links no longer advertise account creation.
-  - [x] **Method 1 — Admin-approved self-registration**: Admin selects Member or Staff and enters only the email address. The system emails the generic `/register` domain link. The customer uses the approved email there, creates a password, receives a 10-minute email OTP, and becomes active after verification. The enrollment approval expires after one day.
-  - [x] **Method 2 — Admin-assisted registration**: Admin selects Member or Staff and enters only the email address. The system uses a default account name, emails a 10-minute OTP, then routes the Admin to a dedicated confirmation page. On success, the customer receives a one-day password-setup link and the `/login` domain link.
-  - [x] Enrollment creation accepts Member or Staff only. Admins are excluded from both enrollment methods; existing Admin role management remains a separate confirmed action.
-  - [x] Redesigned the Admin page around “Register in person” and “Approve self-registration” actions, active enrollment states, OTP/password-link resend controls, cancellation, and operational filtering.
+- [ ] **User Management (`/admin/users`) — professional operational redesign (confirmed, not started)**:
+  - **Preserved rules**: registration remains Admin-controlled; the Admin enters only an email and chooses Member or Staff; no Admin enrollment; Admin never sets or sees a password; customers enrich their profile after activation.
+  - **Method 1 — self-registration approval**: Admin sends the generic `/register` link after granting a one-day approval. The customer supplies a password, verifies a 10-minute OTP, and becomes active.
+  - **Method 2 — counter-assisted registration**: Admin sends the customer a 10-minute OTP, verifies the code on the dedicated Admin page, then the system sends a single-use one-day password-setup link plus `/login` link.
+  - **Information architecture/UI**: replace the generic account/enrollment treatment with a People workspace and action-first Enrollment queue. Surface records needing attention (OTP verification, password setup pending, expiry, delivery failures). Provide desktop data tables and responsive mobile cards/bottom-sheet actions.
+  - **People records**: show role, access state, verified contact, profile completion, last sign-in, and contextual actions. Add an account detail surface for role/access changes, enrollment history, profile state, and activity.
+  - **Enrollment records**: show method, current task, expiry, delivery result/resend history, and direct actions: verify OTP, resend the correct email, cancel, or explicitly restart.
+  - **Required logic hardening**:
+    - Add a self-service registration-link resend path; today an email-delivery failure can leave an approved enrollment without a clear recovery action.
+    - Do not silently overwrite an unfinished enrollment for the same email. Show the existing flow and require the Admin to choose resume/resend, cancel, or restart.
+    - Make OTP verification and password-link consumption atomic to prevent duplicate submissions or inconsistent accounts.
+    - Use an explicit lifecycle model for enrollment task state and separately record delivery attempts/failures.
+    - Add an audit trail for enrollment creation, resend attempts, OTP verification, password setup, role changes, deactivation, and reactivation.
+    - Add deactivate/reactivate as the normal access-control action; retain user, vehicle, and order history. Deactivation and role changes must revoke active sessions and protect subsequent server actions immediately.
+  - **Confirmed product decisions (2026-10-04)**:
+    - Retain a complete audit history for User Management actions.
+    - Deactivated users stay in the system and can be reactivated.
+    - Existing unfinished enrollments must be shown and require an explicit Admin decision to resume/resend, cancel, or restart.
+  - **Implementation order**:
+    1. Design brief/product context and the enrollment lifecycle, schema, audit model, and service invariants.
+    2. Server actions and email delivery/retry/recovery flows, with targeted tests for state transitions.
+    3. People/enrollment workspace redesign, account detail surface, responsive actions, and accessibility pass.
+    4. Verify TypeScript, focused lint, Prisma validation/generation, `impeccable detect src`, and `git diff --check`; do not run a production build.
 
 ### C. POS & Core Workflows
 - [x] Direct POS checkout with item search & barcode scanning.
@@ -120,9 +136,9 @@
    - Vitest / Playwright test scaffolding.
    - Verification for Cloudflare Pages (Frontend) + Railway (Backend/Database).
 
-### Active Work Handoff (2026-10-03)
+### Active Work Handoff (2026-10-04)
 
-- **Current objective**: Admin-controlled enrollment and User Management redesign is complete and awaiting the next requested module.
+- **Current objective**: Implement the confirmed professional User Management redesign in small, verified phases. No implementation work has started for this redesign.
 - **Approved enrollment rules**:
   - Every Member or Staff registration begins with an Admin at the shop. Admin accounts are excluded from enrollment creation.
   - Method 1 has no signed invitation URL: Admin grants one-day email approval; the customer uses `/register`, creates their password, then completes email OTP verification.
@@ -137,8 +153,8 @@
   - new dashboard components should stay under `src/features/dashboard/components/`.
 - **Existing detail routes**: `/admin/revenue`, `/admin/orders`, `/admin/products`, `/admin/users`, `/admin/pos`.
 - **Time zone/business reporting boundary**: calculate calendar-day and calendar-month ranges in `Asia/Bangkok`.
-- **Last committed baseline**: current `HEAD` (`feat(users): add admin-controlled enrollment`).
-- **Implementation state**: milestones 1–6 complete and required validation passed. Changes are uncommitted.
+- **Last committed baseline**: `72fe068` (`fix(users): align enrollment email flows`).
+- **Implementation state**: Dashboard milestones 1–6 and the prior controlled-enrollment implementation are committed. The User Management professional redesign is planned only; this progress update is the handoff baseline.
 - **Verified hydration note**: `cz-shortcut-listen` is injected onto `<body>` by a browser extension before React hydrates. Root layout suppresses hydration warnings on both `<html>` and `<body>`; this does not mask application content mismatches below those elements.
 - **POS boundary fix**: Pending-order server actions serialize Prisma Decimal fields before returning data to client components. Checkout and hold actions return success state only because their Prisma records are unused by the client. TypeScript and focused ESLint passed.
 
@@ -158,4 +174,4 @@ src/components/management/
 └── ItemDialog.tsx           # Generic single-field item modal
 ```
 
-*Last Updated*: 2026-10-03 (Unified ActionMenu primitive & server-action error hardening)
+*Last Updated*: 2026-10-04 (confirmed professional User Management redesign plan)

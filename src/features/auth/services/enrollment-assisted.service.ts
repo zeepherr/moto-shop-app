@@ -1,6 +1,6 @@
 import crypto from "node:crypto";
 import { db as defaultDb } from "@/lib/db";
-import { EnrollmentMethod, EnrollmentStatus } from "@prisma/client";
+import { EnrollmentMethod, EnrollmentStatus, UserAuditAction } from "@prisma/client";
 
 export const createPasswordSetupToken = () => crypto.randomBytes(32).toString("hex");
 
@@ -86,6 +86,20 @@ export const createUserFromPasswordSetup = async (
     });
     if (!enrollment) return null;
 
+    const claimed = await tx.enrollment.updateMany({
+      where: {
+        id: enrollment.id,
+        status: EnrollmentStatus.AWAITING_PASSWORD_SETUP,
+        passwordSetupTokenHash: data.tokenHash,
+      },
+      data: {
+        status: EnrollmentStatus.COMPLETED,
+        passwordSetupTokenHash: null,
+        passwordSetupExpiresAt: null,
+      },
+    });
+    if (claimed.count === 0) return null;
+
     const user = await tx.user.create({
       data: {
         email: enrollment.email,
@@ -98,12 +112,12 @@ export const createUserFromPasswordSetup = async (
       select: { id: true, role: true },
     });
 
-    await tx.enrollment.update({
-      where: { id: enrollment.id },
+    await tx.userAuditEvent.create({
       data: {
-        status: EnrollmentStatus.COMPLETED,
-        passwordSetupTokenHash: null,
-        passwordSetupExpiresAt: null,
+        action: UserAuditAction.ENROLLMENT_COMPLETED,
+        enrollmentId: enrollment.id,
+        subjectUserId: user.id,
+        detail: "ASSISTED",
       },
     });
 

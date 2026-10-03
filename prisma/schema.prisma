@@ -37,6 +37,22 @@ enum EnrollmentStatus {
   EXPIRED
 }
 
+enum UserAuditAction {
+  ENROLLMENT_CREATED
+  REGISTRATION_LINK_SENT
+  REGISTRATION_LINK_DELIVERY_FAILED
+  ENROLLMENT_OTP_SENT
+  ENROLLMENT_OTP_DELIVERY_FAILED
+  ENROLLMENT_OTP_VERIFIED
+  PASSWORD_SETUP_LINK_SENT
+  PASSWORD_SETUP_LINK_DELIVERY_FAILED
+  ENROLLMENT_CANCELLED
+  ENROLLMENT_COMPLETED
+  USER_ROLE_CHANGED
+  USER_DEACTIVATED
+  USER_REACTIVATED
+}
+
 enum MotorType {
   AUTOMATIC
   MANUAL
@@ -87,7 +103,9 @@ model User {
   memberOrders Order[] @relation("MemberOrder")
   saleOrders   Order[] @relation("Sale")
 
-  authSessions AuthSession[]
+  authSessions         AuthSession[]
+  auditEventsAsActor   UserAuditEvent[] @relation("UserAuditActor")
+  auditEventsAsSubject UserAuditEvent[] @relation("UserAuditSubject")
 }
 
 // USER INFO
@@ -175,8 +193,31 @@ model Enrollment {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  auditEvents UserAuditEvent[]
+
   @@index([status, expiresAt])
   @@index([method, status])
+}
+
+model UserAuditEvent {
+  id Int @id @default(autoincrement())
+
+  action UserAuditAction
+  detail String?
+
+  enrollmentId  Int?
+  actorUserId   Int?
+  subjectUserId Int?
+
+  createdAt DateTime @default(now())
+
+  enrollment Enrollment? @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  actor      User?       @relation("UserAuditActor", fields: [actorUserId], references: [id], onDelete: SetNull)
+  subject    User?       @relation("UserAuditSubject", fields: [subjectUserId], references: [id], onDelete: SetNull)
+
+  @@index([enrollmentId, createdAt])
+  @@index([subjectUserId, createdAt])
+  @@index([actorUserId, createdAt])
 }
 
 // MOTOR BRAND

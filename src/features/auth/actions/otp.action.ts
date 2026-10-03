@@ -11,8 +11,10 @@ import {
   createUserFromSelfServiceEnrollment,
   findSelfServiceOtpEnrollment,
   incrementEnrollmentOtpAttempts,
+  recordEnrollmentEvent,
   resendSelfServiceOtp,
 } from "../services/enrollment.service";
+import { UserAuditAction } from "@prisma/client";
 import {
   hashOtp,
   generateOtp,
@@ -104,7 +106,20 @@ export const resendOtpAction = async (input: ResendVerificationInput): Promise<A
   if (!updated) {
     return { success: false, error: "Registration approval has expired. Please ask the shop team for help." };
   }
-  await sendRegistrationOtpEmail(email, otp);
+  try {
+    await sendRegistrationOtpEmail(email, otp);
+  } catch {
+    await recordEnrollmentEvent({
+      enrollmentId: pending.id,
+      action: UserAuditAction.ENROLLMENT_OTP_DELIVERY_FAILED,
+    });
+    return { success: false, error: "Could not send a verification code. Please try again." };
+  }
+  await recordEnrollmentEvent({
+    enrollmentId: pending.id,
+    action: UserAuditAction.ENROLLMENT_OTP_SENT,
+    detail: "SELF_SERVICE_RESEND",
+  });
 
   return {
     success: true,

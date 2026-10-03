@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import {
   resendAssistedEnrollmentOtpAction,
   verifyAssistedEnrollmentOtpAction,
-} from "@/features/auth/actions/admin-enrollment.action";
+} from "@/features/auth/actions/admin-enrollment-verification.action";
 
 interface AssistedEnrollmentOtpFormProps {
   enrollmentId: number;

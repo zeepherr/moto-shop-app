@@ -57,16 +57,16 @@ export const findAllUsers = async (db = defaultDb) => {
       firstName: true,
       lastName: true,
       isActive: true,
+      emailVerifiedAt: true,
       createdAt: true,
+      userInfo: { select: { photoUrl: true } },
+      authSessions: {
+        orderBy: { createdAt: "desc" },
+        take: 1,
+        select: { createdAt: true },
+      },
     },
     orderBy: { createdAt: "desc" },
-  });
-};
-
-export const updateUserRole = async (userId: number, role: UserRole, db = defaultDb) => {
-  return await db.user.update({
-    where: { id: userId },
-    data: { role },
   });
 };
 

@@ -96,10 +96,9 @@
     - Deactivated users stay in the system and can be reactivated.
     - Existing unfinished enrollments must be shown and require an explicit Admin decision to resume/resend, cancel, or restart.
   - **Implementation order**:
-    1. Design brief/product context and the enrollment lifecycle, schema, audit model, and service invariants.
-    2. Server actions and email delivery/retry/recovery flows, with targeted tests for state transitions.
-    3. People/enrollment workspace redesign, account detail surface, responsive actions, and accessibility pass.
-    4. Verify TypeScript, focused lint, Prisma validation/generation, `impeccable detect src`, and `git diff --check`; do not run a production build.
+    1. [x] Product context, enrollment lifecycle, additive audit schema, and server-side invariants. `UserAuditEvent` is deployed through additive `prisma db push`; create/retry/cancel/completion events and role/access changes are recorded. Enrollment creation no longer silently overwrites an unfinished flow, OTP/password completion uses an atomic status claim, and role/access changes revoke refresh sessions.
+    2. [x] Redesigned People/enrollment workspace: action-first queue, explicit resend/cancel/restart choices, account role/access controls, profile state, recent sign-in data, and a protected audit-backed account detail dialog. Desktop tables remain dense; mobile actions stay in the shared viewport-aware menu.
+    3. [x] Final verification passed: TypeScript, focused ESLint, Prisma validation, `impeccable detect src`, and `git diff --check`. No production build was run.
 
 ### C. POS & Core Workflows
 - [x] Direct POS checkout with item search & barcode scanning.

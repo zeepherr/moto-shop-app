@@ -4,7 +4,12 @@ import bcrypt from "bcryptjs";
 import { registerSchema, type RegisterInput } from "../schemas";
 import type { ActionResult } from "../types";
 import { findUserByEmail } from "../services/auth.service";
-import { beginSelfServiceRegistration } from "../services/enrollment.service";
+import {
+  beginSelfServiceRegistration,
+  findSelfServiceOtpEnrollment,
+  recordEnrollmentEvent,
+} from "../services/enrollment.service";
+import { UserAuditAction } from "@prisma/client";
 import { generateOtp, hashOtp, sendRegistrationOtpEmail } from "../services/otp.service";
 import { OTP_TTL_MS } from "../constants";
 
@@ -43,11 +48,27 @@ export const registerAction = async (input: RegisterInput): Promise<ActionResult
   try {
     await sendRegistrationOtpEmail(email, otp);
   } catch {
+    const enrollment = await findSelfServiceOtpEnrollment(email);
+    if (enrollment) {
+      await recordEnrollmentEvent({
+        enrollmentId: enrollment.id,
+        action: UserAuditAction.ENROLLMENT_OTP_DELIVERY_FAILED,
+      });
+    }
     // If SMTP fails, notify user but do not crash
     return {
       success: false,
       error: "Failed to send verification email. Please check your email configuration.",
     };
+  }
+
+  const enrollment = await findSelfServiceOtpEnrollment(email);
+  if (enrollment) {
+    await recordEnrollmentEvent({
+      enrollmentId: enrollment.id,
+      action: UserAuditAction.ENROLLMENT_OTP_SENT,
+      detail: "SELF_SERVICE_REGISTRATION",
+    });
   }
 
   const resendAvailableAt = new Date(Date.now() + 60 * 1000);

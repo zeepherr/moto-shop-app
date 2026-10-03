@@ -22,12 +22,14 @@ interface EnrollmentDialogProps {
   method: EnrollmentMethod | null;
   onOpenChange: (open: boolean) => void;
   onCreated: () => void;
+  defaults?: { email: string; role: "MEMBER" | "STAFF" } | null;
+  onConflict?: () => void;
 }
 
-export function EnrollmentDialog({ method, onOpenChange, onCreated }: EnrollmentDialogProps) {
+export function EnrollmentDialog({ method, onOpenChange, onCreated, defaults, onConflict }: EnrollmentDialogProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const [form, setForm] = useState({ email: "", role: "MEMBER" as "MEMBER" | "STAFF" });
+  const [form, setForm] = useState(() => defaults ?? { email: "", role: "MEMBER" as "MEMBER" | "STAFF" });
   const isAssisted = method === "ASSISTED";
 
   const submit = (event: React.FormEvent) => {
@@ -38,6 +40,10 @@ export function EnrollmentDialog({ method, onOpenChange, onCreated }: Enrollment
       const result = await createEnrollmentAction({ ...form, method });
       if (!result.success) {
         toast.error(result.error || "Unable to start enrollment.");
+        if ("data" in result && result.data) {
+          onOpenChange(false);
+          onConflict?.();
+        }
         return;
       }
       toast.success(result.message || "Enrollment created.");

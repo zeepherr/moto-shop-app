@@ -14,8 +14,6 @@ export const RegisterForm: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
     email: "",
     password: "",
     confirmPassword: "",
@@ -53,33 +51,6 @@ export const RegisterForm: React.FC = () => {
         </div>
       )}
 
-      <div className="grid grid-cols-2 gap-3">
-        <div className="space-y-1.5">
-          <Label htmlFor="firstName">First name</Label>
-          <Input
-            id="firstName"
-            name="firstName"
-            required
-            placeholder="John"
-            value={formData.firstName}
-            onChange={handleChange}
-            disabled={isPending}
-          />
-        </div>
-        <div className="space-y-1.5">
-          <Label htmlFor="lastName">Last name</Label>
-          <Input
-            id="lastName"
-            name="lastName"
-            required
-            placeholder="Doe"
-            value={formData.lastName}
-            onChange={handleChange}
-            disabled={isPending}
-          />
-        </div>
-      </div>
-
       <div className="space-y-1.5">
         <Label htmlFor="email">Email</Label>
         <Input
@@ -87,7 +58,7 @@ export const RegisterForm: React.FC = () => {
           name="email"
           type="email"
           required
-          placeholder="name@example.com"
+          placeholder="Use the email approved by the shop"
           value={formData.email}
           onChange={handleChange}
           disabled={isPending}
@@ -123,7 +94,7 @@ export const RegisterForm: React.FC = () => {
       </div>
 
       <Button type="submit" className="w-full h-11" disabled={isPending}>
-        {isPending ? "Creating account..." : "Create account"}
+        {isPending ? "Sending verification code..." : "Continue"}
       </Button>
 
       <div className="text-center text-sm text-muted-foreground pt-2">

@@ -23,6 +23,20 @@ enum UserRole {
   MEMBER
 }
 
+enum EnrollmentMethod {
+  SELF_SERVICE
+  ASSISTED
+}
+
+enum EnrollmentStatus {
+  APPROVED
+  AWAITING_OTP
+  AWAITING_PASSWORD_SETUP
+  COMPLETED
+  CANCELLED
+  EXPIRED
+}
+
 enum MotorType {
   AUTOMATIC
   MANUAL
@@ -130,6 +144,39 @@ model PendingRegistration {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+// ADMIN-CONTROLLED ENROLLMENT
+model Enrollment {
+  id Int @id @default(autoincrement())
+
+  email String @unique
+
+  firstName String
+  lastName  String
+  role      UserRole
+
+  method EnrollmentMethod
+  status EnrollmentStatus @default(APPROVED)
+
+  passwordHash String?
+
+  otpHash       String?
+  otpExpiresAt  DateTime?
+  otpAttempts   Int       @default(0)
+  otpLastSentAt DateTime?
+
+  passwordSetupTokenHash String?   @unique
+  passwordSetupExpiresAt DateTime?
+
+  expiresAt   DateTime
+  createdById Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status, expiresAt])
+  @@index([method, status])
 }
 
 // MOTOR BRAND

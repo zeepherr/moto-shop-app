@@ -77,9 +77,13 @@
 - [x] **Products & Inventory (`/admin/products`)**:
   - `ProductStats`: Total SKUs, Stock Health %, Low Stock Warning ($\le 5$ units), Inventory Valuation (THB).
   - `ProductTable`: Image thumbnails with R2 fallbacks, sortable columns, category dropdown filter, low stock alerts, R2 presigned image upload flow.
-- [x] **User Management (`/admin/users`)**:
-  - `UserStats`: Total Accounts, Administrators, Staff Members, Customers.
-  - `UserTable`: User avatars, role badges (Admin / Staff / Member), contact details, role promotion/demotion modals.
+- [x] **User Management (`/admin/users`) — controlled enrollment redesign complete**:
+  - Existing baseline: `UserStats` and `UserTable` provide account counts, contact details, role badges, and member/staff role changes.
+  - [x] Public self-registration now requires a pre-approved, unexpired Admin enrollment. Public marketing and login links no longer advertise account creation.
+  - [x] **Method 1 — Admin-approved self-registration**: Admin selects Member or Staff and enters basic name/email details. No initial registration link is sent. The customer visits `/register`, enters the approved email, creates a password, receives a 10-minute email OTP, and becomes active after verification. The enrollment approval expires after one day.
+  - [x] **Method 2 — Admin-assisted registration**: Admin selects Member or Staff and enters basic name/email details. The system emails a 10-minute OTP; the customer tells the OTP to the Admin, who enters it in the protected Admin dialog. On success, the system sends a one-day, single-use password-setup link to the customer's email. The customer sets a private password and is redirected to login.
+  - [x] Enrollment creation accepts Member or Staff only. Admins are excluded from both enrollment methods; existing Admin role management remains a separate confirmed action.
+  - [x] Redesigned the Admin page around “Register in person” and “Approve self-registration” actions, active enrollment states, OTP/password-link resend controls, cancellation, and operational filtering.
 
 ### C. POS & Core Workflows
 - [x] Direct POS checkout with item search & barcode scanning.
@@ -118,8 +122,14 @@
 
 ### Active Work Handoff (2026-10-03)
 
-- **Current objective**: complete the Admin Dashboard operational expansion listed in section 4B.
-- **Resume order**: continue from the first unchecked dashboard milestone, update its checkbox immediately after implementation and focused verification, then move to the next milestone.
+- **Current objective**: Admin-controlled enrollment and User Management redesign is complete and awaiting the next requested module.
+- **Approved enrollment rules**:
+  - Every Member or Staff registration begins with an Admin at the shop. Admin accounts are excluded from enrollment creation.
+  - Method 1 has no signed invitation URL: Admin grants one-day email approval; the customer uses `/register`, creates their password, then completes email OTP verification.
+  - Method 2 has the customer disclose their emailed OTP to an Admin. Only a correct OTP triggers the one-day, single-use password-setup link; Admin never sets or sees the password.
+  - Profile enrichment is deferred to the customer's profile after activation.
+- **Execution rule**: work in small phases, mark a phase complete only after focused verification, run the complete relevant checks before committing, then commit the finished feature.
+- **Validation for enrollment redesign**: Prisma format/generate, additive `prisma db push`, TypeScript, focused ESLint, `prisma validate`, `impeccable detect src`, and `git diff --check` passed. No production build was run.
 - **Primary files**:
   - `src/app/(dashboard)/admin/page.tsx`
   - `src/features/dashboard/services/dashboard.service.ts`
@@ -127,7 +137,7 @@
   - new dashboard components should stay under `src/features/dashboard/components/`.
 - **Existing detail routes**: `/admin/revenue`, `/admin/orders`, `/admin/products`, `/admin/users`, `/admin/pos`.
 - **Time zone/business reporting boundary**: calculate calendar-day and calendar-month ranges in `Asia/Bangkok`.
-- **Last committed baseline**: `ad80f15 feat(admin): add dashboard reporting drilldowns`.
+- **Last committed baseline**: current `HEAD` (`feat(users): add admin-controlled enrollment`).
 - **Implementation state**: milestones 1–6 complete and required validation passed. Changes are uncommitted.
 - **Verified hydration note**: `cz-shortcut-listen` is injected onto `<body>` by a browser extension before React hydrates. Root layout suppresses hydration warnings on both `<html>` and `<body>`; this does not mask application content mismatches below those elements.
 - **POS boundary fix**: Pending-order server actions serialize Prisma Decimal fields before returning data to client components. Checkout and hold actions return success state only because their Prisma records are unused by the client. TypeScript and focused ESLint passed.

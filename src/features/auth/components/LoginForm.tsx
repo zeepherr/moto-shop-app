@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useTransition } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -84,12 +83,9 @@ export const LoginForm: React.FC = () => {
         {isPending ? "Logging in..." : "Sign in"}
       </Button>
 
-      <div className="text-center text-sm text-muted-foreground pt-2">
-        Don&apos;t have an account?{" "}
-        <Link href="/register" className="font-semibold text-primary hover:underline">
-          Create account
-        </Link>
-      </div>
+      <p className="pt-2 text-center text-sm text-muted-foreground">
+        Need an account? Please ask the shop team to start your registration.
+      </p>
     </form>
   );
 };

@@ -8,12 +8,11 @@ import {
 } from "../schemas";
 import type { ActionResult } from "../types";
 import {
-  getPendingByEmail,
-  addAttemptsPending,
-  createUserFromPending,
-  updatePendingOtp,
-  cleanExpiredPending,
-} from "../services/auth.service";
+  createUserFromSelfServiceEnrollment,
+  findSelfServiceOtpEnrollment,
+  incrementEnrollmentOtpAttempts,
+  resendSelfServiceOtp,
+} from "../services/enrollment.service";
 import {
   hashOtp,
   generateOtp,
@@ -21,6 +20,9 @@ import {
   sendRegistrationOtpEmail,
 } from "../services/otp.service";
 import { MAX_OTP_ATTEMPTS, OTP_TTL_MS } from "../constants";
+import { createAuthSession } from "../services/auth.service";
+import { createAccessToken, createRefreshToken, hashRefreshToken } from "../services/token.service";
+import { setAuthCookies } from "../services/cookie.service";
 
 export const verifyOtpAction = async (input: VerifyEmailInput): Promise<ActionResult> => {
   const parsed = verifyEmailSchema.safeParse(input);
@@ -29,24 +31,24 @@ export const verifyOtpAction = async (input: VerifyEmailInput): Promise<ActionRe
   }
 
   const { email, code } = parsed.data;
-  const pending = await getPendingByEmail(email);
+  const pending = await findSelfServiceOtpEnrollment(email);
 
   if (!pending) {
     return { success: false, error: "No pending registration found" };
   }
 
-  if (pending.expiresAt < new Date()) {
+  if (pending.expiresAt < new Date() || !pending.otpExpiresAt || pending.otpExpiresAt < new Date()) {
     return { success: false, error: "Verification code has expired. Please request a new code." };
   }
 
-  if (pending.attempts >= MAX_OTP_ATTEMPTS) {
+  if (pending.otpAttempts >= MAX_OTP_ATTEMPTS) {
     return { success: false, error: "Too many incorrect attempts. Please request a new code." };
   }
 
   const submittedHash = hashOtp(code);
   if (submittedHash !== pending.otpHash) {
-    await addAttemptsPending(pending.id);
-    const remaining = Math.max(0, MAX_OTP_ATTEMPTS - (pending.attempts + 1));
+    await incrementEnrollmentOtpAttempts(pending.id);
+    const remaining = Math.max(0, MAX_OTP_ATTEMPTS - (pending.otpAttempts + 1));
     return {
       success: false,
       error: `Incorrect verification code. ${remaining} attempts remaining.`,
@@ -54,10 +56,25 @@ export const verifyOtpAction = async (input: VerifyEmailInput): Promise<ActionRe
     };
   }
 
-  const newUser = await createUserFromPending(pending);
+  const newUser = await createUserFromSelfServiceEnrollment({ email, otpHash: submittedHash });
+  if (!newUser) {
+    return { success: false, error: "Verification code is no longer valid. Please request a new code." };
+  }
+
+  const accessToken = await createAccessToken({
+    userId: newUser.id,
+    email: newUser.email ?? "",
+    role: newUser.role,
+    firstName: newUser.firstName,
+    lastName: newUser.lastName,
+  });
+  const refreshToken = createRefreshToken();
+  await createAuthSession(newUser.id, hashRefreshToken(refreshToken));
+  await setAuthCookies(accessToken, refreshToken);
+
   return {
     success: true,
-    message: "Email verified successfully! You can now log in.",
+    message: "Email verified successfully! Your account is ready.",
     data: newUser,
   };
 };
@@ -69,14 +86,12 @@ export const resendOtpAction = async (input: ResendVerificationInput): Promise<A
   }
 
   const { email } = parsed.data;
-  await cleanExpiredPending();
-
-  const pending = await getPendingByEmail(email);
+  const pending = await findSelfServiceOtpEnrollment(email);
   if (!pending) {
     return { success: false, error: "Registration has expired or does not exist. Please register again." };
   }
 
-  const cooldown = getOtpCooldownSeconds(pending.lastSentAt);
+  const cooldown = pending.otpLastSentAt ? getOtpCooldownSeconds(pending.otpLastSentAt) : 0;
   if (cooldown > 0) {
     return { success: false, error: `Please wait ${cooldown} seconds before requesting a new code.` };
   }
@@ -85,7 +100,10 @@ export const resendOtpAction = async (input: ResendVerificationInput): Promise<A
   const otpHash = hashOtp(otp);
   const expiresAt = new Date(Date.now() + OTP_TTL_MS);
 
-  await updatePendingOtp({ email, otpHash, expiresAt });
+  const updated = await resendSelfServiceOtp({ email, otpHash, otpExpiresAt: expiresAt });
+  if (!updated) {
+    return { success: false, error: "Registration approval has expired. Please ask the shop team for help." };
+  }
   await sendRegistrationOtpEmail(email, otp);
 
   return {

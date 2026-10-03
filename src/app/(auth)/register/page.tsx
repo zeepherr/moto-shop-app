@@ -4,8 +4,8 @@ import { AuthHeader } from "@/features/auth/components/AuthHeader";
 import { RegisterForm } from "@/features/auth/components/RegisterForm";
 
 export const metadata: Metadata = {
-  title: "Register - HrungMoto",
-  description: "Create a new HrungMoto account",
+  title: "Complete Registration - HrungMoto",
+  description: "Complete your shop-approved HrungMoto registration",
 };
 
 export default function RegisterPage() {
@@ -13,8 +13,8 @@ export default function RegisterPage() {
     <Card className="border-border/60 shadow-lg">
       <CardHeader>
         <AuthHeader
-          title="Create an account"
-          description="Register for a new member account"
+          title="Complete your registration"
+          description="Use the email address approved by the shop team"
         />
       </CardHeader>
       <CardContent>

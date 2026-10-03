@@ -3,7 +3,8 @@
 import bcrypt from "bcryptjs";
 import { registerSchema, type RegisterInput } from "../schemas";
 import type { ActionResult } from "../types";
-import { findUserByEmail, savePendingRegistration } from "../services/auth.service";
+import { findUserByEmail } from "../services/auth.service";
+import { beginSelfServiceRegistration } from "../services/enrollment.service";
 import { generateOtp, hashOtp, sendRegistrationOtpEmail } from "../services/otp.service";
 import { OTP_TTL_MS } from "../constants";
 
@@ -13,7 +14,7 @@ export const registerAction = async (input: RegisterInput): Promise<ActionResult
     return { success: false, error: parsed.error.issues[0]?.message || "Invalid input" };
   }
 
-  const { email, firstName, lastName, password } = parsed.data;
+  const { email, password } = parsed.data;
 
   const existing = await findUserByEmail(email);
   if (existing) {
@@ -25,14 +26,19 @@ export const registerAction = async (input: RegisterInput): Promise<ActionResult
   const expiresAt = new Date(Date.now() + OTP_TTL_MS);
   const passwordHash = await bcrypt.hash(password, 10);
 
-  const pending = await savePendingRegistration({
+  const isApproved = await beginSelfServiceRegistration({
     email,
-    firstName,
-    lastName,
     passwordHash,
     otpHash,
-    expiresAt,
+    otpExpiresAt: expiresAt,
   });
+
+  if (!isApproved) {
+    return {
+      success: false,
+      error: "This email is not approved for registration. Please ask the shop team for help.",
+    };
+  }
 
   try {
     await sendRegistrationOtpEmail(email, otp);
@@ -44,7 +50,7 @@ export const registerAction = async (input: RegisterInput): Promise<ActionResult
     };
   }
 
-  const resendAvailableAt = new Date(new Date(pending.lastSentAt).getTime() + 60 * 1000);
+  const resendAvailableAt = new Date(Date.now() + 60 * 1000);
 
   return {
     success: true,

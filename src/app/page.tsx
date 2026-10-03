@@ -35,13 +35,6 @@ export default async function HomePage() {
             >
               Sign In
             </Link>
-            <Link
-              href="/register"
-              className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-sm transition-all hover:bg-primary/90"
-            >
-              Get Started
-              <ArrowRight className="size-4" />
-            </Link>
           </div>
         </div>
       </header>
@@ -78,12 +71,6 @@ export default async function HomePage() {
               >
                 Launch App
                 <ArrowRight className="size-4" />
-              </Link>
-              <Link
-                href="/register"
-                className="rounded-xl border border-border/80 px-6 py-3 text-sm font-medium text-foreground transition-colors hover:bg-muted"
-              >
-                Register Member
               </Link>
             </div>
           </div>

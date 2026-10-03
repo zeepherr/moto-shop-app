@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { verifyOtpAction, resendOtpAction } from "../actions/otp.action";
+import { ROLES } from "../constants";
 
 export const VerifyEmailForm: React.FC = () => {
   const router = useRouter();
@@ -38,8 +39,11 @@ export const VerifyEmailForm: React.FC = () => {
         return;
       }
 
-      setInfo(res.message || "Verified! Redirecting to login...");
-      setTimeout(() => router.push("/login"), 1500);
+      setInfo(res.message || "Verified! Redirecting...");
+      const role = (res.data as { role?: string } | undefined)?.role;
+      const destination =
+        role === ROLES.STAFF ? "/staff/pos" : role === ROLES.ADMIN ? "/admin" : "/member/profile";
+      setTimeout(() => router.push(destination), 1000);
     });
   };
 

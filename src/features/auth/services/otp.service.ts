@@ -64,3 +64,20 @@ export const sendRegistrationOtpEmail = async (email: string, otp: string): Prom
     `,
   });
 };
+
+export const sendPasswordSetupEmail = async (email: string, setupUrl: string): Promise<void> => {
+  const transporter = createMailTransporter();
+
+  await transporter.sendMail({
+    from: `"HrungMoto" <${config.mail.user}>`,
+    to: email,
+    subject: "Set your HrungMoto password",
+    text: `Your email has been verified. Set your password using this link within 24 hours: ${setupUrl}`,
+    html: `
+      <h2>Set your password</h2>
+      <p>Your email has been verified at the shop.</p>
+      <p><a href="${setupUrl}">Set your password</a></p>
+      <p>This single-use link expires in 24 hours.</p>
+    `,
+  });
+};

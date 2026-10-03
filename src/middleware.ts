@@ -22,7 +22,7 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  const isAuthPage = pathname.startsWith("/login") || pathname.startsWith("/register") || pathname.startsWith("/verify-email");
+  const isAuthPage = pathname.startsWith("/login") || pathname.startsWith("/register") || pathname.startsWith("/verify-email") || pathname.startsWith("/set-password");
   const isAdminPath = pathname.startsWith("/admin");
   const isStaffPath = pathname.startsWith("/staff");
   const isMemberPath = pathname.startsWith("/member");
@@ -55,5 +55,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*", "/staff/:path*", "/member/:path*", "/login", "/register", "/verify-email"],
+  matcher: ["/admin/:path*", "/staff/:path*", "/member/:path*", "/login", "/register", "/verify-email", "/set-password"],
 };

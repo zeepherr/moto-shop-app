@@ -48,8 +48,19 @@
 - [x] **Sidebar User Profile Menu**: Account control adapts to expanded/collapsed layouts; its viewport-level menu supports hover, click, keyboard dismissal, and session-revoking logout.
 - [x] **Theme Tokens**: Aligned `--primary` to `#0066cc` (light) / `#2997ff` (dark), `--background` to `#f6f8fc` (light) / `#090b13` (dark).
 
-### B. Admin Management Modules (100% Complete & Unified)
-- [x] **Admin Dashboard (`/admin`)**: Metric cards (Revenue, Orders, Low stock, Members), 7D/30D/90D revenue chart, recent transactions, inventory alerts.
+### B. Admin Management Modules
+- [ ] **Admin Dashboard (`/admin`) — operational expansion in progress**
+  - [x] Baseline: real-data metric cards, recent transactions, inventory alerts, revenue and completed-order drilldowns.
+  - [x] Detail reports: `/admin/revenue` supports Today / Week / Month / Year; `/admin/orders` supports operational filters and order details.
+  - [x] Milestone 1: headline revenue and completed-order KPIs use the current Bangkok calendar month and compare with the previous calendar month.
+  - [x] Milestone 2: Today’s Operations shows today revenue, completed today, pending orders, cancelled today, and today average order value.
+  - [x] Milestone 3: Action Center surfaces pending orders, out-of-stock inventory, low stock, and today’s cancellations with filtered management links.
+  - [x] Milestone 4: current-month product/service sales mix and Cash/QR payment overview use completed-order data.
+  - [x] Milestone 5: current-month best-selling products and services are ranked by revenue with quantity context.
+  - [x] Milestone 6: dashboard Revenue Analytics supports 7D/30D/90D/1Y using a 365-day query window. The revenue detail page supports Today / Week / Month / Year.
+  - [x] Validation: TypeScript, targeted ESLint, `impeccable detect src` (0 anti-patterns), and `git diff --check`.
+  - **Data boundaries**: do not display exact labor cost, historical product COGS, appointments, suppliers, stock movement, configurable reorder points, or real shop-open state until those facts are recorded in the schema.
+  - **Deferred**: staff activity analytics (orders, handled revenue, average order) can follow after the operational dashboard milestones above.
 - [x] **Motorcycle Brands (`/admin/motor-brands`)**:
   - `MotorBrandStats`: Total Brands, Active Brands, Models Linked.
   - `DockedTableCard` & `MotorBrandTable`: Monogram avatars, models registered count, status badges, edit/status/delete modals.
@@ -92,6 +103,20 @@
 3. **Automated Testing & Deployment Preparation**:
    - Vitest / Playwright test scaffolding.
    - Verification for Cloudflare Pages (Frontend) + Railway (Backend/Database).
+
+### Active Work Handoff (2026-10-03)
+
+- **Current objective**: complete the Admin Dashboard operational expansion listed in section 4B.
+- **Resume order**: continue from the first unchecked dashboard milestone, update its checkbox immediately after implementation and focused verification, then move to the next milestone.
+- **Primary files**:
+  - `src/app/(dashboard)/admin/page.tsx`
+  - `src/features/dashboard/services/dashboard.service.ts`
+  - `src/features/dashboard/components/RevenueTrendChart.tsx`
+  - new dashboard components should stay under `src/features/dashboard/components/`.
+- **Existing detail routes**: `/admin/revenue`, `/admin/orders`, `/admin/products`, `/admin/users`, `/admin/pos`.
+- **Time zone/business reporting boundary**: calculate calendar-day and calendar-month ranges in `Asia/Bangkok`.
+- **Last committed baseline**: `ad80f15 feat(admin): add dashboard reporting drilldowns`.
+- **Implementation state**: milestones 1–6 complete and required validation passed. Changes are uncommitted.
 
 ---
 

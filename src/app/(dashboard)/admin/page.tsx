@@ -6,6 +6,10 @@ import { MetricCard } from "@/features/dashboard/components/MetricCard";
 import { RevenueTrendChart } from "@/features/dashboard/components/RevenueTrendChart";
 import { RecentOrdersList } from "@/features/dashboard/components/RecentOrdersList";
 import { InventoryAlertWidget } from "@/features/dashboard/components/InventoryAlertWidget";
+import { TodayOperations } from "@/features/dashboard/components/TodayOperations";
+import { DashboardActionCenter } from "@/features/dashboard/components/DashboardActionCenter";
+import { DashboardSalesOverview } from "@/features/dashboard/components/DashboardSalesOverview";
+import { BestSellers } from "@/features/dashboard/components/BestSellers";
 import { ManagementLayout } from "@/components/management/ManagementLayout";
 import { DollarSign, ShoppingBag, AlertTriangle, Users } from "lucide-react";
 
@@ -32,13 +36,12 @@ export default async function AdminDashboardPage() {
     <ManagementLayout>
       <DashboardHeader />
 
-      {/* Apple-styled KPI Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <MetricCard
           label="Total Revenue"
           href="/admin/revenue"
           value={`฿${summary.totalRevenue.toLocaleString()}`}
-          subtext={`Last ${trends.windowDays}d vs previous ${trends.windowDays}d`}
+          subtext="This month vs previous month"
           trend={toTrend(trends.revenueChange)}
           tone="blue"
           icon={<DollarSign className="size-4" />}
@@ -47,7 +50,7 @@ export default async function AdminDashboardPage() {
           label="Completed Orders"
           href="/admin/orders?status=COMPLETED"
           value={summary.completedOrdersCount.toString()}
-          subtext={`Avg. ฿${Math.round(summary.avgOrderValue).toLocaleString()}`}
+          subtext={`This month · Avg. ฿${Math.round(summary.avgOrderValue).toLocaleString()}`}
           trend={toTrend(trends.ordersChange)}
           tone="blue"
           icon={<ShoppingBag className="size-4" />}
@@ -72,7 +75,7 @@ export default async function AdminDashboardPage() {
           subtext="Active customer profiles"
           trend={
             trends.newMembersCount > 0
-              ? { value: `+${trends.newMembersCount} in ${trends.windowDays}d`, isPositive: true }
+              ? { value: `+${trends.newMembersCount} this month`, isPositive: true }
               : undefined
           }
           tone="success"
@@ -80,15 +83,30 @@ export default async function AdminDashboardPage() {
         />
       </div>
 
-      {/* Main Analytics & Activity Grid */}
+      <TodayOperations {...summary.today} />
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 space-y-6">
+        <div className="lg:col-span-2">
           <RevenueTrendChart data={summary.revenueTrend} />
         </div>
-        <div className="space-y-6">
+        <DashboardActionCenter {...summary.attention} />
+      </div>
+
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+        <DashboardSalesOverview
+          products={summary.salesMix.products}
+          services={summary.salesMix.services}
+          cash={summary.paymentMix.cash}
+          qr={summary.paymentMix.qr}
+        />
+        <BestSellers products={summary.bestSellers.products} services={summary.bestSellers.services} />
+      </div>
+
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <div className="lg:col-span-2">
           <RecentOrdersList orders={summary.recentOrders} />
-          <InventoryAlertWidget items={summary.lowStockProducts} />
         </div>
+        <InventoryAlertWidget items={summary.lowStockProducts} />
       </div>
     </ManagementLayout>
   );

@@ -15,13 +15,7 @@ export const DashboardHeader: React.FC = () => {
   return (
     <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between pb-2">
       <div>
-        <div className="flex items-center gap-2 mb-1">
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-success/30 bg-success/10 px-2.5 py-0.5 text-[11px] font-medium text-success">
-            <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
-            Shop Open
-          </span>
-          <span className="text-xs text-muted-foreground">{currentDate}</span>
-        </div>
+        <p className="mb-1 text-xs font-medium text-muted-foreground">{currentDate}</p>
         <h1 className="text-3xl font-semibold tracking-tight text-foreground">
           Workshop Cockpit
         </h1>

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip } from "recharts";
 
-type Period = "7D" | "30D" | "90D";
+type Period = "7D" | "30D" | "90D" | "1Y";
 
 interface RevenuePoint {
   date: string;
@@ -16,7 +16,7 @@ interface ChartProps {
   data: RevenuePoint[];
 }
 
-const periodDays: Record<Period, number> = { "7D": 7, "30D": 30, "90D": 90 };
+const periodDays: Record<Period, number> = { "7D": 7, "30D": 30, "90D": 90, "1Y": 365 };
 
 const formatDate = (date: string, long = false) =>
   new Intl.DateTimeFormat("en-GB", {
@@ -41,13 +41,13 @@ export function RevenueTrendChart({ data }: ChartProps) {
         <div>
           <h2 className="text-base font-semibold tracking-tight text-foreground">Revenue Analytics</h2>
           <p className="mt-0.5 text-xs text-muted-foreground">
-            ฿{periodRevenue.toLocaleString()} from completed orders in the last {periodDays[period]} days
+            ฿{periodRevenue.toLocaleString()} from completed orders · {period === "1Y" ? "last 12 months" : `last ${periodDays[period]} days`}
           </p>
         </div>
 
         <div className="flex items-center gap-2">
           <div className="flex items-center rounded-full border border-border/50 bg-muted/50 p-1 text-xs" aria-label="Revenue period">
-            {(["7D", "30D", "90D"] as const).map((option) => (
+            {(["7D", "30D", "90D", "1Y"] as const).map((option) => (
               <button
                 key={option}
                 type="button"

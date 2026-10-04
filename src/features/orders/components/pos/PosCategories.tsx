@@ -31,13 +31,13 @@ export const PosCategories: React.FC<PosCategoriesProps> = ({
   }
 
   return (
-    <div className="flex h-11 gap-1.5 overflow-x-auto scrollbar-none [&::-webkit-scrollbar]:hidden">
+    <div className="flex min-h-11 gap-2 overflow-x-auto px-0.5 scrollbar-none [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
       <Button
         type="button"
         size="sm"
         variant={selectedCategory === "all" ? "default" : "outline"}
         onClick={() => onCategoryChange("all")}
-        className="h-11 shrink-0 cursor-pointer px-3"
+        className="h-11 shrink-0 cursor-pointer rounded-full px-4 text-sm"
       >
         All
       </Button>
@@ -53,7 +53,7 @@ export const PosCategories: React.FC<PosCategoriesProps> = ({
             variant={isSelected ? "default" : "outline"}
             onClick={() => onCategoryChange(String(category.id))}
             className={cn(
-              "h-11 shrink-0 cursor-pointer px-3",
+              "h-11 shrink-0 cursor-pointer rounded-full px-4 text-sm",
               !isSelected && "text-muted-foreground",
             )}
           >

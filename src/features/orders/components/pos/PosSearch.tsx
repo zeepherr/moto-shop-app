@@ -78,33 +78,33 @@ export const PosSearch: React.FC<PosSearchProps> = ({
   };
 
   return (
-    <section className="grid shrink-0 grid-cols-1 gap-2 md:grid-cols-[minmax(0,1fr)_280px]">
-      <div className="relative">
+    <section aria-label="Find an item" className="grid shrink-0 grid-cols-1 gap-2.5 lg:grid-cols-[minmax(0,1fr)_280px]">
+      <label className="relative block">
         <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
         <Input
           value={searchTerm}
           onChange={(e) => onSearchChange(e.target.value)}
-          placeholder="Search products or services..."
+          placeholder="Search products or services"
           aria-label="Search products or services"
-          className="h-11 rounded-xl border border-input bg-card pl-9 text-sm text-foreground placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-primary shadow-xs"
+          className="h-12 rounded-xl border border-input bg-card pl-10 text-base text-foreground placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-primary"
         />
-      </div>
+      </label>
 
-      <div className="relative">
+      <label className="relative block">
         <Barcode className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
         <Input
           ref={skuRef}
           value={sku}
           onChange={(e) => setSku(e.target.value)}
           onKeyDown={handleSkuSubmit}
-          placeholder="Scan or enter SKU (press Enter)"
+          placeholder="Scan or enter SKU"
           aria-label="Scan or enter product SKU. Press F2 to focus, then Enter to add the exact SKU."
           aria-keyshortcuts="F2"
           autoComplete="off"
-          className="h-11 rounded-xl border border-input bg-card pl-9 text-sm text-foreground placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-primary shadow-xs"
+          className="h-12 rounded-xl border border-input bg-card pl-10 text-base text-foreground placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-primary"
         />
         <p className="sr-only">Press F2 to focus the scanner. Press Enter after scanning to add the matching product.</p>
-      </div>
+      </label>
     </section>
   );
 };

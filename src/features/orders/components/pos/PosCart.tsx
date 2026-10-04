@@ -178,7 +178,7 @@ export const PosCart: React.FC<{ productDiscountRate: number }> = ({ productDisc
 
   return (
     <>
-    <aside className="flex flex-col overflow-hidden rounded-2xl border border-border/70 bg-card lg:h-full lg:min-h-0 sm:mt-4 mt-1.5 shadow-sm">
+    <aside className="flex min-w-0 flex-col overflow-hidden rounded-2xl border border-border/70 bg-card lg:h-full lg:min-h-0 sm:mt-4 mt-1.5 shadow-sm">
       <div className="shrink-0">
         <div className="flex items-center justify-between gap-3 border-b border-border/60 p-3 lg:p-4">
           <div>
@@ -211,9 +211,9 @@ export const PosCart: React.FC<{ productDiscountRate: number }> = ({ productDisc
         <PosCustomerSelector />
       </div>
 
-      <div className="min-h-40 max-h-80 overflow-y-auto border-b border-border/60 p-3 scrollbar-none lg:min-h-0 lg:max-h-none lg:flex-1 lg:p-4">
+      <div className="min-h-28 max-h-[35dvh] overflow-y-auto border-b border-border/60 p-3 scrollbar-none lg:min-h-0 lg:max-h-none lg:flex-1 lg:p-4">
         {cartItems.length === 0 ? (
-          <div className="flex h-full min-h-36 flex-col items-center justify-center text-center">
+          <div className="flex h-full min-h-36 flex-col items-center justify-center text-center lg:min-h-0">
             <ShoppingCart className="mb-2 size-8 text-muted-foreground/40" />
             <p className="text-sm font-medium text-foreground">Your cart is empty</p>
             <p className="mt-1 text-xs text-muted-foreground">Add a product or service to begin.</p>
@@ -268,19 +268,19 @@ export const PosCart: React.FC<{ productDiscountRate: number }> = ({ productDisc
       </div>
     </aside>
     <Dialog open={isCancelConfirmOpen} onOpenChange={(open) => !isActionPending && setIsCancelConfirmOpen(open)}>
-      <DialogContent data-pos-modal="true">
+      <DialogContent data-pos-modal="true" className="max-h-[calc(100dvh-2rem)] overflow-y-auto p-4 sm:p-6">
         <DialogHeader>
           <DialogTitle>Cancel pending order?</DialogTitle>
           <DialogDescription>This held ticket will be marked cancelled. This cannot be undone.</DialogDescription>
         </DialogHeader>
       <label className="mb-2 block text-sm font-medium" htmlFor="current-cancel-reason">Reason for cancellation</label>
-      <select id="current-cancel-reason" value={cancelReason} onChange={(event) => setCancelReason(event.target.value)} className="mb-4 h-11 w-full rounded-md border border-input bg-background px-3 text-sm">
+      <select id="current-cancel-reason" value={cancelReason} onChange={(event) => setCancelReason(event.target.value)} className="mb-4 h-12 w-full rounded-xl border border-input bg-background px-3 text-base">
         <option value="">Select a reason</option>
         {ORDER_CANCELLATION_REASONS.map((reason) => <option key={reason} value={reason}>{reason}</option>)}
       </select>
-        <DialogFooter>
-        <Button type="button" variant="outline" disabled={isActionPending} onClick={() => { setIsCancelConfirmOpen(false); setCancelReason(""); }}>Keep order</Button>
-        <Button type="button" variant="destructive" disabled={isActionPending || !cancelReason} onClick={handleCancelCurrentOrder}>
+        <DialogFooter className="flex-col-reverse space-x-0 sm:flex-row sm:space-x-2">
+        <Button type="button" variant="outline" disabled={isActionPending} onClick={() => { setIsCancelConfirmOpen(false); setCancelReason(""); }} className="min-h-11 w-full sm:w-auto">Keep order</Button>
+        <Button type="button" variant="destructive" disabled={isActionPending || !cancelReason} onClick={handleCancelCurrentOrder} className="min-h-11 w-full sm:w-auto">
             {isActionPending ? "Cancelling…" : "Cancel order"}
           </Button>
         </DialogFooter>

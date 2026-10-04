@@ -104,7 +104,7 @@ export const PendingOrders: React.FC<PendingOrdersProps> = ({
     <div className="space-y-3">
       <div className="relative">
         <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-        <Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Filter by order or customer..." className="h-11 pl-9 text-sm" />
+        <Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Find order or customer" className="h-12 pl-9 text-base" />
       </div>
       <p className="text-xs text-muted-foreground">Most recent {orders.length === 50 ? "50" : orders.length} pending tickets</p>
       {filteredOrders.length ? filteredOrders.map((order) => (
@@ -113,7 +113,7 @@ export const PendingOrders: React.FC<PendingOrdersProps> = ({
           type="button"
           variant="outline"
           onClick={() => onSelectOrder(order.id)}
-          className="h-auto min-h-16 min-w-0 flex-1 justify-between px-3 py-2.5 text-left cursor-pointer hover:border-primary/40"
+          className="h-auto min-h-[72px] min-w-0 flex-1 justify-between gap-2 px-3 py-3 text-left cursor-pointer hover:border-primary/40"
         >
           <div className="min-w-0">
             <p className="text-sm font-medium text-foreground">
@@ -143,13 +143,13 @@ export const PendingOrders: React.FC<PendingOrdersProps> = ({
             )}
           </div>
         </Button>
-        <Button type="button" variant="outline" aria-label={`Cancel order ${order.orderNumber || order.id}`} title="Cancel pending order" onClick={() => { setOrderToCancel(order); setCancelReason(""); }} className="min-h-11 min-w-11 self-center px-2 text-destructive hover:text-destructive">
+        <Button type="button" variant="outline" aria-label={`Cancel order ${order.orderNumber || order.id}`} title="Cancel pending order" onClick={() => { setOrderToCancel(order); setCancelReason(""); }} className="min-h-12 min-w-12 self-center px-2 text-destructive hover:text-destructive">
           <XCircle className="size-4" />
         </Button>
         </div>
       )) : <p className="py-6 text-center text-sm text-muted-foreground">No pending tickets match that search.</p>}
       <Dialog open={Boolean(orderToCancel)} onOpenChange={(open) => !open && !isCancelling && setOrderToCancel(null)}>
-        <DialogContent data-pos-modal="true">
+        <DialogContent data-pos-modal="true" className="max-h-[calc(100dvh-2rem)] overflow-y-auto p-4 sm:p-6">
           <DialogHeader>
             <DialogTitle>Cancel pending order?</DialogTitle>
             <DialogDescription>
@@ -157,13 +157,13 @@ export const PendingOrders: React.FC<PendingOrdersProps> = ({
             </DialogDescription>
           </DialogHeader>
           <label className="mb-2 block text-sm font-medium" htmlFor="pending-cancel-reason">Reason for cancellation</label>
-          <select id="pending-cancel-reason" value={cancelReason} onChange={(event) => setCancelReason(event.target.value)} className="mb-4 h-11 w-full rounded-md border border-input bg-background px-3 text-sm">
+          <select id="pending-cancel-reason" value={cancelReason} onChange={(event) => setCancelReason(event.target.value)} className="mb-4 h-12 w-full rounded-xl border border-input bg-background px-3 text-base">
             <option value="">Select a reason</option>
             {ORDER_CANCELLATION_REASONS.map((reason) => <option key={reason} value={reason}>{reason}</option>)}
           </select>
-          <DialogFooter>
-            <Button type="button" variant="outline" disabled={isCancelling} onClick={() => { setOrderToCancel(null); setCancelReason(""); }}>Keep order</Button>
-            <Button type="button" variant="destructive" disabled={isCancelling || !cancelReason} onClick={confirmCancel}>
+          <DialogFooter className="flex-col-reverse space-x-0 sm:flex-row sm:space-x-2">
+            <Button type="button" variant="outline" disabled={isCancelling} onClick={() => { setOrderToCancel(null); setCancelReason(""); }} className="min-h-11 w-full sm:w-auto">Keep order</Button>
+            <Button type="button" variant="destructive" disabled={isCancelling || !cancelReason} onClick={confirmCancel} className="min-h-11 w-full sm:w-auto">
               {isCancelling ? "Cancelling…" : "Cancel order"}
             </Button>
           </DialogFooter>

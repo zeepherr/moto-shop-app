@@ -8,18 +8,21 @@ import { productToCartItem } from "../../utils/cart.util";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
+export interface PosProduct {
+  id: number;
+  sku: string;
+  name: string;
+  sellingPrice: number | string | { toString: () => string };
+  stockQuantity: number;
+  unit?: string | null;
+  imageKey?: string | null;
+  imageUrl?: string | null;
+  productCategoryId?: number | null;
+  productCategory?: { name: string } | null;
+}
+
 interface PosProductCardProps {
-  product: {
-    id: number;
-    sku: string;
-    name: string;
-    sellingPrice: number | string | { toString: () => string };
-    stockQuantity: number;
-    unit?: string | null;
-    imageKey?: string | null;
-    imageUrl?: string | null;
-    productCategory?: { name: string } | null;
-  };
+  product: PosProduct;
 }
 
 export const PosProductCard: React.FC<PosProductCardProps> = ({ product }) => {
@@ -47,12 +50,12 @@ export const PosProductCard: React.FC<PosProductCardProps> = ({ product }) => {
   return (
     <article
       className={cn(
-        "group relative flex min-w-0 flex-col overflow-hidden rounded-2xl border border-border/70 bg-card transition-colors duration-200 ease-out",
+        "group relative flex min-w-0 flex-col overflow-hidden rounded-xl border border-border/70 bg-card transition-colors duration-200 ease-out sm:rounded-2xl",
         !isOutOfStock && "hover:border-primary/30",
         isOutOfStock && "opacity-60",
       )}
     >
-      <div className="relative aspect-4/3 overflow-hidden border-b bg-muted/30 rounded-t-xl">
+      <div className="relative aspect-square overflow-hidden border-b border-border/60 bg-muted/30 sm:aspect-4/3">
         {product.imageUrl ? (
           <img
             src={product.imageUrl}
@@ -62,7 +65,7 @@ export const PosProductCard: React.FC<PosProductCardProps> = ({ product }) => {
             className="h-full w-full object-cover transition-transform duration-200 ease-out group-hover:scale-[1.025]"
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center rounded-xl border border-dashed bg-background/40 text-muted-foreground">
+            <div className="flex h-full w-full items-center justify-center bg-background/40 text-muted-foreground">
             <ImageOff className="size-7 stroke-[1.6]" />
           </div>
         )}
@@ -70,7 +73,7 @@ export const PosProductCard: React.FC<PosProductCardProps> = ({ product }) => {
         {(isLowStock || isOutOfStock) && (
           <span
             className={cn(
-              "absolute right-2.5 top-2.5 rounded-full border px-2 py-1 text-[10px] font-medium backdrop-blur-sm",
+              "absolute right-2 top-2 rounded-full border bg-background/90 px-2 py-1 text-[11px] font-semibold",
               isOutOfStock
                 ? "border-destructive/20 bg-destructive/10 text-destructive"
                 : "border-amber-500/20 bg-amber-500/10 text-amber-600 dark:text-amber-400",
@@ -81,8 +84,8 @@ export const PosProductCard: React.FC<PosProductCardProps> = ({ product }) => {
         )}
       </div>
 
-      <div className="flex flex-1 flex-col p-3.5">
-        <p className="truncate text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+      <div className="flex flex-1 flex-col p-2.5 sm:p-3.5">
+        <p className="truncate text-xs font-medium uppercase tracking-wide text-muted-foreground">
           {product.sku}
         </p>
 
@@ -91,13 +94,13 @@ export const PosProductCard: React.FC<PosProductCardProps> = ({ product }) => {
         </h3>
 
         {product.productCategory?.name && (
-          <p className="mt-1 truncate text-xs text-muted-foreground">
+          <p className="mt-1 hidden truncate text-xs text-muted-foreground sm:block">
             {product.productCategory.name}
           </p>
         )}
 
-        <div className="mt-auto pt-4">
-          <div className="flex items-end justify-between gap-3">
+        <div className="mt-auto pt-3 sm:pt-4">
+          <div className="flex items-end justify-between gap-2">
             <div className="min-w-0">
               <p className="text-lg font-semibold tracking-tight text-foreground">
                 <span className="text-accent">฿ </span>
@@ -107,7 +110,7 @@ export const PosProductCard: React.FC<PosProductCardProps> = ({ product }) => {
                 })}
               </p>
 
-              <div className="mt-1 flex items-center gap-1.5 text-[11px] text-muted-foreground">
+              <div className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
                 <PackageCheck className="size-3.5" />
                 <span>
                   {stock} {product.unit ?? "in stock"}

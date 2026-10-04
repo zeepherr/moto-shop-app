@@ -6,13 +6,15 @@ import { Button } from "@/components/ui/button";
 import { usePosStore } from "../../stores/usePosStore";
 import { serviceToCartItem } from "../../utils/cart.util";
 
+export interface PosService {
+  id: number;
+  name: string;
+  description?: string | null;
+  price: number | string | { toString: () => string };
+}
+
 interface PosServiceCardProps {
-  service: {
-    id: number;
-    name: string;
-    description?: string | null;
-    price: number | string | { toString: () => string };
-  };
+  service: PosService;
 }
 
 export const PosServiceCard: React.FC<PosServiceCardProps> = ({ service }) => {
@@ -25,16 +27,16 @@ export const PosServiceCard: React.FC<PosServiceCardProps> = ({ service }) => {
   };
 
   return (
-    <article className="flex min-h-36 flex-col rounded-xl border border-border/70 bg-card p-3 transition-colors hover:border-primary/40">
+    <article className="flex min-h-40 min-w-0 flex-col rounded-xl border border-border/70 bg-card p-3 transition-colors hover:border-primary/40 sm:rounded-2xl sm:p-3.5">
       <div className="flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
         <Wrench className="size-4" />
       </div>
 
       <div className="mt-3 min-w-0">
-        <h3 className="truncate text-sm font-medium text-foreground">{service.name}</h3>
+        <h3 className="line-clamp-2 text-sm font-semibold leading-5 text-foreground">{service.name}</h3>
 
         {service.description && (
-          <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">
+          <p className="mt-1 line-clamp-2 text-xs leading-5 text-muted-foreground">
             {service.description}
           </p>
         )}

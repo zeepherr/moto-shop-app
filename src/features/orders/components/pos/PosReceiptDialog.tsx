@@ -15,13 +15,13 @@ const money = (amount: number) => `฿${amount.toLocaleString("en-US", { minimum
 export function PosReceiptDialog({ receipt, onOpenChange }: PosReceiptDialogProps) {
   return (
     <Dialog open={receipt !== null} onOpenChange={onOpenChange}>
-      <DialogContent data-pos-modal="true" className="max-h-[calc(100vh-2rem)] overflow-y-auto sm:max-w-lg">
+      <DialogContent data-pos-modal="true" className="max-h-[calc(100dvh-2rem)] overflow-y-auto p-4 sm:max-w-lg sm:p-6">
         <DialogHeader>
           <DialogTitle>Sale completed</DialogTitle>
           <DialogDescription>Review or print the customer receipt.</DialogDescription>
         </DialogHeader>
         {receipt && <>
-          <section id="printable-receipt" aria-label="Completed sale receipt" className="space-y-5 rounded-xl border border-border/70 bg-background p-5 text-foreground">
+          <section id="printable-receipt" aria-label="Completed sale receipt" className="space-y-4 rounded-xl border border-border/70 bg-background p-3 text-foreground sm:space-y-5 sm:p-5">
             <header className="border-b border-border/60 pb-4 text-center">
               <p className="text-lg font-semibold">HrungMoto</p>
               <p className="text-sm text-muted-foreground">Sales receipt</p>
@@ -33,7 +33,7 @@ export function PosReceiptDialog({ receipt, onOpenChange }: PosReceiptDialogProp
               {receipt.vehicleLabel && <p><span className="text-muted-foreground">Motorcycle: </span>{receipt.vehicleLabel}</p>}
               <p><span className="text-muted-foreground">Payment: </span>{receipt.paymentMethod ?? "No payment due"}</p>
             </div>
-            <table className="w-full text-sm">
+            <table className="w-full table-fixed text-xs sm:text-sm">
               <thead><tr className="border-b border-border/60 text-left text-xs text-muted-foreground"><th scope="col" className="py-2">Item</th><th scope="col" className="py-2 text-center">Qty</th><th scope="col" className="py-2 text-right">Amount</th></tr></thead>
               <tbody>{receipt.items.map((item, index) => <tr className="border-b border-border/40" key={`${item.name}-${index}`}><th scope="row" className="py-2 text-left font-normal">{item.name}<span className="block text-xs text-muted-foreground">{money(item.unitPrice)} each</span></th><td className="py-2 text-center tabular-nums">{item.quantity}</td><td className="py-2 text-right tabular-nums">{money(item.lineTotal)}</td></tr>)}</tbody>
             </table>

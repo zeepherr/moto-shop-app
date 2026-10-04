@@ -40,13 +40,22 @@
 
 ## 4. Current Implementation Status (Vault Synchronized)
 
-### A. Global Shell & Surface System (100% Complete)
+### A. Global Shell & Surface System (desktop complete; admin mobile refresh planned)
 - [x] **`AppShell` & Layout**: Responsive container bounded to `max-w-7xl mx-auto` for management screens to eliminate widescreen voids on 1440p/4K monitors.
-- [x] **`AppHeader`**: Compact light/dark adaptive utility bar with role-aware breadcrumbs, mobile navigation, and theme switch.
-- [x] **`AppSidebar`**: Collapsible desktop & mobile drawer with Apple Action Blue active state navigation.
+- [x] **`AppHeader`**: Compact light/dark adaptive utility bar with role-aware breadcrumbs and theme switch.
+- [x] **`AppSidebar`**: Collapsible desktop sidebar with Apple Action Blue active state navigation. The current mobile drawer is the baseline to replace in the admin mobile workstream below.
 - [x] **Sidebar Preference Persistence**: Collapse state is stored in a cookie and applied during server rendering so reloads do not flash or reset the sidebar width.
 - [x] **Sidebar User Profile Menu**: Account control adapts to expanded/collapsed layouts; its viewport-level menu supports hover, click, keyboard dismissal, and session-revoking logout.
 - [x] **Theme Tokens**: Aligned `--primary` to `#0066cc` (light) / `#2997ff` (dark), `--background` to `#f6f8fc` (light) / `#090b13` (dark).
+
+### Active Workstream: Admin Mobile UX (2026-10-04)
+- **Scope/order**: Complete the admin experience first. Staff and member mobile navigation/redesign are deferred to a later phase.
+- [x] **Phase 1 — Admin shell and sidebar/navigation**: Keep the collapsible sidebar at desktop widths (md and above); on mobile remove the admin header and replace the hamburger/drawer with a fixed, safe-area-aware six-slot bottom tab bar for Dashboard, Products, center POS, Users, More, and Settings. More opens the secondary admin destinations (Categories, Motor Brands, Motorcycles, Services, Orders, Revenue) and account actions. Settings opens a theme control. Preserve nested-route active states, apply top/bottom safe-area spacing, and keep POS checkout controls clear of the tab bar.
+- [ ] **Phase 2 — Admin page-by-page mobile redesign**: After the shell is in place, inspect and improve each admin page for mobile use, including Dashboard, Products, Categories, Motor Brands, Motorcycles, Services, Users, Orders, Revenue, and POS. Keep existing desktop behavior and business rules intact while adapting each page's content, controls, tables, and dialogs for small screens.
+  - [x] **POS (`/admin/pos`, shared with `/staff/pos`)**: Add a mobile Browse/Order switch with a live item count; adapt search, catalog filters, product/service cards, customer and vehicle selection, cart quantity controls, payment actions, pending orders, and receipt/cancellation dialogs for touch and narrow screens. Preserve the desktop side-by-side catalog and order layout.
+  - **POS verification**: `npx tsc --noEmit`, focused ESLint on `src/features/orders/components/pos`, and `git diff --check` pass. ESLint reports one existing `<img>` optimization warning in `PosProductCard.tsx`.
+- **Phase 1 verification**: TypeScript and focused ESLint on changed files pass. Repository-wide `npm run lint` reports 18 errors in other files; this shell change adds none. POS cart controls are in normal page flow and remain visible within the padded content area above the persistent bar.
+- **Approved interaction choices**: Keep the bar visible while scrolling and keep it visible on POS. Staff center-button behavior and member navigation are outside this admin-first phase.
 
 ### B. Admin Management Modules
 - [x] **Admin Dashboard (`/admin`) — operational reporting complete**
@@ -175,4 +184,4 @@ src/components/management/
 └── ItemDialog.tsx           # Generic single-field item modal
 ```
 
-*Last Updated*: 2026-10-04 (User Management complete; POS P1 vehicle/QR work and staff activity dashboard added)
+*Last Updated*: 2026-10-04 (Admin mobile shell and POS mobile layout implemented; remaining admin pages next)

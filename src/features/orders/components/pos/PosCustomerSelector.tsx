@@ -66,7 +66,7 @@ export const PosCustomerSelector: React.FC = () => {
   };
 
   return (
-    <div className="border-b border-border/60 p-2.5 lg:p-3">
+    <div className="border-b border-border/60 p-3 sm:p-3.5 lg:p-3">
       {selectedMember ? (
         <div className="space-y-2">
         <div className="flex items-center justify-between gap-3">

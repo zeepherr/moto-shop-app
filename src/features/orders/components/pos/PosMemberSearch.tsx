@@ -23,7 +23,7 @@ export function PosMemberSearch({ searchTerm, members, isSearching, isLoadingMem
           onChange={(event) => onSearchTermChange(event.target.value)}
           placeholder="Search by phone, email, or name..."
           disabled={isLoadingMember}
-          className="h-11 pl-9 text-sm"
+          className="h-12 pl-9 text-base"
         />
       </div>
       {searchTerm.trim().length >= 3 && (
@@ -38,7 +38,7 @@ export function PosMemberSearch({ searchTerm, members, isSearching, isLoadingMem
                 key={member.id}
                 type="button"
                 onClick={() => onSelect(member)}
-                className="flex w-full items-center justify-between gap-3 border-b border-border/40 px-3 py-2 text-left transition-colors last:border-b-0 hover:bg-muted"
+                className="flex min-h-12 w-full items-center justify-between gap-3 border-b border-border/40 px-3 py-2.5 text-left transition-colors last:border-b-0 hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 <span className="min-w-0">
                   <span className="block truncate text-sm font-medium">{member.firstName} {member.lastName}</span>

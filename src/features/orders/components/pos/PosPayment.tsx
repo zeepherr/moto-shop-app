@@ -30,13 +30,13 @@ export const PosPayment: React.FC<PosPaymentProps> = ({
   isPaymentRequired = true,
 }) => {
   return (
-    <div className="border-b border-border/60 px-3 py-2 lg:px-4">
+    <div className="border-b border-border/60 px-3 py-3 lg:px-4 lg:py-2">
       {!isPaymentRequired ? (
         <p className="rounded-lg bg-muted/50 px-3 py-3 text-sm font-medium text-foreground">No payment due after the product discount.</p>
       ) : <>
       <div className="mb-2 flex items-center justify-between">
-        <p className="text-xs font-medium text-foreground">Payment Method</p>
-        <p className="text-[11px] text-muted-foreground">Select method</p>
+        <p className="text-sm font-semibold text-foreground">Payment method</p>
+        <p className="text-xs text-muted-foreground">Choose one</p>
       </div>
 
       <div className="grid grid-cols-2 gap-2">
@@ -45,7 +45,7 @@ export const PosPayment: React.FC<PosPaymentProps> = ({
           size="sm"
           variant={paymentMethod === PaymentMethod.CASH ? "default" : "outline"}
           onClick={() => setPaymentMethod(PaymentMethod.CASH)}
-          className="h-11 cursor-pointer gap-2"
+          className="h-12 cursor-pointer gap-2 text-sm"
         >
           <Banknote className="size-4" />
           Cash
@@ -59,7 +59,7 @@ export const PosPayment: React.FC<PosPaymentProps> = ({
             setPaymentMethod(PaymentMethod.QR);
             setReceivedAmount("");
           }}
-          className="h-11 cursor-pointer gap-2"
+          className="h-12 cursor-pointer gap-2 text-sm"
         >
           <QrCode className="size-4" />
           QR PromptPay
@@ -69,8 +69,8 @@ export const PosPayment: React.FC<PosPaymentProps> = ({
       {paymentMethod === PaymentMethod.CASH && (
         <div className="mt-2.5 flex items-end gap-3">
           <div className="min-w-0 flex-1">
-            <label className="mb-1 block text-[11px] font-medium text-muted-foreground">
-              Received (฿)
+            <label className="mb-1 block text-xs font-medium text-muted-foreground">
+              Received amount (฿)
             </label>
             <Input
               type="number"
@@ -78,13 +78,13 @@ export const PosPayment: React.FC<PosPaymentProps> = ({
               value={receivedAmount}
               onChange={(e) => setReceivedAmount(e.target.value)}
               placeholder="0"
-              className="h-11 text-sm"
+              className="h-12 text-base"
             />
           </div>
 
           <div className="shrink-0 pb-1 text-right">
-            <p className="text-[11px] text-muted-foreground">Change</p>
-            <p className="text-base font-semibold text-primary">
+            <p className="text-xs text-muted-foreground">Change</p>
+            <p className="text-base font-semibold tabular-nums text-primary">
               ฿{changeAmount.toLocaleString()}
             </p>
           </div>
@@ -101,7 +101,7 @@ export const PosPayment: React.FC<PosPaymentProps> = ({
             type="button"
             variant={isQrPaymentConfirmed ? "default" : "outline"}
             onClick={() => onQrPaymentConfirmationChange(!isQrPaymentConfirmed)}
-            className="h-11 w-full gap-2"
+            className="h-12 w-full gap-2 text-sm"
           >
             <CheckCircle2 className="size-4" />
             {isQrPaymentConfirmed ? "Payment received" : "Confirm payment received"}

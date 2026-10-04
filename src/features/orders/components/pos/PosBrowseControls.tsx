@@ -28,8 +28,8 @@ export const PosBrowseControls: React.FC<PosBrowseControlsProps> = ({
   };
 
   return (
-    <div className="flex shrink-0 items-center gap-2">
-      <div className="min-w-0 flex-1">
+    <div className="flex shrink-0 flex-col gap-2 sm:flex-row sm:items-center sm:gap-2">
+      <div className="order-last min-w-0 sm:order-first sm:flex-1">
         {mode === "PRODUCT" && (
           <PosCategories
             categories={categories}
@@ -40,7 +40,7 @@ export const PosBrowseControls: React.FC<PosBrowseControlsProps> = ({
         )}
       </div>
 
-      <div className="shrink-0 flex">
+      <div className="order-first flex w-full shrink-0 sm:order-last sm:w-auto">
         <PosModeSwitch mode={mode} onModeChange={handleModeChange} />
       </div>
     </div>

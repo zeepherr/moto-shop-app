@@ -4,11 +4,13 @@ import React, { useState } from "react";
 import { PosSearch } from "./PosSearch";
 import { PosBrowseControls } from "./PosBrowseControls";
 import { PosItemGrid } from "./PosItemGrid";
+import type { PosProduct } from "./PosProductCard";
+import type { PosService } from "./PosServiceCard";
 
 interface PosWorkspaceProps {
   categories: Array<{ id: number; name: string }>;
-  products: Array<any>;
-  services: Array<any>;
+  products: PosProduct[];
+  services: PosService[];
 }
 
 export const PosWorkspace: React.FC<PosWorkspaceProps> = ({
@@ -21,7 +23,7 @@ export const PosWorkspace: React.FC<PosWorkspaceProps> = ({
   const [selectedCategory, setSelectedCategory] = useState("all");
 
   return (
-    <main className="flex min-w-0 flex-col gap-3 lg:h-full lg:min-h-0 lg:gap-4 sm:mt-4 mt-1.5">
+    <section aria-label="Product and service catalog" className="mt-0 flex min-w-0 flex-col gap-3 sm:mt-4 lg:h-full lg:min-h-0 lg:gap-4">
       <PosSearch
         searchTerm={searchTerm}
         onSearchChange={setSearchTerm}
@@ -43,6 +45,6 @@ export const PosWorkspace: React.FC<PosWorkspaceProps> = ({
         products={products}
         services={services}
       />
-    </main>
+    </section>
   );
 };

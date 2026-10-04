@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Barcode, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { usePosStore } from "../../stores/usePosStore";
@@ -28,6 +28,18 @@ export const PosSearch: React.FC<PosSearchProps> = ({
   const addItem = usePosStore((store) => store.addItem);
   const [sku, setSku] = useState("");
   const skuRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const focusScanner = (event: KeyboardEvent) => {
+      if (event.key !== "F2" || event.repeat || event.defaultPrevented) return;
+      const target = event.target;
+      if (target instanceof HTMLElement && (target.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName))) return;
+      event.preventDefault();
+      skuRef.current?.focus();
+    };
+    window.addEventListener("keydown", focusScanner);
+    return () => window.removeEventListener("keydown", focusScanner);
+  }, []);
 
   const handleSkuSubmit = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key !== "Enter") return;
@@ -67,7 +79,8 @@ export const PosSearch: React.FC<PosSearchProps> = ({
           value={searchTerm}
           onChange={(e) => onSearchChange(e.target.value)}
           placeholder="Search products or services..."
-          className="h-10 rounded-xl border border-input bg-card pl-9 text-sm text-foreground placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-primary shadow-xs"
+          aria-label="Search products or services"
+          className="h-11 rounded-xl border border-input bg-card pl-9 text-sm text-foreground placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-primary shadow-xs"
         />
       </div>
 
@@ -79,8 +92,10 @@ export const PosSearch: React.FC<PosSearchProps> = ({
           onChange={(e) => setSku(e.target.value)}
           onKeyDown={handleSkuSubmit}
           placeholder="Scan or enter SKU (press Enter)"
+          aria-label="Scan or enter product SKU; press F2 to focus this field"
+          aria-keyshortcuts="F2"
           autoComplete="off"
-          className="h-10 rounded-xl border border-input bg-card pl-9 text-sm text-foreground placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-primary shadow-xs"
+          className="h-11 rounded-xl border border-input bg-card pl-9 text-sm text-foreground placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-primary shadow-xs"
         />
       </div>
     </section>

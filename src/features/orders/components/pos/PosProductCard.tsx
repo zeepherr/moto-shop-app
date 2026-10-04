@@ -44,25 +44,12 @@ export const PosProductCard: React.FC<PosProductCardProps> = ({ product }) => {
     }
   };
 
-  const handleKeyDown = (event: React.KeyboardEvent) => {
-    if (isOutOfStock) return;
-    if (event.key === "Enter" || event.key === " ") {
-      event.preventDefault();
-      handleAddProduct();
-    }
-  };
-
   return (
     <article
-      role="button"
-      tabIndex={isOutOfStock ? -1 : 0}
-      aria-disabled={isOutOfStock}
-      onClick={handleAddProduct}
-      onKeyDown={handleKeyDown}
       className={cn(
-        "group relative flex min-w-0 flex-col overflow-hidden rounded-2xl border border-border/70 bg-card outline-none transition-all duration-200 ease-out focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-        !isOutOfStock && "cursor-pointer hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-md hover:shadow-black/5 dark:hover:shadow-black/20",
-        isOutOfStock && "cursor-not-allowed opacity-60",
+        "group relative flex min-w-0 flex-col overflow-hidden rounded-2xl border border-border/70 bg-card transition-colors duration-200 ease-out",
+        !isOutOfStock && "hover:border-primary/30",
+        isOutOfStock && "opacity-60",
       )}
     >
       <div className="relative aspect-4/3 overflow-hidden border-b bg-muted/30 rounded-t-xl">
@@ -132,11 +119,8 @@ export const PosProductCard: React.FC<PosProductCardProps> = ({ product }) => {
               type="button"
               size="icon"
               disabled={isOutOfStock}
-              onClick={(event) => {
-                event.stopPropagation();
-                handleAddProduct();
-              }}
-              className="size-9 shrink-0 cursor-pointer rounded-xl shadow-xs"
+              onClick={handleAddProduct}
+              className="size-11 shrink-0 cursor-pointer rounded-xl shadow-xs"
               aria-label={`Add ${product.name} to cart`}
             >
               <Plus className="size-4" />

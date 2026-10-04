@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Clock3, Loader2 } from "lucide-react";
+import { Clock3, Loader2, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { getPendingOrdersAction } from "../../actions/order-query.actions";
 import type { OrderDTO } from "../../types";
 
@@ -18,6 +19,7 @@ export const PendingOrders: React.FC<PendingOrdersProps> = ({
   const [orders, setOrders] = useState<OrderDTO[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     let mounted = true;
@@ -71,9 +73,20 @@ export const PendingOrders: React.FC<PendingOrdersProps> = ({
     );
   }
 
+  const term = search.trim().toLowerCase();
+  const filteredOrders = orders.filter((order) => {
+    const customer = order.member ? `${order.member.firstName} ${order.member.lastName}` : "guest customer";
+    return !term || `${order.orderNumber} ${order.id} ${customer}`.toLowerCase().includes(term);
+  });
+
   return (
-    <div className="space-y-2">
-      {orders.map((order) => (
+    <div className="space-y-3">
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+        <Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Filter by order or customer..." className="h-11 pl-9 text-sm" />
+      </div>
+      <p className="text-xs text-muted-foreground">Most recent {orders.length === 50 ? "50" : orders.length} pending tickets</p>
+      {filteredOrders.length ? filteredOrders.map((order) => (
         <Button
           key={order.id}
           type="button"
@@ -109,7 +122,7 @@ export const PendingOrders: React.FC<PendingOrdersProps> = ({
             )}
           </div>
         </Button>
-      ))}
+      )) : <p className="py-6 text-center text-sm text-muted-foreground">No pending tickets match that search.</p>}
     </div>
   );
 };

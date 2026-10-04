@@ -32,6 +32,7 @@ type OrderForClient = {
     quantity: number;
     unitPrice: { toString: () => string } | number;
     lineTotal: { toString: () => string } | number;
+    product?: { stockQuantity: number; isActive: boolean } | null;
   }>;
 };
 
@@ -70,6 +71,7 @@ const serializeOrder = (order: OrderForClient) => ({
     quantity: item.quantity,
     unitPrice: Number(item.unitPrice),
     lineTotal: Number(item.lineTotal),
+    availableStock: item.product ? (item.product.isActive ? item.product.stockQuantity : 0) : null,
   })),
 });
 

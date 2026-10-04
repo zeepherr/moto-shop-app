@@ -34,7 +34,7 @@ export const PosCartActions: React.FC<PosCartActionsProps> = ({
             variant="outline"
             disabled={!hasItems || isPending}
             onClick={onHold}
-            className="gap-2 cursor-pointer h-9 px-3"
+            className="gap-2 cursor-pointer h-11 px-3"
           >
             <Save className="size-4" />
             Update
@@ -45,7 +45,7 @@ export const PosCartActions: React.FC<PosCartActionsProps> = ({
             variant="outline"
             disabled={!hasItems || isPending}
             onClick={onHold}
-            className="gap-2 cursor-pointer h-9 px-3"
+            className="gap-2 cursor-pointer h-11 px-3"
           >
             <Pause className="size-4" />
             Hold
@@ -58,7 +58,7 @@ export const PosCartActions: React.FC<PosCartActionsProps> = ({
           disabled={!hasItems || isPending}
           onClick={isEditingPending ? onCancel : onClear}
           title={isEditingPending ? "Cancel order" : "Clear order"}
-          className="size-9 p-0 text-destructive hover:text-destructive hover:bg-destructive/10 cursor-pointer"
+          className="size-11 p-0 text-destructive hover:text-destructive hover:bg-destructive/10 cursor-pointer"
         >
           {isEditingPending ? (
             <XCircle className="size-4" />
@@ -71,7 +71,7 @@ export const PosCartActions: React.FC<PosCartActionsProps> = ({
           type="button"
           disabled={!canComplete || isPending}
           onClick={onComplete}
-          className="w-full cursor-pointer h-9 gap-2"
+          className="w-full cursor-pointer h-11 gap-2"
         >
           <CheckCircle2 className="size-4" />
           {isPending ? "Processing..." : isEditingPending ? "Complete sale" : "Checkout order"}

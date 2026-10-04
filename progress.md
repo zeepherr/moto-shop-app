@@ -49,7 +49,7 @@
 - [x] **Theme Tokens**: Aligned `--primary` to `#0066cc` (light) / `#2997ff` (dark), `--background` to `#f6f8fc` (light) / `#090b13` (dark).
 
 ### B. Admin Management Modules
-- [ ] **Admin Dashboard (`/admin`) — operational expansion in progress**
+- [x] **Admin Dashboard (`/admin`) — operational reporting complete**
   - [x] Baseline: real-data metric cards, recent transactions, inventory alerts, revenue and completed-order drilldowns.
   - [x] Detail reports: `/admin/revenue` supports Today / Week / Month / Year; `/admin/orders` supports operational filters and order details.
   - [x] Revenue terminology correction: the detail report presents costs and estimated profits, including estimated gross margin; service sales are labeled as service revenue rather than labor cost/revenue.
@@ -59,9 +59,10 @@
   - [x] Milestone 4: current-month product/service sales mix and Cash/QR payment overview use completed-order data.
   - [x] Milestone 5: current-month best-selling products and services are ranked by revenue with quantity context.
   - [x] Milestone 6: dashboard Revenue Analytics supports 7D/30D/90D/1Y using a 365-day query window. The revenue detail page supports Today / Week / Month / Year.
+  - [x] Milestone 7: Staff Activity reports current-month completed orders, handled revenue, and average order for current staff, grouped by the recorded order handler.
   - [x] Validation: TypeScript, targeted ESLint, `impeccable detect src` (0 anti-patterns), and `git diff --check`.
   - **Data boundaries**: do not display exact labor cost, historical product COGS, appointments, suppliers, stock movement, configurable reorder points, or real shop-open state until those facts are recorded in the schema.
-  - **Deferred**: staff activity analytics (orders, handled revenue, average order) can follow after the operational dashboard milestones above.
+  - **Reporting boundary**: staff activity only uses completed orders with a recorded handler and includes users whose current role is Staff.
 - [x] **Motorcycle Brands (`/admin/motor-brands`)**:
   - `MotorBrandStats`: Total Brands, Active Brands, Models Linked.
   - `DockedTableCard` & `MotorBrandTable`: Monogram avatars, models registered count, status badges, edit/status/delete modals.
@@ -123,13 +124,14 @@
      - [x] P0: Restrict every POS server action to ADMIN or STAFF. Route middleware is not sufficient protection for direct server-action calls.
      - [x] P0: Resume, update, and checkout operations must require the target order to still be PENDING, using an atomic status-aware update. The current ID-only updates can modify a completed order after a stale or malicious resume request.
      - [x] P0: Replace the full member include in order retrieval with an explicit safe selection, and build a DTO without spreading the Prisma record. The current serializer can expose member fields that the POS does not need.
-     - [ ] P1: Add vehicle selection after a member is chosen. The schema supports motorId, but the POS never sends it; service work cannot be reliably tied to a motorcycle.
-     - [ ] P1: Add QR payment confirmation and a receipt/printable completed-sale result. Selecting QR currently permits immediate completion without a cashier confirmation step.
+     - [x] P1: Add vehicle selection after a member is chosen. The POS carries the selected registered motorcycle through held orders and checkout, with server-side ownership validation.
+     - [x] P1: Add cashier QR payment confirmation and a printable completed-sale receipt. Checkout now requires an explicit payment-received confirmation when QR is selected.
      - [ ] P1: Add confirmation and a reason for cancelling held orders, plus ownership or concurrency protection for pending tickets used by multiple staff.
-     - [ ] P2: Revalidate product availability when resuming a held ticket, then cap cart quantities by current stock before checkout.
+     - [x] P2: Revalidate product availability when resuming a held ticket, then cap cart quantities by current stock before checkout. Checkout still rechecks stock transactionally.
      - [ ] P2: Add discounts only with an approved role/approval rule; discount fields already exist in the schema but the POS has no controlled discount flow.
-     - [ ] P2: Improve POS keyboard and touch operation: scanner autofocus/shortcut, 44px minimum touch targets, semantic product/service add controls, and no nested interactive elements.
-     - [ ] P2: Add a bounded/filterable pending-ticket list and accessible chart-free text alternatives where required.
+     - [x] P2: Improve POS keyboard and touch operation: F2 scanner focus, 44px control targets, semantic product/service add buttons, and no nested interactive elements.
+     - [x] P2: Bound the pending-ticket query to the 50 newest tickets and add search by order number or customer.
+     - [ ] P2: Add accessible chart-free text alternatives where required.
    - Polish receipt printing/preview modal, scanner autofocus behavior, and hold-order drawer after the hardening items above.
 3. **Automated Testing & Deployment Preparation**:
    - Vitest / Playwright test scaffolding.
@@ -173,4 +175,4 @@ src/components/management/
 └── ItemDialog.tsx           # Generic single-field item modal
 ```
 
-*Last Updated*: 2026-10-04 (confirmed professional User Management redesign plan)
+*Last Updated*: 2026-10-04 (User Management complete; POS P1 vehicle/QR work and staff activity dashboard added)

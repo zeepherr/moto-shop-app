@@ -10,6 +10,7 @@ import { TodayOperations } from "@/features/dashboard/components/TodayOperations
 import { DashboardActionCenter } from "@/features/dashboard/components/DashboardActionCenter";
 import { DashboardSalesOverview } from "@/features/dashboard/components/DashboardSalesOverview";
 import { BestSellers } from "@/features/dashboard/components/BestSellers";
+import { StaffActivity } from "@/features/dashboard/components/StaffActivity";
 import { ManagementLayout } from "@/components/management/ManagementLayout";
 import { DollarSign, ShoppingBag, AlertTriangle, Users } from "lucide-react";
 
@@ -101,6 +102,8 @@ export default async function AdminDashboardPage() {
         />
         <BestSellers products={summary.bestSellers.products} services={summary.bestSellers.services} />
       </div>
+
+      <StaffActivity items={summary.staffActivity} />
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2">

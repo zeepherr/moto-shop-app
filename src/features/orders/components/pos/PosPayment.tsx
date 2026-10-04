@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Banknote, QrCode } from "lucide-react";
+import { Banknote, CheckCircle2, QrCode } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PaymentMethod } from "@prisma/client";
@@ -13,6 +13,8 @@ interface PosPaymentProps {
   setReceivedAmount: (amount: string) => void;
   subtotal: number;
   changeAmount: number;
+  isQrPaymentConfirmed: boolean;
+  onQrPaymentConfirmationChange: (confirmed: boolean) => void;
 }
 
 export const PosPayment: React.FC<PosPaymentProps> = ({
@@ -22,6 +24,8 @@ export const PosPayment: React.FC<PosPaymentProps> = ({
   setReceivedAmount,
   subtotal,
   changeAmount,
+  isQrPaymentConfirmed,
+  onQrPaymentConfirmationChange,
 }) => {
   return (
     <div className="border-b border-border/60 px-3 py-2 lg:px-4">
@@ -36,7 +40,7 @@ export const PosPayment: React.FC<PosPaymentProps> = ({
           size="sm"
           variant={paymentMethod === PaymentMethod.CASH ? "default" : "outline"}
           onClick={() => setPaymentMethod(PaymentMethod.CASH)}
-          className="h-8 cursor-pointer gap-2"
+          className="h-11 cursor-pointer gap-2"
         >
           <Banknote className="size-4" />
           Cash
@@ -50,7 +54,7 @@ export const PosPayment: React.FC<PosPaymentProps> = ({
             setPaymentMethod(PaymentMethod.QR);
             setReceivedAmount("");
           }}
-          className="h-8 cursor-pointer gap-2"
+          className="h-11 cursor-pointer gap-2"
         >
           <QrCode className="size-4" />
           QR PromptPay
@@ -69,7 +73,7 @@ export const PosPayment: React.FC<PosPaymentProps> = ({
               value={receivedAmount}
               onChange={(e) => setReceivedAmount(e.target.value)}
               placeholder="0"
-              className="h-8 text-sm"
+              className="h-11 text-sm"
             />
           </div>
 
@@ -83,11 +87,20 @@ export const PosPayment: React.FC<PosPaymentProps> = ({
       )}
 
       {paymentMethod === PaymentMethod.QR && (
-        <div className="mt-2.5 flex items-center justify-between rounded-lg bg-muted/50 px-3 py-2">
-          <span className="text-xs text-muted-foreground">Scan QR to pay</span>
-          <span className="text-sm font-semibold text-foreground">
-            ฿{subtotal.toLocaleString()}
-          </span>
+        <div className="mt-2.5 space-y-2 rounded-lg bg-muted/50 px-3 py-2.5">
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-xs text-muted-foreground">Verify the transfer in your payment app</span>
+            <span className="shrink-0 text-sm font-semibold text-foreground">฿{subtotal.toLocaleString()}</span>
+          </div>
+          <Button
+            type="button"
+            variant={isQrPaymentConfirmed ? "default" : "outline"}
+            onClick={() => onQrPaymentConfirmationChange(!isQrPaymentConfirmed)}
+            className="h-11 w-full gap-2"
+          >
+            <CheckCircle2 className="size-4" />
+            {isQrPaymentConfirmed ? "Payment received" : "Confirm payment received"}
+          </Button>
         </div>
       )}
     </div>

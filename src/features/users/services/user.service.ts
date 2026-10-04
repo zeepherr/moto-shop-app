@@ -28,8 +28,8 @@ export const searchMembers = async (query: string, limit = 10, db = defaultDb) =
 };
 
 export const findMemberById = async (id: number, db = defaultDb) => {
-  return await db.user.findUnique({
-    where: { id },
+  const member = await db.user.findFirst({
+    where: { id, role: UserRole.MEMBER },
     select: {
       id: true,
       firstName: true,
@@ -37,14 +37,26 @@ export const findMemberById = async (id: number, db = defaultDb) => {
       email: true,
       phone: true,
       userMotors: {
-        include: {
+        select: {
           motor: {
-            include: { motorBrand: true },
+            select: { id: true, model: true, motorBrand: { select: { name: true } } },
           },
         },
       },
     },
   });
+  if (!member) return null;
+  return {
+    id: member.id,
+    firstName: member.firstName,
+    lastName: member.lastName,
+    email: member.email,
+    phone: member.phone,
+    vehicles: member.userMotors.map(({ motor }) => ({
+      id: motor.id,
+      label: `${motor.motorBrand.name} ${motor.model}`,
+    })),
+  };
 };
 
 export const findAllUsers = async (db = defaultDb) => {

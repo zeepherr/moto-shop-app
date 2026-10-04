@@ -24,15 +24,34 @@ export const checkoutOrderAction = async (input: CheckoutOrderInput) => {
   }
 
   try {
-    await executeCheckoutTx({
+    const order = await executeCheckoutTx({
       ...parsed.data,
       handledById: user.id,
     });
+    if (!order) throw new Error("Completed order could not be loaded");
 
     revalidatePath("/admin/pos");
     revalidatePath("/staff/pos");
     revalidatePath("/admin/products");
-    return { success: true };
+    return {
+      success: true,
+      data: {
+        orderNumber: order.orderNumber,
+        completedAt: order.completedAt?.toISOString() ?? new Date().toISOString(),
+        customerName: order.member ? `${order.member.firstName} ${order.member.lastName}`.trim() : "Guest customer",
+        vehicleLabel: order.motor ? `${order.motor.motorBrand.name} ${order.motor.model}` : null,
+        paymentMethod: order.paymentMethod,
+        items: order.orderItems.map((item) => ({
+          name: item.itemNameSnapshot,
+          quantity: item.quantity,
+          unitPrice: Number(item.unitPrice),
+          lineTotal: Number(item.lineTotal),
+        })),
+        subtotal: Number(order.subtotal),
+        total: Number(order.finalTotal),
+        receivedAmount: Number(order.receivedAmount ?? order.finalTotal),
+      },
+    };
   } catch (err: unknown) {
     return { success: false, error: (err as Error).message || "Checkout failed" };
   }

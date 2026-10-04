@@ -25,10 +25,7 @@ export const PosServiceCard: React.FC<PosServiceCardProps> = ({ service }) => {
   };
 
   return (
-    <article
-      onClick={handleAddService}
-      className="flex min-h-36 flex-col rounded-xl border border-border/70 bg-card p-3 transition-colors hover:border-primary/40 cursor-pointer"
-    >
+    <article className="flex min-h-36 flex-col rounded-xl border border-border/70 bg-card p-3 transition-colors hover:border-primary/40">
       <div className="flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
         <Wrench className="size-4" />
       </div>
@@ -51,11 +48,9 @@ export const PosServiceCard: React.FC<PosServiceCardProps> = ({ service }) => {
         <Button
           type="button"
           size="sm"
-          className="size-8 p-0 shrink-0 cursor-pointer"
-          onClick={(e) => {
-            e.stopPropagation();
-            handleAddService();
-          }}
+          className="size-11 shrink-0 cursor-pointer rounded-xl"
+          onClick={handleAddService}
+          aria-label={`Add ${service.name} to cart`}
         >
           <Plus className="size-4" />
         </Button>

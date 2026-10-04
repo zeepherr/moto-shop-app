@@ -1,4 +1,4 @@
-import { OrderItemType, PaymentMethod, CustomerType } from "@prisma/client";
+import { OrderItemType, PaymentMethod } from "@prisma/client";
 import type { PosCartItem, SelectedMember } from "../types";
 import type { CheckoutOrderInput, HoldOrderInput } from "../schemas";
 
@@ -43,22 +43,25 @@ export const serviceToCartItem = (service: {
 export const buildCheckoutPayload = ({
   cartItems,
   selectedMember,
+  selectedMotorId,
   paymentMethod,
   receivedAmount,
   pendingOrderId,
 }: {
   cartItems: PosCartItem[];
   selectedMember?: SelectedMember | null;
+  selectedMotorId?: number | null;
   paymentMethod: PaymentMethod;
   receivedAmount: number;
   pendingOrderId?: number | null;
 }): CheckoutOrderInput => {
   return {
     memberId: selectedMember?.id ?? null,
+    motorId: selectedMember ? selectedMotorId ?? null : null,
     paymentMethod,
     receivedAmount,
     pendingOrderId: pendingOrderId ?? null,
-    items: cartItems.map((item) => ({
+    items: cartItems.filter((item) => item.quantity > 0).map((item) => ({
       itemType: item.itemType,
       productId: item.itemType === OrderItemType.PRODUCT ? item.id : null,
       serviceId: item.itemType === OrderItemType.SERVICE ? item.id : null,
@@ -70,16 +73,19 @@ export const buildCheckoutPayload = ({
 export const buildHoldPayload = ({
   cartItems,
   selectedMember,
+  selectedMotorId,
   pendingOrderId,
 }: {
   cartItems: PosCartItem[];
   selectedMember?: SelectedMember | null;
+  selectedMotorId?: number | null;
   pendingOrderId?: number | null;
 }): HoldOrderInput => {
   return {
     orderId: pendingOrderId ?? null,
     memberId: selectedMember?.id ?? null,
-    items: cartItems.map((item) => ({
+    motorId: selectedMember ? selectedMotorId ?? null : null,
+    items: cartItems.filter((item) => item.quantity > 0).map((item) => ({
       itemType: item.itemType,
       productId: item.itemType === OrderItemType.PRODUCT ? item.id : null,
       serviceId: item.itemType === OrderItemType.SERVICE ? item.id : null,
@@ -96,19 +102,22 @@ export const pendingOrderToCartItems = (
     itemNameSnapshot: string;
     unitPrice: number | string | { toString: () => string };
     quantity: number;
+    availableStock?: number | null;
   }> = [],
 ): PosCartItem[] => {
   return orderItems.map((item) => {
     const id = item.itemType === OrderItemType.PRODUCT ? item.productId! : item.serviceId!;
     const price = Number(item.unitPrice);
+    const availableStock = item.itemType === OrderItemType.PRODUCT ? item.availableStock ?? null : null;
     return {
       id,
       itemType: item.itemType,
       name: item.itemNameSnapshot,
       price,
       unitPrice: price,
-      quantity: item.quantity,
-      maxQuantity: null,
+      quantity: availableStock === null ? item.quantity : Math.min(item.quantity, availableStock),
+      maxQuantity: availableStock,
+      stockLimited: availableStock !== null && availableStock < item.quantity,
     };
   });
 };

@@ -4,6 +4,7 @@ import type { PosCartItem, SelectedMember } from "../types";
 interface PosState {
   cartItems: PosCartItem[];
   selectedMember: SelectedMember | null;
+  selectedMotorId: number | null;
   pendingOrderId: number | null;
 
   setCartItems: (items: PosCartItem[]) => void;
@@ -14,6 +15,7 @@ interface PosState {
   clearCart: () => void;
 
   setSelectedMember: (member: SelectedMember | null) => void;
+  setSelectedMotorId: (motorId: number | null) => void;
   setPendingOrderId: (orderId: number | null) => void;
   resetOrder: () => void;
 }
@@ -21,6 +23,7 @@ interface PosState {
 export const usePosStore = create<PosState>((set, get) => ({
   cartItems: [],
   selectedMember: null,
+  selectedMotorId: null,
   pendingOrderId: null,
 
   setCartItems: (items) => set({ cartItems: items }),
@@ -89,7 +92,9 @@ export const usePosStore = create<PosState>((set, get) => ({
 
   clearCart: () => set({ cartItems: [] }),
 
-  setSelectedMember: (member) => set({ selectedMember: member }),
+  setSelectedMember: (member) => set({ selectedMember: member, selectedMotorId: null }),
+
+  setSelectedMotorId: (motorId) => set({ selectedMotorId: motorId }),
 
   setPendingOrderId: (orderId) => set({ pendingOrderId: orderId }),
 
@@ -97,6 +102,7 @@ export const usePosStore = create<PosState>((set, get) => ({
     set({
       cartItems: [],
       selectedMember: null,
+      selectedMotorId: null,
       pendingOrderId: null,
     }),
 }));

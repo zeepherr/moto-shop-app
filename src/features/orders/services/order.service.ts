@@ -23,9 +23,21 @@ async function lockPendingOrder(
   }
 }
 
+async function assertMemberOwnsMotor(
+  tx: Prisma.TransactionClient,
+  memberId: number | null | undefined,
+  motorId: number | null | undefined,
+) {
+  if (motorId == null) return;
+  if (memberId == null) throw new Error("Select a customer before attaching a motorcycle");
+  const association = await tx.userMotor.findFirst({ where: { userId: memberId, motorId } });
+  if (!association) throw new Error("Selected motorcycle is not registered to this customer");
+}
+
 export const findPendingOrders = async (db = defaultDb) => {
   return await db.order.findMany({
     where: { status: OrderStatus.PENDING },
+    take: 50,
     include: {
       orderItems: true,
       member: {
@@ -46,7 +58,7 @@ export const findOrderById = async (id: number, db = defaultDb) => {
   return await db.order.findFirst({
     where: { id, status: OrderStatus.PENDING },
     include: {
-      orderItems: true,
+      orderItems: { include: { product: { select: { stockQuantity: true, isActive: true } } } },
       member: {
         select: {
           id: true,
@@ -59,6 +71,12 @@ export const findOrderById = async (id: number, db = defaultDb) => {
     },
   });
 };
+
+const checkoutReceiptInclude = {
+  orderItems: true,
+  member: { select: { firstName: true, lastName: true } },
+  motor: { select: { model: true, motorBrand: { select: { name: true } } } },
+} satisfies Prisma.OrderInclude;
 
 export const cancelPendingOrder = async (id: number, db = defaultDb) => {
   return await db.order.updateMany({
@@ -78,6 +96,7 @@ export const holdPendingOrder = async (
   db = defaultDb,
 ) => {
   return await db.$transaction(async (tx) => {
+    await assertMemberOwnsMotor(tx, data.memberId, data.motorId);
     let subtotal = 0;
     const preparedItems = [];
 
@@ -167,6 +186,7 @@ export const executeCheckoutTx = async (
   db = defaultDb,
 ) => {
   return await db.$transaction(async (tx) => {
+    await assertMemberOwnsMotor(tx, data.memberId, data.motorId);
     if (data.pendingOrderId) {
       await lockPendingOrder(tx, data.pendingOrderId, true);
     }
@@ -183,11 +203,13 @@ export const executeCheckoutTx = async (
           throw new Error(`Insufficient stock for "${prod.name}" (Available: ${prod.stockQuantity})`);
         }
 
-        // Deduct stock atomically
-        await tx.product.update({
-          where: { id: prod.id },
+        const stockUpdated = await tx.product.updateMany({
+          where: { id: prod.id, isActive: true, stockQuantity: { gte: item.quantity } },
           data: { stockQuantity: { decrement: item.quantity } },
         });
+        if (stockUpdated.count === 0) {
+          throw new Error(`Insufficient stock for "${prod.name}" (Available: ${prod.stockQuantity})`);
+        }
 
         const price = Number(prod.sellingPrice);
         subtotal += price * item.quantity;
@@ -230,6 +252,9 @@ export const executeCheckoutTx = async (
           paymentMethod: data.paymentMethod,
           receivedAmount: data.receivedAmount,
           completedAt: new Date(),
+          memberId: data.memberId,
+          motorId: data.motorId,
+          customerType,
           subtotal,
           finalTotal: subtotal,
           orderItems: {
@@ -240,7 +265,7 @@ export const executeCheckoutTx = async (
       });
       return await tx.order.findUnique({
         where: { id: data.pendingOrderId },
-        include: { orderItems: true },
+        include: checkoutReceiptInclude,
       });
     }
 
@@ -262,7 +287,7 @@ export const executeCheckoutTx = async (
           create: preparedItems,
         },
       },
-      include: { orderItems: true },
+      include: checkoutReceiptInclude,
     });
   });
 };

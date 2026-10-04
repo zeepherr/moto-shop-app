@@ -29,9 +29,13 @@ export const getMemberByIdAction = async (id: number) => {
   if (!user || (user.role !== ROLES.ADMIN && user.role !== ROLES.STAFF)) {
     return { success: false, error: "Unauthorized" };
   }
+  if (!Number.isSafeInteger(id) || id <= 0) {
+    return { success: false, error: "Invalid member" };
+  }
 
   try {
     const member = await findMemberById(id);
+    if (!member) return { success: false, error: "Member not found" };
     return { success: true, data: member };
   } catch (err: unknown) {
     return { success: false, error: (err as Error).message || "Failed to get member" };

@@ -27,6 +27,7 @@ export const PosCartItem: React.FC<PosCartItemProps> = ({ item }) => {
             <p className="text-[11px] uppercase tracking-wider text-muted-foreground">
               {item.itemType}
             </p>
+            {item.stockLimited && <p className="mt-1 text-xs font-medium text-destructive">Stock changed · adjusted to available quantity</p>}
           </div>
 
           <p className="shrink-0 text-sm font-semibold text-foreground">
@@ -45,12 +46,13 @@ export const PosCartItem: React.FC<PosCartItemProps> = ({ item }) => {
               variant="outline"
               size="sm"
               onClick={() => decreaseQuantity(item.itemType, item.id)}
-              className="size-7 p-0 cursor-pointer"
+              aria-label={`Decrease ${item.name} quantity`}
+              className="size-11 shrink-0 p-0 cursor-pointer"
             >
               <Minus className="size-3.5" />
             </Button>
 
-            <span className="min-w-8 text-center text-sm font-medium">
+            <span className="min-w-8 text-center text-sm font-medium tabular-nums">
               {item.quantity}
             </span>
 
@@ -60,7 +62,8 @@ export const PosCartItem: React.FC<PosCartItemProps> = ({ item }) => {
               size="sm"
               onClick={() => increaseQuantity(item.itemType, item.id)}
               disabled={item.maxQuantity != null && item.quantity >= item.maxQuantity}
-              className="size-7 p-0 cursor-pointer"
+              aria-label={`Increase ${item.name} quantity`}
+              className="size-11 shrink-0 p-0 cursor-pointer"
             >
               <Plus className="size-3.5" />
             </Button>
@@ -70,7 +73,8 @@ export const PosCartItem: React.FC<PosCartItemProps> = ({ item }) => {
               variant="ghost"
               size="sm"
               onClick={() => removeItem(item.itemType, item.id)}
-              className="ml-1 size-7 p-0 cursor-pointer text-destructive hover:text-destructive hover:bg-destructive/10"
+              aria-label={`Remove ${item.name} from order`}
+              className="ml-1 size-11 shrink-0 p-0 cursor-pointer text-destructive hover:text-destructive hover:bg-destructive/10"
             >
               <Trash2 className="size-3.5" />
             </Button>

@@ -10,19 +10,23 @@ import { PosCartItem } from "./CartItem";
 import { PosPayment } from "./PosPayment";
 import { PosCartActions } from "./PosCartAction";
 import { PendingOrders } from "./PendingOrders";
+import { PosReceiptDialog } from "./PosReceiptDialog";
 import { PaymentMethod } from "@prisma/client";
+import { getMemberByIdAction } from "@/features/users/actions/user.actions";
 import { checkoutOrderAction, holdOrderAction, cancelPendingOrderAction } from "../../actions/order.actions";
 import { getOrderByIdAction } from "../../actions/order-query.actions";
 import { buildCheckoutPayload, buildHoldPayload, pendingOrderToCartItems } from "../../utils/cart.util";
 import { toast } from "sonner";
-import type { OrderDTO } from "../../types";
+import type { CheckoutReceipt, OrderDTO } from "../../types";
 
 export const PosCart: React.FC = () => {
   const cartItems = usePosStore((store) => store.cartItems);
   const selectedMember = usePosStore((store) => store.selectedMember);
+  const selectedMotorId = usePosStore((store) => store.selectedMotorId);
   const pendingOrderId = usePosStore((store) => store.pendingOrderId);
   const setCartItems = usePosStore((store) => store.setCartItems);
   const setSelectedMember = usePosStore((store) => store.setSelectedMember);
+  const setSelectedMotorId = usePosStore((store) => store.setSelectedMotorId);
   const setPendingOrderId = usePosStore((store) => store.setPendingOrderId);
   const resetOrder = usePosStore((store) => store.resetOrder);
 
@@ -30,18 +34,20 @@ export const PosCart: React.FC = () => {
   const [receivedAmount, setReceivedAmount] = useState("");
   const [isPendingSheetOpen, setIsPendingSheetOpen] = useState(false);
   const [isActionPending, setIsActionPending] = useState(false);
+  const [receipt, setReceipt] = useState<CheckoutReceipt | null>(null);
+  const [qrConfirmedAmount, setQrConfirmedAmount] = useState<number | null>(null);
 
   const totalItems = cartItems.reduce((acc, item) => acc + item.quantity, 0);
   const subtotal = cartItems.reduce(
     (acc, item) => acc + (item.unitPrice ?? item.price) * item.quantity,
     0,
   );
-  const hasItems = cartItems.length > 0;
+  const hasItems = cartItems.some((item) => item.quantity > 0);
+  const isQrPaymentConfirmed = qrConfirmedAmount === subtotal && qrConfirmedAmount !== null;
   const numReceived = Number(receivedAmount) || 0;
-  const canComplete =
-    hasItems &&
-    (paymentMethod === PaymentMethod.QR ||
-      (numReceived > 0 && numReceived >= subtotal));
+  const canComplete = hasItems && (paymentMethod === PaymentMethod.QR
+    ? isQrPaymentConfirmed
+    : numReceived > 0 && numReceived >= subtotal);
 
   const changeAmount =
     paymentMethod === PaymentMethod.CASH
@@ -52,13 +58,14 @@ export const PosCart: React.FC = () => {
     resetOrder();
     setPaymentMethod(PaymentMethod.CASH);
     setReceivedAmount("");
+    setQrConfirmedAmount(null);
   };
 
   const handleHoldOrder = async () => {
     if (!hasItems) return;
     setIsActionPending(true);
     try {
-      const payload = buildHoldPayload({ cartItems, selectedMember, pendingOrderId });
+      const payload = buildHoldPayload({ cartItems, selectedMember, selectedMotorId, pendingOrderId });
       const res = await holdOrderAction(payload);
       if (res.success) {
         toast.success(pendingOrderId ? "Pending order updated" : "Order held successfully");
@@ -79,6 +86,7 @@ export const PosCart: React.FC = () => {
       const payload = buildCheckoutPayload({
         cartItems,
         selectedMember,
+        selectedMotorId,
         paymentMethod,
         receivedAmount: finalReceived,
         pendingOrderId,
@@ -87,6 +95,7 @@ export const PosCart: React.FC = () => {
       if (res.success) {
         toast.success("Order completed successfully!");
         handleClear();
+        if ("data" in res && res.data) setReceipt(res.data);
       } else {
         toast.error(res.error || "Checkout failed");
       }
@@ -117,9 +126,20 @@ export const PosCart: React.FC = () => {
       const res = await getOrderByIdAction(orderId);
       if (res.success && res.data) {
         const order: OrderDTO = res.data;
+        let member = order.member ?? null;
+        if (order.memberId) {
+          const memberResult = await getMemberByIdAction(order.memberId);
+          if (!memberResult.success || !("data" in memberResult) || !memberResult.data) {
+            toast.error(memberResult.error || "Unable to load the customer linked to this order.");
+            return;
+          }
+          member = memberResult.data;
+        }
         setCartItems(pendingOrderToCartItems(order.orderItems));
-        setSelectedMember(order.member ?? null);
+        setSelectedMember(member);
+        setSelectedMotorId(order.motorId);
         setPaymentMethod(order.paymentMethod || PaymentMethod.CASH);
+        setQrConfirmedAmount(null);
         setReceivedAmount("");
         setPendingOrderId(order.id);
         setIsPendingSheetOpen(false);
@@ -132,6 +152,7 @@ export const PosCart: React.FC = () => {
   };
 
   return (
+    <>
     <aside className="flex flex-col overflow-hidden rounded-2xl border border-border/70 bg-card lg:h-full lg:min-h-0 sm:mt-4 mt-1.5 shadow-sm">
       <div className="shrink-0">
         <div className="flex items-center justify-between gap-3 border-b border-border/60 p-3 lg:p-4">
@@ -145,7 +166,7 @@ export const PosCart: React.FC = () => {
           <Sheet open={isPendingSheetOpen} onOpenChange={setIsPendingSheetOpen}>
             <SheetTrigger
               render={<Button type="button" variant="outline" size="sm" />}
-              className="gap-2 cursor-pointer h-8 text-xs font-medium"
+              className="gap-2 cursor-pointer h-11 text-xs font-medium"
             >
               <Clock3 className="size-3.5 text-muted-foreground" />
               Pending
@@ -197,11 +218,13 @@ export const PosCart: React.FC = () => {
 
         <PosPayment
           paymentMethod={paymentMethod}
-          setPaymentMethod={setPaymentMethod}
+          setPaymentMethod={(method) => { setPaymentMethod(method); setQrConfirmedAmount(null); }}
           receivedAmount={receivedAmount}
           setReceivedAmount={setReceivedAmount}
           subtotal={subtotal}
           changeAmount={changeAmount}
+          isQrPaymentConfirmed={isQrPaymentConfirmed}
+          onQrPaymentConfirmationChange={(confirmed) => setQrConfirmedAmount(confirmed ? subtotal : null)}
         />
 
         <PosCartActions
@@ -216,5 +239,7 @@ export const PosCart: React.FC = () => {
         />
       </div>
     </aside>
+    <PosReceiptDialog receipt={receipt} onOpenChange={(open) => !open && setReceipt(null)} />
+    </>
   );
 };

@@ -8,6 +8,7 @@ export interface PosCartItem {
   unitPrice?: number;
   quantity: number;
   maxQuantity?: number | null;
+  stockLimited?: boolean;
   imageKey?: string | null;
 }
 
@@ -17,6 +18,12 @@ export interface SelectedMember {
   lastName: string;
   email: string | null;
   phone: string | null;
+  vehicles?: SelectedMotor[];
+}
+
+export interface SelectedMotor {
+  id: number;
+  label: string;
 }
 
 export interface OrderItemDTO {
@@ -29,6 +36,7 @@ export interface OrderItemDTO {
   quantity: number;
   unitPrice: number;
   lineTotal: number;
+  availableStock?: number | null;
 }
 
 export interface OrderDTO {
@@ -49,4 +57,16 @@ export interface OrderDTO {
   completedAt: string | null;
   orderItems: OrderItemDTO[];
   member?: SelectedMember | null;
+}
+
+export interface CheckoutReceipt {
+  orderNumber: string;
+  completedAt: string;
+  customerName: string;
+  vehicleLabel: string | null;
+  paymentMethod: PaymentMethod | null;
+  items: Array<{ name: string; quantity: number; unitPrice: number; lineTotal: number }>;
+  subtotal: number;
+  total: number;
+  receivedAmount: number;
 }

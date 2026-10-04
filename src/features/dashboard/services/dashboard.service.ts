@@ -1,5 +1,6 @@
 import { OrderItemType, OrderStatus, PaymentMethod, UserRole } from "@prisma/client";
 import { db as defaultDb } from "@/lib/db";
+import { getMonthlyStaffActivity } from "./staff-activity.service";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const CHART_WINDOW_DAYS = 365;
@@ -58,7 +59,7 @@ export const getDashboardSummary = async (db = defaultDb) => {
 
   const [monthlyOrders, previousPeriod, lowStockCount, outOfStockCount, membersCount,
     newMembersCount, recentOrders, lowStockProducts, pendingOrders, pendingCount,
-    todayCompleted, todayCancelledCount, chartOrders] = await Promise.all([
+    todayCompleted, todayCancelledCount, chartOrders, staffActivity] = await Promise.all([
     db.order.findMany({
       where: { status: OrderStatus.COMPLETED, completedAt: { gte: monthStart, lte: now } },
       select: {
@@ -99,6 +100,7 @@ export const getDashboardSummary = async (db = defaultDb) => {
       where: { status: OrderStatus.COMPLETED, completedAt: { gte: chartStart } },
       select: { completedAt: true, finalTotal: true }, orderBy: { completedAt: "asc" },
     }),
+    getMonthlyStaffActivity(monthStart, now, db),
   ]);
 
   const monthlyRevenue = monthlyOrders.reduce((sum, order) => sum + Number(order.finalTotal), 0);
@@ -173,5 +175,6 @@ export const getDashboardSummary = async (db = defaultDb) => {
       products: rankByType(OrderItemType.PRODUCT),
       services: rankByType(OrderItemType.SERVICE),
     },
+    staffActivity,
   };
 };

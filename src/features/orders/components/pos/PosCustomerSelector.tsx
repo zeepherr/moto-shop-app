@@ -1,27 +1,29 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Search, UserRound, X } from "lucide-react";
+import { UserRound, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
 import { usePosStore } from "../../stores/usePosStore";
-import { searchMembersAction } from "@/features/users/actions/user.actions";
+import { PosMemberSearch } from "./PosMemberSearch";
+import { PosVehicleSelector } from "./PosVehicleSelector";
+import { getMemberByIdAction, searchMembersAction } from "@/features/users/actions/user.actions";
 import type { SelectedMember } from "../../types";
 
 export const PosCustomerSelector: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [members, setMembers] = useState<SelectedMember[]>([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [isLoadingMember, setIsLoadingMember] = useState(false);
 
   const selectedMember = usePosStore((store) => store.selectedMember);
+  const selectedMotorId = usePosStore((store) => store.selectedMotorId);
   const setSelectedMember = usePosStore((store) => store.setSelectedMember);
+  const setSelectedMotorId = usePosStore((store) => store.setSelectedMotorId);
 
   useEffect(() => {
     const term = searchTerm.trim();
-    if (term.length < 3) {
-      setMembers([]);
-      return;
-    }
+    if (term.length < 3) return;
 
     const handler = setTimeout(async () => {
       setIsSearching(true);
@@ -38,14 +40,27 @@ export const PosCustomerSelector: React.FC = () => {
     return () => clearTimeout(handler);
   }, [searchTerm]);
 
-  const handleSelect = (member: SelectedMember) => {
-    setSelectedMember(member);
-    setSearchTerm("");
-    setMembers([]);
+  const handleSelect = async (member: SelectedMember) => {
+    setIsLoadingMember(true);
+    try {
+      const result = await getMemberByIdAction(member.id);
+      if (!result.success || !("data" in result) || !result.data) {
+        toast.error(result.error || "Unable to load customer vehicles.");
+        return;
+      }
+      setSelectedMember(result.data);
+      setSearchTerm("");
+      setMembers([]);
+    } catch {
+      toast.error("Unable to load customer vehicles.");
+    } finally {
+      setIsLoadingMember(false);
+    }
   };
 
   const handleClear = () => {
     setSelectedMember(null);
+    setSelectedMotorId(null);
     setSearchTerm("");
     setMembers([]);
   };
@@ -53,6 +68,7 @@ export const PosCustomerSelector: React.FC = () => {
   return (
     <div className="border-b border-border/60 p-2.5 lg:p-3">
       {selectedMember ? (
+        <div className="space-y-2">
         <div className="flex items-center justify-between gap-3">
           <div className="flex min-w-0 items-center gap-3">
             <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground">
@@ -75,10 +91,17 @@ export const PosCustomerSelector: React.FC = () => {
             variant="ghost"
             size="sm"
             onClick={handleClear}
-            className="size-8 p-0 cursor-pointer"
+            aria-label="Clear selected customer"
+            className="size-11 shrink-0 p-0 cursor-pointer"
           >
             <X className="size-4" />
           </Button>
+        </div>
+        <PosVehicleSelector
+          vehicles={selectedMember.vehicles ?? []}
+          selectedMotorId={selectedMotorId}
+          onVehicleChange={setSelectedMotorId}
+        />
         </div>
       ) : (
         <div className="space-y-2">
@@ -87,43 +110,14 @@ export const PosCustomerSelector: React.FC = () => {
             <p className="text-sm font-medium text-foreground">Guest customer</p>
           </div>
 
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search by phone, email, or name..."
-              className="h-8 pl-9 text-xs"
-            />
-          </div>
-
-          {searchTerm.trim().length >= 3 && (
-            <div className="max-h-48 overflow-y-auto rounded-lg border border-border bg-popover text-popover-foreground shadow-lg">
-              {isSearching ? (
-                <p className="px-3 py-2 text-xs text-muted-foreground">Searching members...</p>
-              ) : members.length > 0 ? (
-                members.map((member) => (
-                  <button
-                    key={member.id}
-                    type="button"
-                    onClick={() => handleSelect(member)}
-                    className="flex w-full items-center justify-between gap-3 px-3 py-2 text-left hover:bg-muted cursor-pointer transition-colors border-b border-border/40 last:border-b-0"
-                  >
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-medium">
-                        {member.firstName} {member.lastName}
-                      </p>
-                      <p className="truncate text-xs text-muted-foreground">
-                        {member.phone || member.email}
-                      </p>
-                    </div>
-                  </button>
-                ))
-              ) : (
-                <p className="px-3 py-2 text-xs text-muted-foreground">No members found</p>
-              )}
-            </div>
-          )}
+          <PosMemberSearch
+            searchTerm={searchTerm}
+            members={members}
+            isSearching={isSearching}
+            isLoadingMember={isLoadingMember}
+            onSearchTermChange={(value) => { setSearchTerm(value); setMembers([]); }}
+            onSelect={handleSelect}
+          />
         </div>
       )}
     </div>

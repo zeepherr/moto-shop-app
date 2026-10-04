@@ -24,17 +24,20 @@ export const ProductImageField: React.FC<ProductImageFieldProps> = ({
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const previewUrlRef = useRef<string | null>(null);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    if (!file) {
-      setPreviewUrl(null);
-      return;
-    }
-    const objectUrl = URL.createObjectURL(file);
-    setPreviewUrl(objectUrl);
-    return () => URL.revokeObjectURL(objectUrl);
-  }, [file]);
+    return () => {
+      if (previewUrlRef.current) URL.revokeObjectURL(previewUrlRef.current);
+    };
+  }, []);
+
+  const updatePreview = (nextFile: File | null) => {
+    if (previewUrlRef.current) URL.revokeObjectURL(previewUrlRef.current);
+    previewUrlRef.current = nextFile ? URL.createObjectURL(nextFile) : null;
+    setPreviewUrl(previewUrlRef.current);
+  };
 
   const handleChooseImage = () => {
     if (disabled) return;
@@ -59,11 +62,13 @@ export const ProductImageField: React.FC<ProductImageFieldProps> = ({
       return;
     }
 
+    updatePreview(selectedFile);
     onFileChange(selectedFile);
   };
 
   const handleCancelImage = () => {
     setError("");
+    updatePreview(null);
     onCancelFile();
     if (inputRef.current) {
       inputRef.current.value = "";

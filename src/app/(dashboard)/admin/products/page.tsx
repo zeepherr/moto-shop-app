@@ -5,6 +5,7 @@ import { findAllCategories } from "@/features/categories/services/category.servi
 import { getR2PublicUrl } from "@/features/products/services/r2.service";
 import { ProductPageClient } from "@/features/products/components/ProductPageClient";
 import { getProductDiscountRate } from "@/features/products/services/discount-setting.service";
+import type { ProductCategoryDTO } from "@/features/categories/types";
 
 export const metadata: Metadata = {
   title: "Products & Inventory - HrungMoto",
@@ -38,7 +39,7 @@ export default async function AdminProductsPage() {
     productCategory: p.productCategory,
   }));
 
-  const categories = rawCategories.map((c) => ({
+  const categories: ProductCategoryDTO[] = rawCategories.map((c) => ({
     id: c.id,
     name: c.name,
     isActive: c.isActive,
@@ -47,5 +48,5 @@ export default async function AdminProductsPage() {
     _count: c._count,
   }));
 
-  return <ProductPageClient initialProducts={products} categories={categories as any} initialProductDiscountRate={productDiscountRate} />;
+  return <ProductPageClient initialProducts={products} categories={categories} initialProductDiscountRate={productDiscountRate} />;
 }

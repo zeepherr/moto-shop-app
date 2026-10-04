@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -28,23 +28,31 @@ export const ServiceDialog: React.FC<ServiceDialogProps> = ({
   onSubmit,
   isPending = false,
 }) => {
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [price, setPrice] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      {open && (
+        <ServiceDialogForm
+          key={service?.id ?? "new"}
+          onOpenChange={onOpenChange}
+          service={service}
+          onSubmit={onSubmit}
+          isPending={isPending}
+        />
+      )}
+    </Dialog>
+  );
+};
 
-  useEffect(() => {
-    if (service) {
-      setName(service.name);
-      setDescription(service.description || "");
-      setPrice(service.price.toString());
-    } else {
-      setName("");
-      setDescription("");
-      setPrice("");
-    }
-    setError(null);
-  }, [service, open]);
+const ServiceDialogForm: React.FC<Omit<ServiceDialogProps, "open">> = ({
+  onOpenChange,
+  service,
+  onSubmit,
+  isPending = false,
+}) => {
+  const [name, setName] = useState(service?.name ?? "");
+  const [description, setDescription] = useState(service?.description ?? "");
+  const [price, setPrice] = useState(service?.price.toString() ?? "");
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -66,8 +74,7 @@ export const ServiceDialog: React.FC<ServiceDialogProps> = ({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+    <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>{service ? "Edit Repair Service" : "Add Repair Service"}</DialogTitle>
           <DialogDescription>
@@ -148,7 +155,6 @@ export const ServiceDialog: React.FC<ServiceDialogProps> = ({
             </Button>
           </div>
         </form>
-      </DialogContent>
-    </Dialog>
+    </DialogContent>
   );
 };

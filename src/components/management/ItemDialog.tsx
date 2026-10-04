@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -37,13 +37,38 @@ export const ItemDialog: React.FC<ItemDialogProps> = ({
   onSubmit,
   isPending = false,
 }) => {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      {open && (
+        <ItemDialogForm
+          title={title}
+          description={description}
+          label={label}
+          placeholder={placeholder}
+          initialValue={initialValue}
+          submitLabel={submitLabel}
+          onSubmit={onSubmit}
+          onOpenChange={onOpenChange}
+          isPending={isPending}
+        />
+      )}
+    </Dialog>
+  );
+};
+
+const ItemDialogForm: React.FC<Omit<ItemDialogProps, "open">> = ({
+  onOpenChange,
+  title,
+  description,
+  label,
+  placeholder,
+  initialValue = "",
+  submitLabel = "Save",
+  onSubmit,
+  isPending = false,
+}) => {
   const [value, setValue] = useState(initialValue);
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    setValue(initialValue);
-    setError(null);
-  }, [initialValue, open]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,8 +81,7 @@ export const ItemDialog: React.FC<ItemDialogProps> = ({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+    <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{description}</DialogDescription>
@@ -97,7 +121,6 @@ export const ItemDialog: React.FC<ItemDialogProps> = ({
             </Button>
           </div>
         </form>
-      </DialogContent>
-    </Dialog>
+    </DialogContent>
   );
 };

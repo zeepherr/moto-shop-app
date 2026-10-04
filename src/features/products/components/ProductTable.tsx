@@ -5,10 +5,12 @@ import { ArrowDown, ArrowUp, ArrowUpDown, PackageOpen } from "lucide-react";
 import { ProductRow } from "./ProductRow";
 import type { ProductDTO } from "../types";
 
+type ProductSortKey = "name" | "sellingPrice" | "stockQuantity";
+
 interface ProductTableProps {
   products: ProductDTO[];
-  sort: { key: string; direction: "asc" | "desc" };
-  onSort: (key: string) => void;
+  sort: { key: ProductSortKey; direction: "asc" | "desc" };
+  onSort: (key: ProductSortKey) => void;
   onEdit: (product: ProductDTO) => void;
   onStatusChange: (product: ProductDTO) => void;
   onDelete: (product: ProductDTO) => void;
@@ -75,9 +77,9 @@ function TableHeading({
   onSort,
 }: {
   label: string;
-  sortKey: string;
-  sort: { key: string; direction: "asc" | "desc" };
-  onSort: (key: string) => void;
+  sortKey: ProductSortKey;
+  sort: { key: ProductSortKey; direction: "asc" | "desc" };
+  onSort: (key: ProductSortKey) => void;
 }) {
   const isActive = sort.key === sortKey;
 

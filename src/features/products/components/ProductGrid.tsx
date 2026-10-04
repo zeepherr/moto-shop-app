@@ -5,6 +5,8 @@ import { ProductFilters } from "./ProductFilters";
 import { ProductTable } from "./ProductTable";
 import type { ProductDTO } from "../types";
 
+type ProductSortKey = "name" | "sellingPrice" | "stockQuantity";
+
 interface ProductGridProps {
   products: ProductDTO[];
   onEdit: (product: ProductDTO) => void;
@@ -21,7 +23,7 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedStatus, setSelectedStatus] = useState("all");
-  const [sort, setSort] = useState<{ key: string; direction: "asc" | "desc" }>({
+  const [sort, setSort] = useState<{ key: ProductSortKey; direction: "asc" | "desc" }>({
     key: "name",
     direction: "asc",
   });
@@ -48,7 +50,7 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
       return matchesSearch && matchesCat && matchesStatus;
     });
 
-    return filtered?.sort((a: any, b: any) => {
+    return filtered?.sort((a, b) => {
       const aVal = a[sort.key];
       const bVal = b[sort.key];
 
@@ -73,7 +75,7 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
     setSelectedStatus("all");
   };
 
-  const handleSort = (key: string) => {
+  const handleSort = (key: ProductSortKey) => {
     setSort((curr) => ({
       key,
       direction: curr.key === key && curr.direction === "asc" ? "desc" : "asc",

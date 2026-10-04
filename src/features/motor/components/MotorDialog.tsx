@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -30,23 +30,35 @@ export const MotorDialog: React.FC<MotorDialogProps> = ({
   onSubmit,
   isPending = false,
 }) => {
-  const [model, setModel] = useState("");
-  const [motorBrandId, setMotorBrandId] = useState<number>(brands[0]?.id || 0);
-  const [type, setType] = useState<"AUTOMATIC" | "MANUAL">("AUTOMATIC");
-  const [error, setError] = useState<string | null>(null);
+  const formKey = `${motor?.id ?? "new"}:${brands.map((brand) => brand.id).join(",")}`;
 
-  useEffect(() => {
-    if (motor) {
-      setModel(motor.model);
-      setMotorBrandId(motor.motorBrandId);
-      setType(motor.type as "AUTOMATIC" | "MANUAL");
-    } else {
-      setModel("");
-      setMotorBrandId(brands[0]?.id || 0);
-      setType("AUTOMATIC");
-    }
-    setError(null);
-  }, [motor, brands, open]);
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      {open && (
+        <MotorDialogForm
+          key={formKey}
+          onOpenChange={onOpenChange}
+          motor={motor}
+          brands={brands}
+          onSubmit={onSubmit}
+          isPending={isPending}
+        />
+      )}
+    </Dialog>
+  );
+};
+
+const MotorDialogForm: React.FC<Omit<MotorDialogProps, "open">> = ({
+  onOpenChange,
+  motor,
+  brands,
+  onSubmit,
+  isPending = false,
+}) => {
+  const [model, setModel] = useState(motor?.model ?? "");
+  const [motorBrandId, setMotorBrandId] = useState<number>(motor?.motorBrandId ?? brands[0]?.id ?? 0);
+  const [type, setType] = useState<"AUTOMATIC" | "MANUAL">(motor?.type ?? "AUTOMATIC");
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -68,8 +80,7 @@ export const MotorDialog: React.FC<MotorDialogProps> = ({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+    <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>{motor ? "Edit Motorcycle Model" : "Add Motorcycle Model"}</DialogTitle>
           <DialogDescription>
@@ -150,7 +161,6 @@ export const MotorDialog: React.FC<MotorDialogProps> = ({
             </Button>
           </div>
         </form>
-      </DialogContent>
-    </Dialog>
+    </DialogContent>
   );
 };

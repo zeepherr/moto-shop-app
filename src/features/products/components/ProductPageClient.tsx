@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo, useTransition } from "react";
+import React, { useState, useMemo, useTransition } from "react";
 import { toast } from "sonner";
 import { ManagementLayout } from "@/components/management/ManagementLayout";
 import { PageHeader } from "@/components/management/PageHeader";
@@ -26,16 +26,19 @@ interface ProductPageClientProps {
   initialProductDiscountRate: number;
 }
 
+type ProductSortKey = "name" | "sellingPrice" | "stockQuantity";
+
 export const ProductPageClient: React.FC<ProductPageClientProps> = ({
   initialProducts,
   categories,
   initialProductDiscountRate,
 }) => {
   const [products, setProducts] = useState(initialProducts);
+  const [previousInitialProducts, setPreviousInitialProducts] = useState(initialProducts);
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [status, setStatus] = useState("all");
-  const [sort, setSort] = useState<{ key: string; direction: "asc" | "desc" }>({
+  const [sort, setSort] = useState<{ key: ProductSortKey; direction: "asc" | "desc" }>({
     key: "name",
     direction: "asc",
   });
@@ -50,9 +53,10 @@ export const ProductPageClient: React.FC<ProductPageClientProps> = ({
 
   const [isPending, startTransition] = useTransition();
 
-  useEffect(() => {
+  if (initialProducts !== previousInitialProducts) {
+    setPreviousInitialProducts(initialProducts);
     setProducts(initialProducts);
-  }, [initialProducts]);
+  }
 
   const filteredProducts = useMemo(() => {
     const term = search.trim().toLowerCase();
@@ -75,7 +79,7 @@ export const ProductPageClient: React.FC<ProductPageClientProps> = ({
       return matchesSearch && matchesCat && matchesStatus;
     });
 
-    return filtered.sort((a: any, b: any) => {
+    return filtered.sort((a, b) => {
       const aVal = a[sort.key];
       const bVal = b[sort.key];
       if (typeof aVal === "string") {
@@ -263,7 +267,7 @@ export const ProductPageClient: React.FC<ProductPageClientProps> = ({
         <ProductTable
           products={filteredProducts}
           sort={sort}
-          onSort={(key) =>
+          onSort={(key: ProductSortKey) =>
             setSort((curr) => ({
               key,
               direction:

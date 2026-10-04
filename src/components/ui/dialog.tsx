@@ -25,7 +25,11 @@ export const Dialog: React.FC<DialogProps> = ({ open, onOpenChange, children, cl
   if (!open) return null;
 
   const hasDialogContent = React.Children.toArray(children).some(
-    (child) => React.isValidElement(child) && (child.type as any)?.displayName === "DialogContent"
+    (child) =>
+      React.isValidElement(child) &&
+      typeof child.type === "function" &&
+      "displayName" in child.type &&
+      child.type.displayName === "DialogContent"
   );
 
   return (

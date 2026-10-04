@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useCallback, useContext, useEffect, useSyncExternalStore } from "react";
 
 interface ThemeContextType {
   theme: string;
@@ -8,6 +8,7 @@ interface ThemeContextType {
 }
 
 const ThemeContext = createContext<ThemeContextType | null>(null);
+const THEME_CHANGE_EVENT = "motor-theme-change";
 
 function applyThemeToDocument(theme: string) {
   const isDark =
@@ -24,24 +25,29 @@ export const ThemeProvider: React.FC<{
   defaultTheme?: string;
   storageKey?: string;
 }> = ({ children, defaultTheme = "dark", storageKey = "motor-theme" }) => {
-  // Must render the same value on the server and on the first client render,
-  // otherwise hydration mismatches. The stored theme is read after mount.
-  const [theme, setCurrentTheme] = useState<string>(defaultTheme);
-  const [isHydrated, setIsHydrated] = useState(false);
+  const subscribe = useCallback((onStoreChange: () => void) => {
+    window.addEventListener("storage", onStoreChange);
+    window.addEventListener(THEME_CHANGE_EVENT, onStoreChange);
+    return () => {
+      window.removeEventListener("storage", onStoreChange);
+      window.removeEventListener(THEME_CHANGE_EVENT, onStoreChange);
+    };
+  }, []);
+
+  const getSnapshot = useCallback(
+    () => localStorage.getItem(storageKey) || defaultTheme,
+    [storageKey, defaultTheme],
+  );
+  const getServerSnapshot = useCallback(() => defaultTheme, [defaultTheme]);
+  const theme = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
   useEffect(() => {
-    setCurrentTheme(localStorage.getItem(storageKey) || defaultTheme);
-    setIsHydrated(true);
-  }, [storageKey, defaultTheme]);
-
-  useEffect(() => {
-    if (!isHydrated) return;
     applyThemeToDocument(theme);
-  }, [theme, isHydrated]);
+  }, [theme]);
 
   const setTheme = (newTheme: string) => {
     localStorage.setItem(storageKey, newTheme);
-    setCurrentTheme(newTheme);
+    window.dispatchEvent(new Event(THEME_CHANGE_EVENT));
   };
 
   return (

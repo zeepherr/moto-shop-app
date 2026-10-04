@@ -77,11 +77,11 @@
 - [x] **Products & Inventory (`/admin/products`)**:
   - `ProductStats`: Total SKUs, Stock Health %, Low Stock Warning ($\le 5$ units), Inventory Valuation (THB).
   - `ProductTable`: Image thumbnails with R2 fallbacks, sortable columns, category dropdown filter, low stock alerts, R2 presigned image upload flow.
-- [ ] **User Management (`/admin/users`) — professional operational redesign (confirmed, not started)**:
+- [x] **User Management (`/admin/users`) — professional operational redesign complete**:
   - **Preserved rules**: registration remains Admin-controlled; the Admin enters only an email and chooses Member or Staff; no Admin enrollment; Admin never sets or sees a password; customers enrich their profile after activation.
   - **Method 1 — self-registration approval**: Admin sends the generic `/register` link after granting a one-day approval. The customer supplies a password, verifies a 10-minute OTP, and becomes active.
   - **Method 2 — counter-assisted registration**: Admin sends the customer a 10-minute OTP, verifies the code on the dedicated Admin page, then the system sends a single-use one-day password-setup link plus `/login` link.
-  - **Information architecture/UI**: replace the generic account/enrollment treatment with a People workspace and action-first Enrollment queue. Surface records needing attention (OTP verification, password setup pending, expiry, delivery failures). Provide desktop data tables and responsive mobile cards/bottom-sheet actions.
+  - **Information architecture/UI**: People workspace and action-first Enrollment queue. Surface records needing attention (OTP verification, password setup pending, expiry, delivery failures). Provide desktop data tables, responsive mobile cards, and viewport-aware action menus.
   - **People records**: show role, access state, verified contact, profile completion, last sign-in, and contextual actions. Add an account detail surface for role/access changes, enrollment history, profile state, and activity.
   - **Enrollment records**: show method, current task, expiry, delivery result/resend history, and direct actions: verify OTP, resend the correct email, cancel, or explicitly restart.
   - **Required logic hardening**:
@@ -97,7 +97,7 @@
     - Existing unfinished enrollments must be shown and require an explicit Admin decision to resume/resend, cancel, or restart.
   - **Implementation order**:
     1. [x] Product context, enrollment lifecycle, additive audit schema, and server-side invariants. `UserAuditEvent` is deployed through additive `prisma db push`; create/retry/cancel/completion events and role/access changes are recorded. Enrollment creation no longer silently overwrites an unfinished flow, OTP/password completion uses an atomic status claim, and role/access changes revoke refresh sessions.
-    2. [x] Redesigned People/enrollment workspace: action-first queue, explicit resend/cancel/restart choices, account role/access controls, profile state, recent sign-in data, and a protected audit-backed account detail dialog. Desktop tables remain dense; mobile actions stay in the shared viewport-aware menu.
+    2. [x] Redesigned People/enrollment workspace: action-first queue, explicit resend/cancel/restart choices, account role/access controls, profile state, recent sign-in data, and a protected audit-backed account detail dialog. Desktop tables remain dense; mobile uses account/enrollment cards with the shared viewport-aware action menu.
     3. [x] Final verification passed: TypeScript, focused ESLint, Prisma validation, `impeccable detect src`, and `git diff --check`. No production build was run.
 
 ### C. POS & Core Workflows
@@ -135,9 +135,9 @@
    - Vitest / Playwright test scaffolding.
    - Verification for Cloudflare Pages (Frontend) + Railway (Backend/Database).
 
-### Active Work Handoff (2026-10-04)
+### Completed User Management Handoff (2026-10-04)
 
-- **Current objective**: Implement the confirmed professional User Management redesign in small, verified phases. No implementation work has started for this redesign.
+- **Status**: User Management redesign is implemented and committed. A follow-up responsive pass adds mobile People and Enrollment cards; the original table layouts remain for desktop.
 - **Approved enrollment rules**:
   - Every Member or Staff registration begins with an Admin at the shop. Admin accounts are excluded from enrollment creation.
   - Method 1 has no signed invitation URL: Admin grants one-day email approval; the customer uses `/register`, creates their password, then completes email OTP verification.
@@ -152,8 +152,8 @@
   - new dashboard components should stay under `src/features/dashboard/components/`.
 - **Existing detail routes**: `/admin/revenue`, `/admin/orders`, `/admin/products`, `/admin/users`, `/admin/pos`.
 - **Time zone/business reporting boundary**: calculate calendar-day and calendar-month ranges in `Asia/Bangkok`.
-- **Last committed baseline**: `72fe068` (`fix(users): align enrollment email flows`).
-- **Implementation state**: Dashboard milestones 1–6 and the prior controlled-enrollment implementation are committed. The User Management professional redesign is planned only; this progress update is the handoff baseline.
+- **Last committed baseline before the responsive follow-up**: `5f8ef54` (`feat(users): redesign people management workflows`).
+- **Implementation state**: Dashboard milestones 1–6, controlled enrollment, and the redesigned User Management workflow are complete. Remaining unchecked dashboard and POS items are listed above as separate work.
 - **Verified hydration note**: `cz-shortcut-listen` is injected onto `<body>` by a browser extension before React hydrates. Root layout suppresses hydration warnings on both `<html>` and `<body>`; this does not mask application content mismatches below those elements.
 - **POS boundary fix**: Pending-order server actions serialize Prisma Decimal fields before returning data to client components. Checkout and hold actions return success state only because their Prisma records are unused by the client. TypeScript and focused ESLint passed.
 

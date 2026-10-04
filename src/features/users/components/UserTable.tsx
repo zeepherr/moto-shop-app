@@ -44,6 +44,45 @@ export function UserTable({ users, onView, onRoleChange, onAccessChange, isPendi
   }
 
   return (
+    <>
+    <div className="space-y-3 p-3 md:hidden">
+      {users.map((user) => {
+        const name = `${user.firstName} ${user.lastName}`.trim() || "Unnamed user";
+        const profileComplete = user.firstName !== "New" && Boolean(user.phone || user.hasProfilePhoto);
+        const actions = [
+          { label: "View account details", icon: Eye, onSelect: () => onView(user) },
+          ...(user.role !== "ADMIN"
+            ? [
+                user.role === "MEMBER"
+                  ? { label: "Promote to staff", icon: ShieldCheck, tone: "success" as const, onSelect: () => onRoleChange(user, "STAFF") }
+                  : { label: "Change to member", icon: UserRound, onSelect: () => onRoleChange(user, "MEMBER") },
+                user.isActive
+                  ? { label: "Deactivate access", icon: UserX, tone: "danger" as const, separatorBefore: true, onSelect: () => onAccessChange(user, false) }
+                  : { label: "Reactivate access", icon: UserCheck, tone: "success" as const, separatorBefore: true, onSelect: () => onAccessChange(user, true) },
+              ]
+            : []),
+        ];
+        return <article key={user.id} className="rounded-xl border border-border/70 bg-background p-3.5">
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex min-w-0 items-center gap-3">
+              <div className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-border/70 bg-muted/50 text-xs font-bold uppercase tracking-wider text-foreground">{`${user.firstName[0] ?? ""}${user.lastName[0] ?? ""}`.toUpperCase() || "U"}</div>
+              <div className="min-w-0"><p className="truncate text-sm font-semibold text-foreground">{name}</p><p className="text-xs text-muted-foreground">Account #{user.id}</p></div>
+            </div>
+            <div className="[&>button]:size-11 [&>button]:rounded-xl"><ActionMenu label={name} disabled={isPending} items={actions} /></div>
+          </div>
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <span className="rounded-full border border-border/60 bg-muted/50 px-2.5 py-1 text-xs font-medium text-foreground">{roleLabel(user.role)}</span>
+            <StatusBadge isActive={user.isActive} />
+            <span className="text-xs text-muted-foreground">{profileComplete ? "Profile complete" : "Profile needs update"}</span>
+          </div>
+          <div className="mt-3 grid grid-cols-2 gap-3 border-t border-border/60 pt-3 text-xs">
+            <div className="min-w-0"><p className="text-muted-foreground">Contact</p><p className="mt-1 truncate font-medium text-foreground">{user.email || user.phone || "Not added"}</p><p className="mt-0.5 text-muted-foreground">{user.emailVerifiedAt ? "Email verified" : "Email not verified"}</p></div>
+            <div><p className="text-muted-foreground">Recent sign-in</p><p className="mt-1 font-medium text-foreground">{formatDate(user.lastSignedInAt)}</p></div>
+          </div>
+        </article>;
+      })}
+    </div>
+    <div className="hidden overflow-x-auto md:block">
     <table className="w-full min-w-[920px] text-sm">
       <thead>
         <tr className="border-b border-border/60 bg-muted/30 text-left text-xs uppercase tracking-wider text-muted-foreground">
@@ -91,5 +130,7 @@ export function UserTable({ users, onView, onRoleChange, onAccessChange, isPendi
         })}
       </tbody>
     </table>
+    </div>
+    </>
   );
 }

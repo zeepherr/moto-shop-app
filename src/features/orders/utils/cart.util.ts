@@ -1,4 +1,4 @@
-import { OrderItemType, PaymentMethod } from "@prisma/client";
+import type { OrderItemType, PaymentMethod } from "@prisma/client";
 import type { PosCartItem, SelectedMember } from "../types";
 import type { CheckoutOrderInput, HoldOrderInput } from "../schemas";
 
@@ -13,7 +13,7 @@ export const productToCartItem = (product: {
   const price = Number(product.sellingPrice);
   return {
     id: product.id,
-    itemType: OrderItemType.PRODUCT,
+    itemType: "PRODUCT",
     name: product.name,
     price,
     unitPrice: price,
@@ -31,7 +31,7 @@ export const serviceToCartItem = (service: {
   const price = Number(service.price);
   return {
     id: service.id,
-    itemType: OrderItemType.SERVICE,
+    itemType: "SERVICE",
     name: service.name,
     price,
     unitPrice: price,
@@ -66,8 +66,8 @@ export const buildCheckoutPayload = ({
     pendingOrderId: pendingOrderId ?? null,
     items: cartItems.filter((item) => item.quantity > 0).map((item) => ({
       itemType: item.itemType,
-      productId: item.itemType === OrderItemType.PRODUCT ? item.id : null,
-      serviceId: item.itemType === OrderItemType.SERVICE ? item.id : null,
+      productId: item.itemType === "PRODUCT" ? item.id : null,
+      serviceId: item.itemType === "SERVICE" ? item.id : null,
       quantity: item.quantity,
     })),
   };
@@ -90,8 +90,8 @@ export const buildHoldPayload = ({
     motorId: selectedMember ? selectedMotorId ?? null : null,
     items: cartItems.filter((item) => item.quantity > 0).map((item) => ({
       itemType: item.itemType,
-      productId: item.itemType === OrderItemType.PRODUCT ? item.id : null,
-      serviceId: item.itemType === OrderItemType.SERVICE ? item.id : null,
+      productId: item.itemType === "PRODUCT" ? item.id : null,
+      serviceId: item.itemType === "SERVICE" ? item.id : null,
       quantity: item.quantity,
     })),
   };
@@ -109,9 +109,9 @@ export const pendingOrderToCartItems = (
   }> = [],
 ): PosCartItem[] => {
   return orderItems.map((item) => {
-    const id = item.itemType === OrderItemType.PRODUCT ? item.productId! : item.serviceId!;
+    const id = item.itemType === "PRODUCT" ? item.productId! : item.serviceId!;
     const price = Number(item.unitPrice);
-    const availableStock = item.itemType === OrderItemType.PRODUCT ? item.availableStock ?? null : null;
+    const availableStock = item.itemType === "PRODUCT" ? item.availableStock ?? null : null;
     return {
       id,
       itemType: item.itemType,

@@ -12,7 +12,7 @@ import { PosPayment } from "./PosPayment";
 import { PosCartActions } from "./PosCartAction";
 import { PendingOrders } from "./PendingOrders";
 import { PosReceiptDialog } from "./PosReceiptDialog";
-import { OrderItemType, PaymentMethod } from "@prisma/client";
+import type { PaymentMethod } from "@prisma/client";
 import { getMemberByIdAction } from "@/features/users/actions/user.actions";
 import { checkoutOrderAction, holdOrderAction, cancelPendingOrderAction } from "../../actions/order.actions";
 import { getOrderByIdAction } from "../../actions/order-query.actions";
@@ -32,7 +32,7 @@ export const PosCart: React.FC<{ productDiscountRate: number }> = ({ productDisc
   const setPendingOrderId = usePosStore((store) => store.setPendingOrderId);
   const resetOrder = usePosStore((store) => store.resetOrder);
 
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(PaymentMethod.CASH);
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("CASH");
   const [receivedAmount, setReceivedAmount] = useState("");
   const [isPendingSheetOpen, setIsPendingSheetOpen] = useState(false);
   const [isActionPending, setIsActionPending] = useState(false);
@@ -43,11 +43,11 @@ export const PosCart: React.FC<{ productDiscountRate: number }> = ({ productDisc
   const [cancelReason, setCancelReason] = useState("");
 
   const totalItems = cartItems.reduce((acc, item) => acc + item.quantity, 0);
-  const productSubtotal = cartItems.filter((item) => item.itemType === OrderItemType.PRODUCT).reduce(
+  const productSubtotal = cartItems.filter((item) => item.itemType === "PRODUCT").reduce(
     (acc, item) => acc + (item.unitPrice ?? item.price) * item.quantity,
     0,
   );
-  const serviceSubtotal = cartItems.filter((item) => item.itemType === OrderItemType.SERVICE).reduce(
+  const serviceSubtotal = cartItems.filter((item) => item.itemType === "SERVICE").reduce(
     (acc, item) => acc + (item.unitPrice ?? item.price) * item.quantity,
     0,
   );
@@ -58,18 +58,18 @@ export const PosCart: React.FC<{ productDiscountRate: number }> = ({ productDisc
   const hasItems = cartItems.some((item) => item.quantity > 0);
   const isQrPaymentConfirmed = qrConfirmedAmount === totalDue && qrConfirmedAmount !== null;
   const numReceived = Number(receivedAmount) || 0;
-  const canComplete = hasItems && (totalDue === 0 || (paymentMethod === PaymentMethod.QR
+  const canComplete = hasItems && (totalDue === 0 || (paymentMethod === "QR"
     ? isQrPaymentConfirmed
     : numReceived >= totalDue));
 
   const changeAmount =
-    paymentMethod === PaymentMethod.CASH
+    paymentMethod === "CASH"
       ? Math.max(numReceived - totalDue, 0)
       : 0;
 
   const handleClear = () => {
     resetOrder();
-    setPaymentMethod(PaymentMethod.CASH);
+    setPaymentMethod("CASH");
     setReceivedAmount("");
     setQrConfirmedAmount(null);
   };
@@ -95,7 +95,7 @@ export const PosCart: React.FC<{ productDiscountRate: number }> = ({ productDisc
     if (!canComplete) return;
     setIsActionPending(true);
     try {
-      const finalReceived = totalDue === 0 ? 0 : paymentMethod === PaymentMethod.QR ? totalDue : numReceived;
+      const finalReceived = totalDue === 0 ? 0 : paymentMethod === "QR" ? totalDue : numReceived;
       const payload = buildCheckoutPayload({
         cartItems,
         selectedMember,
@@ -162,7 +162,7 @@ export const PosCart: React.FC<{ productDiscountRate: number }> = ({ productDisc
         setCartItems(pendingOrderToCartItems(order.orderItems));
         setSelectedMember(member);
         setSelectedMotorId(order.motorId);
-        setPaymentMethod(order.paymentMethod || PaymentMethod.CASH);
+        setPaymentMethod(order.paymentMethod || "CASH");
         setQrConfirmedAmount(null);
         setReceivedAmount("");
         setPendingOrderId(order.id);

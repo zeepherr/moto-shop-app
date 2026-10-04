@@ -4,7 +4,7 @@ import React from "react";
 import { Banknote, CheckCircle2, QrCode } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { PaymentMethod } from "@prisma/client";
+import type { PaymentMethod } from "@prisma/client";
 
 interface PosPaymentProps {
   paymentMethod: PaymentMethod;
@@ -43,8 +43,8 @@ export const PosPayment: React.FC<PosPaymentProps> = ({
         <Button
           type="button"
           size="sm"
-          variant={paymentMethod === PaymentMethod.CASH ? "default" : "outline"}
-          onClick={() => setPaymentMethod(PaymentMethod.CASH)}
+          variant={paymentMethod === "CASH" ? "default" : "outline"}
+          onClick={() => setPaymentMethod("CASH")}
           className="h-12 cursor-pointer gap-2 text-sm"
         >
           <Banknote className="size-4" />
@@ -54,9 +54,9 @@ export const PosPayment: React.FC<PosPaymentProps> = ({
         <Button
           type="button"
           size="sm"
-          variant={paymentMethod === PaymentMethod.QR ? "default" : "outline"}
+          variant={paymentMethod === "QR" ? "default" : "outline"}
           onClick={() => {
-            setPaymentMethod(PaymentMethod.QR);
+            setPaymentMethod("QR");
             setReceivedAmount("");
           }}
           className="h-12 cursor-pointer gap-2 text-sm"
@@ -66,7 +66,7 @@ export const PosPayment: React.FC<PosPaymentProps> = ({
         </Button>
       </div>
 
-      {paymentMethod === PaymentMethod.CASH && (
+      {paymentMethod === "CASH" && (
         <div className="mt-2.5 flex items-end gap-3">
           <div className="min-w-0 flex-1">
             <label className="mb-1 block text-xs font-medium text-muted-foreground">
@@ -91,7 +91,7 @@ export const PosPayment: React.FC<PosPaymentProps> = ({
         </div>
       )}
 
-      {paymentMethod === PaymentMethod.QR && (
+      {paymentMethod === "QR" && (
         <div className="mt-2.5 space-y-2 rounded-lg bg-muted/50 px-3 py-2.5">
           <div className="flex items-center justify-between gap-3">
             <span className="text-xs text-muted-foreground">Verify the transfer in your payment app</span>

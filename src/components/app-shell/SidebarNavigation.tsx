@@ -5,14 +5,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion, type Variants } from "motion/react";
 import { cn } from "@/lib/utils";
-import type { LucideIcon } from "lucide-react";
-
-export interface NavItem {
-  label: string;
-  href: string;
-  icon: LucideIcon;
-  end?: boolean;
-}
+import { isNavItemActive } from "./nav-utils";
+import type { NavItem } from "./navigation.config";
 
 interface SidebarNavigationProps {
   navigation: NavItem[];
@@ -61,10 +55,7 @@ export const SidebarNavigation: React.FC<SidebarNavigationProps> = ({
       )}
       {navigation.map((item) => {
         const Icon = item.icon;
-        const isActive = item.end
-          ? pathname === item.href
-          : pathname === item.href ||
-            (item.href !== "/admin" && pathname.startsWith(item.href));
+        const isActive = isNavItemActive(pathname, item);
 
         return (
           <motion.div

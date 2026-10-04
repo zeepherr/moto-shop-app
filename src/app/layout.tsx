@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
@@ -6,6 +6,10 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "HrungMoto - Motorcycle Shop Management",
   description: "Modern motorcycle repair shop management system",
+};
+
+export const viewport: Viewport = {
+  viewportFit: "cover",
 };
 
 export default function RootLayout({

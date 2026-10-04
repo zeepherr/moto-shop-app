@@ -37,7 +37,7 @@ export const SheetTrigger: React.FC<{
 }> = ({ children, render, className, onClick }) => {
   const ctx = React.useContext(SheetContext);
 
-  const handleClick = (e: React.MouseEvent) => {
+  const handleClick = () => {
     onClick?.();
     ctx?.onOpenChange(true);
   };
@@ -60,7 +60,7 @@ export const SheetTrigger: React.FC<{
 export const SheetContent: React.FC<{
   children: React.ReactNode;
   className?: string;
-  side?: "right" | "left";
+  side?: "right" | "left" | "bottom";
 }> = ({ children, className, side = "right" }) => {
   const ctx = React.useContext(SheetContext);
   if (!ctx) return null;
@@ -81,13 +81,16 @@ export const SheetContent: React.FC<{
 
           {/* Slide-over panel */}
           <motion.div
-            initial={{ x: side === "right" ? "100%" : "-100%" }}
-            animate={{ x: 0 }}
-            exit={{ x: side === "right" ? "100%" : "-100%" }}
+            initial={side === "bottom" ? { y: "100%" } : { x: side === "right" ? "100%" : "-100%" }}
+            animate={side === "bottom" ? { y: 0 } : { x: 0 }}
+            exit={side === "bottom" ? { y: "100%" } : { x: side === "right" ? "100%" : "-100%" }}
             transition={{ type: "spring", damping: 25, stiffness: 250 }}
             className={cn(
-              "fixed inset-y-0 z-50 flex w-full max-w-md flex-col bg-popover text-popover-foreground shadow-2xl border-l border-border",
-              side === "right" ? "right-0" : "left-0",
+              "fixed z-50 flex flex-col bg-popover text-popover-foreground shadow-2xl",
+              side === "bottom"
+                ? "inset-x-0 bottom-0 max-h-[90dvh] w-full border-t border-border"
+                : "inset-y-0 w-full max-w-md border-border",
+              side === "right" ? "right-0 border-l" : side === "left" ? "left-0 border-r" : "",
               className,
             )}
           >

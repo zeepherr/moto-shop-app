@@ -3,7 +3,8 @@
 import React from "react";
 import { cn } from "@/lib/utils";
 import { SidebarBrand } from "./SidebarBrand";
-import { SidebarNavigation, type NavItem } from "./SidebarNavigation";
+import { SidebarNavigation } from "./SidebarNavigation";
+import type { NavItem } from "./navigation.config";
 import { SidebarUser } from "./SidebarUser";
 import type { AuthUserDTO } from "@/features/auth/types";
 

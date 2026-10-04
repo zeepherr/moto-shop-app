@@ -5,19 +5,11 @@ import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
 import { AppSidebar } from "./AppSidebar";
 import { AppHeader } from "./AppHeader";
-import {
-  LayoutDashboard,
-  ShoppingCart,
-  Package,
-  Tags,
-  Bike,
-  Wrench,
-  Users,
-  User,
-} from "lucide-react";
 import { ROLES } from "@/features/auth/constants";
 import type { AuthUserDTO } from "@/features/auth/types";
-import type { NavItem } from "./SidebarNavigation";
+import { getMoreNavigation, getNavigation } from "./navigation.config";
+import { isNavItemActive } from "./nav-utils";
+import { MobileTabBar } from "./MobileTabBar";
 
 interface AppShellProps {
   user: AuthUserDTO | null;
@@ -37,6 +29,7 @@ export const AppShell: React.FC<AppShellProps> = ({
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(initialSidebarCollapsed);
 
+  const isAdmin = user?.role === ROLES.ADMIN;
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const toggleSidebar = () => {
@@ -48,45 +41,25 @@ export const AppShell: React.FC<AppShellProps> = ({
   };
 
   useEffect(() => {
+    if (isAdmin) return;
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") setMobileOpen(false);
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, []);
+  }, [isAdmin]);
 
-  const adminNavigation: NavItem[] = [
-    { label: "POS", href: "/admin/pos", icon: ShoppingCart },
-    { label: "Products", href: "/admin/products", icon: Package },
-    { label: "Categories", href: "/admin/categories", icon: Tags },
-    { label: "Motor Brands", href: "/admin/motor-brands", icon: Bike },
-    { label: "Motorcycles", href: "/admin/motors", icon: Bike },
-    { label: "Services", href: "/admin/services", icon: Wrench },
-    { label: "Users", href: "/admin/users", icon: Users },
-    { label: "Dashboard", href: "/admin", icon: LayoutDashboard, end: true },
-  ];
-
-  const staffNavigation: NavItem[] = [
-    { label: "POS", href: "/staff/pos", icon: ShoppingCart, end: true },
-    { label: "Services", href: "/staff/services", icon: Wrench },
-    { label: "Profile", href: "/staff/profile", icon: User },
-  ];
-
-  const memberNavigation: NavItem[] = [
-    { label: "Profile", href: "/member/profile", icon: User, end: true },
-  ];
-
-  const navigation =
-    user?.role === ROLES.ADMIN
-      ? adminNavigation
-      : user?.role === ROLES.STAFF
-        ? staffNavigation
-        : memberNavigation;
-
-  const activeItem =
-    navigation.find((item) =>
-      item.end ? pathname === item.href : pathname.startsWith(item.href),
-    ) ?? navigation[0];
+  const role = user?.role ?? ROLES.MEMBER;
+  const navigation = getNavigation(role);
+  const activeItem = [...navigation, ...getMoreNavigation(role)].find((item) =>
+    isNavItemActive(pathname, item),
+  ) ?? navigation[0];
+  const mainPadding = isAdmin
+    ? "pb-[calc(64px+env(safe-area-inset-bottom)+12px)] md:pb-5"
+    : "pb-3 sm:pb-4 lg:pb-5";
+  const mainTopSpacing = isAdmin
+    ? "mt-0 pt-[env(safe-area-inset-top)] md:mt-16 md:pt-0"
+    : "mt-16";
 
   return (
     <div className="flex h-dvh overflow-hidden bg-background">
@@ -106,54 +79,59 @@ export const AppShell: React.FC<AppShellProps> = ({
         />
       </motion.div>
 
-      {/* MOBILE SIDEBAR */}
-      <AnimatePresence>
-        {mobileOpen && (
-          <>
-            <motion.button
-              type="button"
-              aria-label="Close navigation"
-              onClick={() => setMobileOpen(false)}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.18 }}
-              className="fixed inset-0 z-40 bg-black/45 backdrop-blur-[3px] md:hidden cursor-pointer"
-            />
-
-            <motion.div
-              initial={{ x: "-100%", opacity: 0.7 }}
-              animate={{ x: 0, opacity: 1 }}
-              exit={{ x: "-100%", opacity: 0.7 }}
-              transition={{ type: "spring", stiffness: 340, damping: 34, mass: 0.8 }}
-              className="fixed inset-y-0 left-0 z-50 w-[min(86vw,300px)] p-2 md:hidden"
-            >
-              <AppSidebar
-                navigation={navigation}
-                workspace={workspace}
-                user={user}
-                collapsed={false}
-                mobile
-                onToggle={() => setMobileOpen(false)}
-                onNavigate={() => setMobileOpen(false)}
+      {/* Keep the existing mobile drawer for roles scheduled for a later navigation phase. */}
+      {!isAdmin && (
+        <AnimatePresence>
+          {mobileOpen && (
+            <>
+              <motion.button
+                type="button"
+                aria-label="Close navigation"
+                onClick={() => setMobileOpen(false)}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.18 }}
+                className="fixed inset-0 z-40 cursor-pointer bg-black/45 backdrop-blur-[3px] md:hidden"
               />
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+
+              <motion.div
+                initial={{ x: "-100%", opacity: 0.7 }}
+                animate={{ x: 0, opacity: 1 }}
+                exit={{ x: "-100%", opacity: 0.7 }}
+                transition={{ type: "spring", stiffness: 340, damping: 34, mass: 0.8 }}
+                className="fixed inset-y-0 left-0 z-50 w-[min(86vw,300px)] p-2 md:hidden"
+              >
+                <AppSidebar
+                  navigation={navigation}
+                  workspace={workspace}
+                  user={user}
+                  collapsed={false}
+                  mobile
+                  onToggle={() => setMobileOpen(false)}
+                  onNavigate={() => setMobileOpen(false)}
+                />
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
+      )}
 
       {/* RIGHT CONTENT */}
       <div className="relative flex min-h-0 min-w-0 flex-1 flex-col">
         <AppHeader
           section={section}
           title={activeItem?.label}
+          showMobileMenu={!isAdmin}
+          hideOnMobile={isAdmin}
           onMenuClick={() => setMobileOpen(true)}
         />
 
-        <main className="relative mt-16 min-h-0 min-w-0 flex-1 overflow-y-auto scroll-smooth px-2 pb-3 sm:px-3 sm:pb-4 lg:px-5 lg:pb-5 [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+        <main className={`relative ${mainTopSpacing} min-h-0 min-w-0 flex-1 overflow-y-auto scroll-smooth px-2 sm:px-3 lg:px-5 [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden ${mainPadding}`}>
           {children}
         </main>
       </div>
+      {isAdmin && <MobileTabBar user={user} />}
     </div>
   );
 };

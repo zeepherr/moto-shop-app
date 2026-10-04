@@ -128,7 +128,7 @@
      - [x] P1: Add cashier QR payment confirmation and a printable completed-sale receipt. Checkout now requires an explicit payment-received confirmation when QR is selected.
      - [x] P1: Finish held-order cancellation audit details. Staff and admins can cancel any pending ticket with confirmation and one of five preset reasons; the authenticated actor and reason are stored through nullable additive fields, and only a still-pending order can be cancelled. Admin order details show the cancellation actor and reason.
      - [x] P2: Revalidate product availability when resuming a held ticket, then cap cart quantities by current stock before checkout. Checkout still rechecks stock transactionally.
-     - [x] P2: Add a controlled POS discount flow. Admins manage the global percentage from the Products page; checkout applies it only to product lines for staff and admin sales, with the effective rate and amount shown in receipts and order details. The additive ShopSetting table is synced.
+     - [x] P2: Add a controlled POS discount flow. Admins manage the global percentage from the Products page; checkout applies it only to product lines on active member orders (never guest orders), with the effective rate and amount shown in receipts and order details. The additive ShopSetting table is synced.
      - [x] P2: Improve POS keyboard and touch operation: F2 scanner focus, 44px control targets, semantic product/service add buttons, and no nested interactive elements.
      - [x] P2: Bound the pending-ticket query to the 50 newest tickets and add search by order number or customer.
      - [x] P2: Add accessible chart-free text alternatives for dashboard and revenue report charts.

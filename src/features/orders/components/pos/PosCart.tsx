@@ -52,7 +52,8 @@ export const PosCart: React.FC<{ productDiscountRate: number }> = ({ productDisc
     0,
   );
   const subtotal = productSubtotal + serviceSubtotal;
-  const discountAmount = Math.min(Math.round((productSubtotal * productDiscountRate) / 100 * 100) / 100, productSubtotal);
+  const appliedDiscountRate = selectedMember ? productDiscountRate : 0;
+  const discountAmount = Math.min(Math.round((productSubtotal * appliedDiscountRate) / 100 * 100) / 100, productSubtotal);
   const totalDue = Math.max(0, Math.round((subtotal - discountAmount) * 100) / 100);
   const hasItems = cartItems.some((item) => item.quantity > 0);
   const isQrPaymentConfirmed = qrConfirmedAmount === totalDue && qrConfirmedAmount !== null;
@@ -235,7 +236,8 @@ export const PosCart: React.FC<{ productDiscountRate: number }> = ({ productDisc
             </div>
             <div className="text-right">
               <div className="flex items-baseline justify-end gap-2"><span className="text-xs text-muted-foreground">Subtotal</span><span className="text-sm font-semibold text-foreground">฿{subtotal.toLocaleString()}</span></div>
-              {discountAmount > 0 && <div className="flex items-baseline justify-end gap-2 text-xs text-emerald-700 dark:text-emerald-400"><span>Product discount ({productDiscountRate}%)</span><span>−฿{discountAmount.toLocaleString()}</span></div>}
+              {discountAmount > 0 && <div className="flex items-baseline justify-end gap-2 text-xs text-emerald-700 dark:text-emerald-400"><span>Product discount ({appliedDiscountRate}%)</span><span>−฿{discountAmount.toLocaleString()}</span></div>}
+              {productDiscountRate > 0 && <p className="text-xs text-muted-foreground">{selectedMember ? `Member discount: ${productDiscountRate}% on products` : `Product discount ${productDiscountRate}% is for members only`}</p>}
               <div className="flex items-baseline justify-end gap-2"><span className="text-xs font-medium text-muted-foreground">Total due</span><span className="text-lg font-bold text-foreground">฿{totalDue.toLocaleString()}</span></div>
             </div>
           </div>

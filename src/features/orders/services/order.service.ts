@@ -3,6 +3,7 @@ import {
   OrderStatus,
   CustomerType,
   OrderItemType,
+  UserRole,
   type PaymentMethod,
   type Prisma,
 } from "@prisma/client";
@@ -197,6 +198,15 @@ export const executeCheckoutTx = async (
 ) => {
   return await db.$transaction(async (tx) => {
     await assertMemberOwnsMotor(tx, data.memberId, data.motorId);
+    const member = data.memberId
+      ? await tx.user.findFirst({
+          where: { id: data.memberId, role: UserRole.MEMBER, isActive: true },
+          select: { id: true },
+        })
+      : null;
+    if (data.memberId && !member) {
+      throw new Error("Selected member is no longer active. Choose a current member or check out as a guest.");
+    }
     const configuredDiscount = await tx.shopSetting.findUnique({
       where: { id: 1 },
       select: { productDiscountRate: true },
@@ -205,6 +215,7 @@ export const executeCheckoutTx = async (
     if (discountRate !== data.discountRate) {
       throw new Error("The product discount changed. Refresh the POS before checking out.");
     }
+    const appliedDiscountRate = member ? discountRate : 0;
     if (data.pendingOrderId) {
       await lockPendingOrder(tx, data.pendingOrderId, true);
     }
@@ -258,7 +269,7 @@ export const executeCheckoutTx = async (
 
     const subtotal = productSubtotal + serviceSubtotal;
     const discountAmount = Math.min(
-      Math.round((productSubtotal * discountRate) / 100 * 100) / 100,
+      Math.round((productSubtotal * appliedDiscountRate) / 100 * 100) / 100,
       productSubtotal,
     );
     const finalTotal = Math.max(0, Math.round((subtotal - discountAmount) * 100) / 100);
@@ -267,7 +278,7 @@ export const executeCheckoutTx = async (
       throw new Error(`Received amount (฿${data.receivedAmount}) is less than total (฿${finalTotal})`);
     }
 
-    const customerType = data.memberId ? CustomerType.MEMBER : CustomerType.GUEST;
+    const customerType = member ? CustomerType.MEMBER : CustomerType.GUEST;
 
     // If completing an existing pending ticket
     if (data.pendingOrderId) {
@@ -282,7 +293,7 @@ export const executeCheckoutTx = async (
           motorId: data.motorId,
           customerType,
           subtotal,
-          discountRate,
+          discountRate: appliedDiscountRate,
           discountAmount,
           finalTotal,
           orderItems: {
@@ -306,7 +317,7 @@ export const executeCheckoutTx = async (
         motorId: data.motorId,
         customerType,
         subtotal,
-        discountRate,
+        discountRate: appliedDiscountRate,
         discountAmount,
         finalTotal,
         status: OrderStatus.COMPLETED,

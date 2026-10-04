@@ -27,7 +27,7 @@ export const PosPageClient: React.FC<PosPageClientProps> = ({
   );
 
   return (
-    <div className="mx-auto flex w-full max-w-[1800px] flex-col gap-3 sm:px-2.5 md:h-[calc(100dvh-5.5rem)] md:min-h-0 md:p-4">
+    <div className="mx-auto flex w-full max-w-[1800px] flex-col gap-3 sm:px-2.5 lg:block lg:h-[calc(100vh-5.5rem)] lg:min-h-0 lg:p-4">
       <div className="md:hidden">
         <h1 className="text-xl font-semibold tracking-tight text-foreground">Point of sale</h1>
         <p className="mt-1 text-sm text-muted-foreground">Build an order, then collect payment.</p>
@@ -60,10 +60,10 @@ export const PosPageClient: React.FC<PosPageClientProps> = ({
       </div>
 
       <div className="grid min-w-0 grid-cols-1 gap-3 lg:h-full lg:min-h-0 lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-4">
-        <div className={`min-w-0 ${mobileView === "catalog" ? "block" : "hidden"} lg:block`}>
+        <div className={`min-w-0 ${mobileView === "catalog" ? "block" : "hidden"} lg:block lg:h-full lg:min-h-0`}>
           <PosWorkspace categories={categories} products={products} services={services} />
         </div>
-        <div className={`min-w-0 ${mobileView === "order" ? "block" : "hidden"} lg:block`}>
+        <div className={`min-w-0 ${mobileView === "order" ? "block" : "hidden"} lg:block lg:h-full lg:min-h-0`}>
           <PosCart productDiscountRate={productDiscountRate} />
         </div>
       </div>

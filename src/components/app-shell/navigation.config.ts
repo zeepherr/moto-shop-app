@@ -18,7 +18,7 @@ export interface NavItem {
   href: string;
   icon: LucideIcon;
   end?: boolean;
-  mobile?: "tab" | "center" | "more" | "settings";
+  mobile?: "tab" | "center" | "more";
   mobileOrder?: number;
   sidebar?: boolean;
 }
@@ -33,6 +33,7 @@ const adminNavigation: NavItem[] = [
   { label: "Users", href: "/admin/users", icon: Users, mobile: "tab", mobileOrder: 3 },
   { label: "Orders", href: "/admin/orders", icon: ShoppingCart, mobile: "more", sidebar: false },
   { label: "Revenue", href: "/admin/revenue", icon: LayoutDashboard, mobile: "more", sidebar: false },
+  { label: "Settings", href: "/admin/settings", icon: Settings, mobile: "more", sidebar: false },
   { label: "Dashboard", href: "/admin", icon: LayoutDashboard, end: true, mobile: "tab", mobileOrder: 0 },
 ];
 
@@ -67,6 +68,5 @@ export function getMobileTabs(role: UserRole): NavItem[] {
   return [
     ...primaryTabs,
     { label: "More", href: "/admin", icon: Ellipsis, mobile: "more", mobileOrder: 4 },
-    { label: "Settings", href: "/admin", icon: Settings, mobile: "settings", mobileOrder: 5 },
   ];
 }

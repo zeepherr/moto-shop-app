@@ -25,6 +25,12 @@ export const SidebarUser: React.FC<SidebarUserProps> = ({ user, collapsed }) => 
   const fullName = user ? `${user.firstName} ${user.lastName}`.trim() : "Administrator";
   const initials = `${user?.firstName?.[0] ?? ""}${user?.lastName?.[0] ?? ""}`.toUpperCase() || "A";
   const roleName = user?.role === "ADMIN" ? "Administrator" : user?.role === "STAFF" ? "Staff" : "Member";
+  const profileHref = user?.role === "ADMIN"
+    ? "/admin/profile"
+    : user?.role === "STAFF"
+      ? "/staff/profile"
+      : "/member/profile";
+  const settingsHref = user?.role === "ADMIN" ? "/admin/settings" : undefined;
   const cancelScheduledClose = () => {
     if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
     closeTimerRef.current = null;
@@ -44,7 +50,7 @@ export const SidebarUser: React.FC<SidebarUserProps> = ({ user, collapsed }) => 
     if (!rect) return;
 
     const menuWidth = collapsed ? 272 : 224;
-    const menuHeight = 166;
+    const menuHeight = 180;
     const gap = 10;
     const left = collapsed ? rect.right + gap : rect.left;
     const top = collapsed
@@ -137,13 +143,14 @@ export const SidebarUser: React.FC<SidebarUserProps> = ({ user, collapsed }) => 
 
       {isOpen && position && (
         <SidebarAccountMenu
-          user={user}
           fullName={fullName}
-          initials={initials}
+          profileHref={profileHref}
+          settingsHref={settingsHref}
           position={position}
           width={collapsed ? 272 : 224}
           isLoggingOut={isLoggingOut}
           onLogout={handleLogout}
+          onNavigate={() => closeMenu()}
           onMouseEnter={cancelScheduledClose}
           onMouseLeave={scheduleClose}
         />

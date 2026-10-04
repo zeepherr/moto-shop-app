@@ -38,7 +38,7 @@ export function StaffProfile({ user }: { user: StaffProfileData }) {
     <ManagementLayout className="max-w-5xl">
       <PageHeader
         title="My Profile"
-        description="Review your staff identity, contact details, and account access"
+        description="Review your identity, contact details, and account access"
       />
 
       <Card className="overflow-hidden border-border/70 shadow-xs">
@@ -69,7 +69,7 @@ export function StaffProfile({ user }: { user: StaffProfileData }) {
                   {roleLabel}
                 </span>
               </div>
-              <p className="mt-1 text-sm text-muted-foreground">Staff account #{user.id}</p>
+              <p className="mt-1 text-sm text-muted-foreground">Account #{user.id}</p>
               <div className="mt-4 flex flex-wrap gap-2 text-xs">
                 <AccountBadge
                   icon={BadgeCheck}

@@ -1,31 +1,33 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "motion/react";
-import { LogOut } from "lucide-react";
-import type { AuthUserDTO } from "@/features/auth/types";
+import { LogOut, Settings, UserRound } from "lucide-react";
 
 interface SidebarAccountMenuProps {
-  user: AuthUserDTO | null;
   fullName: string;
-  initials: string;
+  profileHref: string;
+  settingsHref?: string;
   position: { left: number; top: number };
   width: number;
   isLoggingOut: boolean;
   onLogout: () => void;
+  onNavigate: () => void;
   onMouseEnter: () => void;
   onMouseLeave: () => void;
 }
 
 export function SidebarAccountMenu({
-  user,
   fullName,
-  initials,
+  profileHref,
+  settingsHref,
   position,
   width,
   isLoggingOut,
   onLogout,
+  onNavigate,
   onMouseEnter,
   onMouseLeave,
 }: SidebarAccountMenuProps) {
@@ -44,15 +46,27 @@ export function SidebarAccountMenu({
         onMouseLeave={onMouseLeave}
         className="fixed z-[100] rounded-2xl border border-border/80 bg-popover p-2 text-popover-foreground shadow-[0_18px_48px_rgba(0,0,0,0.24)] dark:shadow-[0_18px_48px_rgba(0,0,0,0.5)]"
       >
-        <div className="flex min-w-0 items-center gap-3 rounded-xl bg-muted/50 px-3 py-3 dark:bg-white/[0.04]">
-          <span className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-primary/20 bg-primary/10 text-sm font-semibold text-primary">
-            {initials}
-          </span>
-          <span className="min-w-0">
-            <span className="block truncate text-sm font-semibold text-foreground">{fullName}</span>
-            <span className="block truncate text-xs text-muted-foreground">{user?.email ?? "Signed in account"}</span>
-          </span>
-        </div>
+        <Link
+          href={profileHref}
+          role="menuitem"
+          onClick={onNavigate}
+          className="flex min-h-11 w-full items-center gap-3 rounded-xl px-3 text-left text-sm font-semibold text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          <UserRound className="size-4 text-muted-foreground" />
+          Profile
+        </Link>
+
+        {settingsHref && (
+          <Link
+            href={settingsHref}
+            role="menuitem"
+            onClick={onNavigate}
+            className="flex min-h-11 w-full items-center gap-3 rounded-xl px-3 text-left text-sm font-semibold text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            <Settings className="size-4 text-muted-foreground" />
+            Settings
+          </Link>
+        )}
 
         <div className="my-2 border-t border-border/70" />
 

@@ -78,7 +78,7 @@ export const PosSearch: React.FC<PosSearchProps> = ({
   };
 
   return (
-    <section aria-label="Find an item" className="grid shrink-0 grid-cols-1 gap-2.5 lg:grid-cols-[minmax(0,1fr)_280px]">
+    <section aria-label="Find an item" className="grid shrink-0 grid-cols-1 gap-2 min-[400px]:grid-cols-[minmax(0,1fr)_minmax(7.5rem,0.42fr)] sm:gap-2.5 lg:grid-cols-[minmax(0,1fr)_280px]">
       <label className="relative block">
         <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
         <Input
@@ -86,7 +86,7 @@ export const PosSearch: React.FC<PosSearchProps> = ({
           onChange={(e) => onSearchChange(e.target.value)}
           placeholder="Search products or services"
           aria-label="Search products or services"
-          className="h-12 rounded-xl border border-input bg-card pl-10 text-base text-foreground placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-primary"
+          className="h-11 rounded-xl border border-input bg-card pl-10 text-base text-foreground placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-primary sm:h-12"
         />
       </label>
 
@@ -97,11 +97,11 @@ export const PosSearch: React.FC<PosSearchProps> = ({
           value={sku}
           onChange={(e) => setSku(e.target.value)}
           onKeyDown={handleSkuSubmit}
-          placeholder="Scan or enter SKU"
+          placeholder="Scan SKU"
           aria-label="Scan or enter product SKU. Press F2 to focus, then Enter to add the exact SKU."
           aria-keyshortcuts="F2"
           autoComplete="off"
-          className="h-12 rounded-xl border border-input bg-card pl-10 text-base text-foreground placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-primary"
+          className="h-11 rounded-xl border border-input bg-card pl-10 text-base text-foreground placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-primary sm:h-12"
         />
         <p className="sr-only">Press F2 to focus the scanner. Press Enter after scanning to add the matching product.</p>
       </label>

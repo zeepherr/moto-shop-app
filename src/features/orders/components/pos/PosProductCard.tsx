@@ -55,14 +55,14 @@ export const PosProductCard: React.FC<PosProductCardProps> = ({ product }) => {
         isOutOfStock && "opacity-60",
       )}
     >
-      <div className="relative aspect-square overflow-hidden border-b border-border/60 bg-muted/30 sm:aspect-4/3">
+      <div className="relative aspect-[4/3] overflow-hidden border-b border-border/60 bg-white sm:aspect-4/3 sm:bg-muted/30">
         {product.imageUrl ? (
           <img
             src={product.imageUrl}
             alt={product.name}
             loading="lazy"
             decoding="async"
-            className="h-full w-full object-cover transition-transform duration-200 ease-out group-hover:scale-[1.025]"
+            className="h-full w-full object-contain p-1.5 transition-transform duration-200 ease-out group-hover:scale-[1.025] sm:object-cover sm:p-0"
           />
         ) : (
             <div className="flex h-full w-full items-center justify-center bg-background/40 text-muted-foreground">
@@ -84,12 +84,12 @@ export const PosProductCard: React.FC<PosProductCardProps> = ({ product }) => {
         )}
       </div>
 
-      <div className="flex flex-1 flex-col p-2.5 sm:p-3.5">
-        <p className="truncate text-xs font-medium uppercase tracking-wide text-muted-foreground">
+      <div className="flex flex-1 flex-col p-2 sm:p-3.5">
+        <p className="truncate text-[10px] font-medium uppercase tracking-wide text-muted-foreground sm:text-xs">
           {product.sku}
         </p>
 
-        <h3 className="mt-1 line-clamp-2 min-h-10 text-sm font-semibold leading-5 text-foreground">
+        <h3 className="mt-1 line-clamp-2 min-h-9 text-sm font-semibold leading-[1.125rem] text-foreground sm:min-h-10 sm:leading-5">
           {product.name}
         </h3>
 
@@ -99,10 +99,10 @@ export const PosProductCard: React.FC<PosProductCardProps> = ({ product }) => {
           </p>
         )}
 
-        <div className="mt-auto pt-3 sm:pt-4">
+        <div className="mt-auto pt-2 sm:pt-4">
           <div className="flex items-end justify-between gap-2">
             <div className="min-w-0">
-              <p className="text-lg font-semibold tracking-tight text-foreground">
+              <p className="text-base font-semibold tracking-tight text-foreground sm:text-lg">
                 <span className="text-accent">฿ </span>
                 {price.toLocaleString(undefined, {
                   minimumFractionDigits: 0,

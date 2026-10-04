@@ -27,12 +27,12 @@ export const PosServiceCard: React.FC<PosServiceCardProps> = ({ service }) => {
   };
 
   return (
-    <article className="flex min-h-40 min-w-0 flex-col rounded-xl border border-border/70 bg-card p-3 transition-colors hover:border-primary/40 sm:rounded-2xl sm:p-3.5">
-      <div className="flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
+    <article className="flex min-h-32 min-w-0 flex-col rounded-xl border border-border/70 bg-card p-2.5 transition-colors hover:border-primary/40 sm:min-h-40 sm:rounded-2xl sm:p-3.5">
+      <div className="flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary sm:size-9">
         <Wrench className="size-4" />
       </div>
 
-      <div className="mt-3 min-w-0">
+      <div className="mt-2 min-w-0 sm:mt-3">
         <h3 className="line-clamp-2 text-sm font-semibold leading-5 text-foreground">{service.name}</h3>
 
         {service.description && (
@@ -42,7 +42,7 @@ export const PosServiceCard: React.FC<PosServiceCardProps> = ({ service }) => {
         )}
       </div>
 
-      <div className="mt-auto flex items-end justify-between gap-2 pt-3">
+      <div className="mt-auto flex items-end justify-between gap-2 pt-2 sm:pt-3">
         <p className="text-base font-semibold text-foreground">
           ฿{price.toLocaleString()}
         </p>

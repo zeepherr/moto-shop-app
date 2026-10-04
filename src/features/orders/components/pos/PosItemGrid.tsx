@@ -48,7 +48,7 @@ export const PosItemGrid: React.FC<PosItemGridProps> = ({
   if (isLoading) {
     return (
       <PosItemGridShell>
-        <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 sm:gap-2.5">
           {Array.from({ length: 10 }).map((_, index) => (
             <div key={index} className="h-48 animate-pulse rounded-xl bg-muted" />
           ))}
@@ -75,7 +75,7 @@ export const PosItemGrid: React.FC<PosItemGridProps> = ({
 
   return (
     <PosItemGridShell>
-      <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 sm:gap-2.5">
         {isProductMode
           ? filteredProducts.map((product) => (
               <PosProductCard key={product.id} product={product} />

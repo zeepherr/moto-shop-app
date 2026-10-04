@@ -126,13 +126,13 @@
      - [x] P0: Replace the full member include in order retrieval with an explicit safe selection, and build a DTO without spreading the Prisma record. The current serializer can expose member fields that the POS does not need.
      - [x] P1: Add vehicle selection after a member is chosen. The POS carries the selected registered motorcycle through held orders and checkout, with server-side ownership validation.
      - [x] P1: Add cashier QR payment confirmation and a printable completed-sale receipt. Checkout now requires an explicit payment-received confirmation when QR is selected.
-     - [ ] P1: Add confirmation and a reason for cancelling held orders, plus ownership or concurrency protection for pending tickets used by multiple staff.
+     - [x] P1: Finish held-order cancellation audit details. Staff and admins can cancel any pending ticket with confirmation and one of five preset reasons; the authenticated actor and reason are stored through nullable additive fields, and only a still-pending order can be cancelled. Admin order details show the cancellation actor and reason.
      - [x] P2: Revalidate product availability when resuming a held ticket, then cap cart quantities by current stock before checkout. Checkout still rechecks stock transactionally.
-     - [ ] P2: Add discounts only with an approved role/approval rule; discount fields already exist in the schema but the POS has no controlled discount flow.
+     - [x] P2: Add a controlled POS discount flow. Admins manage the global percentage from the Products page; checkout applies it only to product lines for staff and admin sales, with the effective rate and amount shown in receipts and order details. The additive ShopSetting table is synced.
      - [x] P2: Improve POS keyboard and touch operation: F2 scanner focus, 44px control targets, semantic product/service add buttons, and no nested interactive elements.
      - [x] P2: Bound the pending-ticket query to the 50 newest tickets and add search by order number or customer.
-     - [ ] P2: Add accessible chart-free text alternatives where required.
-   - Polish receipt printing/preview modal, scanner autofocus behavior, and hold-order drawer after the hardening items above.
+     - [x] P2: Add accessible chart-free text alternatives for dashboard and revenue report charts.
+   - [x] Polish receipt printing/preview with clearer print layout and table semantics; keep F2 scanner focus from stealing focus while modals are open and restore scanner focus after each successful scan; show loading feedback when resuming tickets and clarify the pending-ticket drawer actions.
 3. **Automated Testing & Deployment Preparation**:
    - Vitest / Playwright test scaffolding.
    - Verification for Cloudflare Pages (Frontend) + Railway (Backend/Database).

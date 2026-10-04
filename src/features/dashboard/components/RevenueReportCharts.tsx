@@ -43,7 +43,7 @@ function DonutCard({ title, data }: { title: string; data: Array<{ name: string;
     <section className="rounded-2xl border border-border/70 bg-card p-5">
       <h2 className="text-sm font-semibold text-foreground">{title}</h2>
       <div className="mt-4 grid grid-cols-[132px_1fr] items-center gap-4">
-        <div className="h-32">
+        <div className="h-32" aria-hidden="true">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie data={data} dataKey="value" nameKey="name" innerRadius={40} outerRadius={58} paddingAngle={2} strokeWidth={0}>
@@ -67,6 +67,11 @@ function DonutCard({ title, data }: { title: string; data: Array<{ name: string;
           ))}
         </div>
       </div>
+      <table className="sr-only">
+        <caption>{title} revenue breakdown</caption>
+        <thead><tr><th scope="col">Category</th><th scope="col">Revenue</th></tr></thead>
+        <tbody>{data.map((item) => <tr key={item.name}><th scope="row">{item.name}</th><td>{item.value}</td></tr>)}</tbody>
+      </table>
     </section>
   );
 }
@@ -79,7 +84,7 @@ export function RevenueReportCharts(props: RevenueReportChartsProps) {
           <h2 className="text-base font-semibold text-foreground">Revenue over time</h2>
           <p className="mt-1 text-xs text-muted-foreground">Completed sales grouped in Bangkok time</p>
         </div>
-        <div className="mt-5 h-72">
+        <div className="mt-5 h-72" aria-hidden="true">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={props.trend} margin={{ left: -12, right: 8 }}>
               <CartesianGrid vertical={false} stroke="var(--border)" strokeOpacity={0.6} />
@@ -90,6 +95,11 @@ export function RevenueReportCharts(props: RevenueReportChartsProps) {
             </BarChart>
           </ResponsiveContainer>
         </div>
+        <table className="sr-only">
+          <caption>Revenue per period for the selected {props.period} range</caption>
+          <thead><tr><th scope="col">Period</th><th scope="col">Revenue</th></tr></thead>
+          <tbody>{props.trend.map((point) => <tr key={point.label}><th scope="row">{formatBucket(point.label, props.period)}</th><td>{point.value}</td></tr>)}</tbody>
+        </table>
       </section>
 
       <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-1">

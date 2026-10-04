@@ -67,6 +67,8 @@ export interface CheckoutReceipt {
   paymentMethod: PaymentMethod | null;
   items: Array<{ name: string; quantity: number; unitPrice: number; lineTotal: number }>;
   subtotal: number;
+  discountRate: number;
+  discountAmount: number;
   total: number;
   receivedAmount: number;
 }

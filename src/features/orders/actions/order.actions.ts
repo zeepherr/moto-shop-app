@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import {
   checkoutOrderSchema,
   holdOrderSchema,
+  cancelPendingOrderSchema,
   type CheckoutOrderInput,
   type HoldOrderInput,
 } from "../schemas";
@@ -13,6 +14,7 @@ import {
   cancelPendingOrder,
 } from "../services/order.service";
 import { getPosOperator } from "./pos-auth";
+import { getProductDiscountRate } from "@/features/products/services/discount-setting.service";
 
 export const checkoutOrderAction = async (input: CheckoutOrderInput) => {
   const user = await getPosOperator();
@@ -24,6 +26,11 @@ export const checkoutOrderAction = async (input: CheckoutOrderInput) => {
   }
 
   try {
+    const productDiscountRate = await getProductDiscountRate();
+    if (parsed.data.discountRate !== productDiscountRate) {
+      return { success: false, error: "The product discount changed. Refresh the POS before checking out." };
+    }
+
     const order = await executeCheckoutTx({
       ...parsed.data,
       handledById: user.id,
@@ -48,6 +55,8 @@ export const checkoutOrderAction = async (input: CheckoutOrderInput) => {
           lineTotal: Number(item.lineTotal),
         })),
         subtotal: Number(order.subtotal),
+        discountRate: Number(order.discountRate),
+        discountAmount: Number(order.discountAmount),
         total: Number(order.finalTotal),
         receivedAmount: Number(order.receivedAmount ?? order.finalTotal),
       },
@@ -80,11 +89,20 @@ export const holdOrderAction = async (input: HoldOrderInput) => {
   }
 };
 
-export const cancelPendingOrderAction = async (orderId: number) => {
+export const cancelPendingOrderAction = async (input: { orderId: number; reason: string }) => {
   const user = await getPosOperator();
   if (!user) return { success: false, error: "Unauthorized" };
 
-  const result = await cancelPendingOrder(orderId);
+  const parsed = cancelPendingOrderSchema.safeParse(input);
+  if (!parsed.success) {
+    return { success: false, error: parsed.error.issues[0]?.message || "Invalid cancellation details" };
+  }
+
+  const result = await cancelPendingOrder({
+    id: parsed.data.orderId,
+    cancelledById: user.id,
+    reason: parsed.data.reason,
+  });
   if (result.count === 0) {
     return { success: false, error: "Pending order is no longer available" };
   }

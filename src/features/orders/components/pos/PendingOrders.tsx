@@ -1,25 +1,46 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Clock3, Loader2, Search } from "lucide-react";
+import { Clock3, Loader2, Search, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { getPendingOrdersAction } from "../../actions/order-query.actions";
 import type { OrderDTO } from "../../types";
+import { ORDER_CANCELLATION_REASONS } from "../../constants/cancellation-reasons";
 
 interface PendingOrdersProps {
   onSelectOrder: (orderId: number) => void;
+  onCancelOrder: (orderId: number, reason: string) => Promise<boolean>;
   isSelecting?: boolean;
 }
 
 export const PendingOrders: React.FC<PendingOrdersProps> = ({
   onSelectOrder,
+  onCancelOrder,
   isSelecting = false,
 }) => {
   const [orders, setOrders] = useState<OrderDTO[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
   const [search, setSearch] = useState("");
+  const [orderToCancel, setOrderToCancel] = useState<OrderDTO | null>(null);
+  const [cancelReason, setCancelReason] = useState("");
+  const [isCancelling, setIsCancelling] = useState(false);
+
+  const confirmCancel = async () => {
+    if (!orderToCancel || isCancelling) return;
+    setIsCancelling(true);
+    try {
+      if (await onCancelOrder(orderToCancel.id, cancelReason)) {
+        setOrders((current) => current.filter((order) => order.id !== orderToCancel.id));
+        setOrderToCancel(null);
+        setCancelReason("");
+      }
+    } finally {
+      setIsCancelling(false);
+    }
+  };
 
   useEffect(() => {
     let mounted = true;
@@ -87,12 +108,12 @@ export const PendingOrders: React.FC<PendingOrdersProps> = ({
       </div>
       <p className="text-xs text-muted-foreground">Most recent {orders.length === 50 ? "50" : orders.length} pending tickets</p>
       {filteredOrders.length ? filteredOrders.map((order) => (
+        <div key={order.id} className="flex items-stretch gap-2">
         <Button
-          key={order.id}
           type="button"
           variant="outline"
           onClick={() => onSelectOrder(order.id)}
-          className="h-auto w-full justify-between px-3 py-2.5 text-left cursor-pointer hover:border-primary/40"
+          className="h-auto min-h-16 min-w-0 flex-1 justify-between px-3 py-2.5 text-left cursor-pointer hover:border-primary/40"
         >
           <div className="min-w-0">
             <p className="text-sm font-medium text-foreground">
@@ -122,7 +143,32 @@ export const PendingOrders: React.FC<PendingOrdersProps> = ({
             )}
           </div>
         </Button>
+        <Button type="button" variant="outline" aria-label={`Cancel order ${order.orderNumber || order.id}`} title="Cancel pending order" onClick={() => { setOrderToCancel(order); setCancelReason(""); }} className="min-h-11 min-w-11 self-center px-2 text-destructive hover:text-destructive">
+          <XCircle className="size-4" />
+        </Button>
+        </div>
       )) : <p className="py-6 text-center text-sm text-muted-foreground">No pending tickets match that search.</p>}
+      <Dialog open={Boolean(orderToCancel)} onOpenChange={(open) => !open && !isCancelling && setOrderToCancel(null)}>
+        <DialogContent data-pos-modal="true">
+          <DialogHeader>
+            <DialogTitle>Cancel pending order?</DialogTitle>
+            <DialogDescription>
+              Order #{orderToCancel?.orderNumber || orderToCancel?.id} will be marked cancelled. This cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <label className="mb-2 block text-sm font-medium" htmlFor="pending-cancel-reason">Reason for cancellation</label>
+          <select id="pending-cancel-reason" value={cancelReason} onChange={(event) => setCancelReason(event.target.value)} className="mb-4 h-11 w-full rounded-md border border-input bg-background px-3 text-sm">
+            <option value="">Select a reason</option>
+            {ORDER_CANCELLATION_REASONS.map((reason) => <option key={reason} value={reason}>{reason}</option>)}
+          </select>
+          <DialogFooter>
+            <Button type="button" variant="outline" disabled={isCancelling} onClick={() => { setOrderToCancel(null); setCancelReason(""); }}>Keep order</Button>
+            <Button type="button" variant="destructive" disabled={isCancelling || !cancelReason} onClick={confirmCancel}>
+              {isCancelling ? "Cancelling…" : "Cancel order"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

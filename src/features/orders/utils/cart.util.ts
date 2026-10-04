@@ -47,19 +47,22 @@ export const buildCheckoutPayload = ({
   paymentMethod,
   receivedAmount,
   pendingOrderId,
+  discountRate,
 }: {
   cartItems: PosCartItem[];
   selectedMember?: SelectedMember | null;
   selectedMotorId?: number | null;
-  paymentMethod: PaymentMethod;
+  paymentMethod: PaymentMethod | null;
   receivedAmount: number;
   pendingOrderId?: number | null;
+  discountRate: number;
 }): CheckoutOrderInput => {
   return {
     memberId: selectedMember?.id ?? null,
     motorId: selectedMember ? selectedMotorId ?? null : null,
     paymentMethod,
     receivedAmount,
+    discountRate,
     pendingOrderId: pendingOrderId ?? null,
     items: cartItems.filter((item) => item.quantity > 0).map((item) => ({
       itemType: item.itemType,

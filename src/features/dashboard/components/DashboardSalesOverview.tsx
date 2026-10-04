@@ -13,7 +13,7 @@ function MixPanel({ title, description, data }: { title: string; description: st
   const total = data.reduce((sum, item) => sum + item.revenue, 0);
   return (
     <div className="grid min-w-0 grid-cols-[120px_minmax(0,1fr)] items-center gap-3">
-      <div className="h-28">
+      <div className="h-28" aria-hidden="true">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie data={data} dataKey="revenue" nameKey="label" innerRadius={34} outerRadius={50} paddingAngle={2} strokeWidth={0}>
@@ -38,6 +38,11 @@ function MixPanel({ title, description, data }: { title: string; description: st
           ))}
         </div>
       </div>
+      <table className="sr-only">
+        <caption>{title} revenue breakdown</caption>
+        <thead><tr><th scope="col">Category</th><th scope="col">Revenue</th>{data.some((item) => item.count !== undefined) && <th scope="col">Transactions</th>}</tr></thead>
+        <tbody>{data.map((item) => <tr key={item.label}><th scope="row">{item.label}</th><td>{item.revenue}</td>{data.some((value) => value.count !== undefined) && <td>{item.count ?? 0}</td>}</tr>)}</tbody>
+      </table>
     </div>
   );
 }

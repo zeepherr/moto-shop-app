@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { ORDER_CANCELLATION_REASONS } from "./constants/cancellation-reasons";
 
 export const orderItemInputSchema = z
   .object({
@@ -28,8 +29,9 @@ export const checkoutOrderSchema = z.object({
   memberId: z.number().int().positive().optional().nullable(),
   motorId: z.number().int().positive().optional().nullable(),
   items: z.array(orderItemInputSchema).min(1, "Order must contain at least one item"),
-  paymentMethod: z.enum(["CASH", "QR"]),
-  receivedAmount: z.coerce.number().positive("Received amount must be greater than 0"),
+  paymentMethod: z.enum(["CASH", "QR"]).nullable(),
+  receivedAmount: z.coerce.number().nonnegative("Received amount cannot be negative"),
+  discountRate: z.number().min(0).max(100),
   pendingOrderId: z.number().int().positive().optional().nullable(),
 });
 
@@ -40,6 +42,12 @@ export const holdOrderSchema = z.object({
   items: z.array(orderItemInputSchema).min(1, "Order must contain at least one item"),
 });
 
+export const cancelPendingOrderSchema = z.object({
+  orderId: z.number().int().positive(),
+  reason: z.enum(ORDER_CANCELLATION_REASONS, "Select a cancellation reason"),
+});
+
 export type OrderItemInput = z.infer<typeof orderItemInputSchema>;
 export type CheckoutOrderInput = z.infer<typeof checkoutOrderSchema>;
 export type HoldOrderInput = z.infer<typeof holdOrderSchema>;
+export type CancelPendingOrderInput = z.infer<typeof cancelPendingOrderSchema>;

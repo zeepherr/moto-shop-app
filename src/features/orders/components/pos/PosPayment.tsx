@@ -15,6 +15,7 @@ interface PosPaymentProps {
   changeAmount: number;
   isQrPaymentConfirmed: boolean;
   onQrPaymentConfirmationChange: (confirmed: boolean) => void;
+  isPaymentRequired?: boolean;
 }
 
 export const PosPayment: React.FC<PosPaymentProps> = ({
@@ -26,9 +27,13 @@ export const PosPayment: React.FC<PosPaymentProps> = ({
   changeAmount,
   isQrPaymentConfirmed,
   onQrPaymentConfirmationChange,
+  isPaymentRequired = true,
 }) => {
   return (
     <div className="border-b border-border/60 px-3 py-2 lg:px-4">
+      {!isPaymentRequired ? (
+        <p className="rounded-lg bg-muted/50 px-3 py-3 text-sm font-medium text-foreground">No payment due after the product discount.</p>
+      ) : <>
       <div className="mb-2 flex items-center justify-between">
         <p className="text-xs font-medium text-foreground">Payment Method</p>
         <p className="text-[11px] text-muted-foreground">Select method</p>
@@ -103,6 +108,7 @@ export const PosPayment: React.FC<PosPaymentProps> = ({
           </Button>
         </div>
       )}
+      </>}
     </div>
   );
 };

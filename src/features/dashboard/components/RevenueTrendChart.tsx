@@ -69,7 +69,7 @@ export function RevenueTrendChart({ data }: ChartProps) {
         </div>
       </div>
 
-      <div className="h-[280px] w-full pt-4">
+      <div className="h-[280px] w-full pt-4" aria-hidden="true">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={visibleData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
             <defs>
@@ -119,6 +119,11 @@ export function RevenueTrendChart({ data }: ChartProps) {
           </AreaChart>
         </ResponsiveContainer>
       </div>
+      <table className="sr-only">
+        <caption>Daily revenue for the selected {period} period</caption>
+        <thead><tr><th scope="col">Date</th><th scope="col">Revenue</th></tr></thead>
+        <tbody>{visibleData.map((point) => <tr key={point.date}><th scope="row">{formatDate(point.date, true)}</th><td>{point.revenue}</td></tr>)}</tbody>
+      </table>
     </div>
   );
 }

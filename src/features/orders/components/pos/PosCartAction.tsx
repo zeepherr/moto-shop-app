@@ -48,7 +48,7 @@ export const PosCartActions: React.FC<PosCartActionsProps> = ({
             className="gap-2 cursor-pointer h-11 px-3"
           >
             <Pause className="size-4" />
-            Hold
+            {isPending ? "Saving…" : "Hold"}
           </Button>
         )}
 

@@ -8,12 +8,14 @@ interface PosPageClientProps {
   categories: Array<{ id: number; name: string }>;
   products: Array<any>;
   services: Array<any>;
+  productDiscountRate: number;
 }
 
 export const PosPageClient: React.FC<PosPageClientProps> = ({
   categories,
   products,
   services,
+  productDiscountRate,
 }) => {
   return (
     <div className="mx-auto w-full max-w-[1800px] sm:px-2.5 pr-1.5 lg:h-[calc(100vh-5.5rem)] lg:min-h-0 lg:p-4">
@@ -23,7 +25,7 @@ export const PosPageClient: React.FC<PosPageClientProps> = ({
           products={products}
           services={services}
         />
-        <PosCart />
+        <PosCart productDiscountRate={productDiscountRate} />
       </div>
     </div>
   );

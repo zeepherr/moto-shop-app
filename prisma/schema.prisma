@@ -102,10 +102,20 @@ model User {
 
   memberOrders Order[] @relation("MemberOrder")
   saleOrders   Order[] @relation("Sale")
+  cancelledOrders Order[] @relation("OrderCanceller")
 
   authSessions         AuthSession[]
   auditEventsAsActor   UserAuditEvent[] @relation("UserAuditActor")
   auditEventsAsSubject UserAuditEvent[] @relation("UserAuditSubject")
+}
+
+// SHOP-WIDE SETTINGS
+model ShopSetting {
+  id Int @id @default(1)
+
+  productDiscountRate Decimal @default(0) @db.Decimal(5, 2)
+
+  updatedAt DateTime @updatedAt
 }
 
 // USER INFO
@@ -350,7 +360,9 @@ model Order {
 
   memberId    Int?
   handledById Int
+  cancelledById Int?
   motorId     Int?
+  cancellationReason String?
 
   customerType CustomerType
 
@@ -372,6 +384,7 @@ model Order {
   member User? @relation("MemberOrder", fields: [memberId], references: [id], onDelete: SetNull)
 
   handledBy User @relation("Sale", fields: [handledById], references: [id], onDelete: Restrict)
+  cancelledBy User? @relation("OrderCanceller", fields: [cancelledById], references: [id], onDelete: SetNull)
 
   motor Motor? @relation(fields: [motorId], references: [id], onDelete: SetNull)
 
@@ -379,6 +392,7 @@ model Order {
 
   @@index([memberId])
   @@index([handledById])
+  @@index([cancelledById])
   @@index([motorId])
   @@index([createdAt])
   @@index([status])

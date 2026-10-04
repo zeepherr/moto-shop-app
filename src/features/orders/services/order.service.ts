@@ -78,10 +78,17 @@ const checkoutReceiptInclude = {
   motor: { select: { model: true, motorBrand: { select: { name: true } } } },
 } satisfies Prisma.OrderInclude;
 
-export const cancelPendingOrder = async (id: number, db = defaultDb) => {
+export const cancelPendingOrder = async (
+  data: { id: number; cancelledById: number; reason: string },
+  db = defaultDb,
+) => {
   return await db.order.updateMany({
-    where: { id, status: OrderStatus.PENDING },
-    data: { status: OrderStatus.CANCELLED },
+    where: { id: data.id, status: OrderStatus.PENDING },
+    data: {
+      status: OrderStatus.CANCELLED,
+      cancelledById: data.cancelledById,
+      cancellationReason: data.reason,
+    },
   });
 };
 
@@ -143,6 +150,8 @@ export const holdPendingOrder = async (
           motorId: data.motorId,
           customerType,
           subtotal,
+          discountRate: 0,
+          discountAmount: 0,
           finalTotal: subtotal,
           orderItems: {
             deleteMany: {},
@@ -179,19 +188,29 @@ export const executeCheckoutTx = async (
     memberId?: number | null;
     motorId?: number | null;
     items: OrderItemInput[];
-    paymentMethod: PaymentMethod;
+    paymentMethod: PaymentMethod | null;
     receivedAmount: number;
+    discountRate: number;
     pendingOrderId?: number | null;
   },
   db = defaultDb,
 ) => {
   return await db.$transaction(async (tx) => {
     await assertMemberOwnsMotor(tx, data.memberId, data.motorId);
+    const configuredDiscount = await tx.shopSetting.findUnique({
+      where: { id: 1 },
+      select: { productDiscountRate: true },
+    });
+    const discountRate = Number(configuredDiscount?.productDiscountRate ?? 0);
+    if (discountRate !== data.discountRate) {
+      throw new Error("The product discount changed. Refresh the POS before checking out.");
+    }
     if (data.pendingOrderId) {
       await lockPendingOrder(tx, data.pendingOrderId, true);
     }
 
-    let subtotal = 0;
+    let productSubtotal = 0;
+    let serviceSubtotal = 0;
     const preparedItems = [];
 
     // Verify stock & calculate totals
@@ -212,7 +231,7 @@ export const executeCheckoutTx = async (
         }
 
         const price = Number(prod.sellingPrice);
-        subtotal += price * item.quantity;
+        productSubtotal += price * item.quantity;
         preparedItems.push({
           itemType: OrderItemType.PRODUCT,
           productId: prod.id,
@@ -225,7 +244,7 @@ export const executeCheckoutTx = async (
         const serv = await tx.service.findUnique({ where: { id: item.serviceId } });
         if (!serv || !serv.isActive) throw new Error(`Service #${item.serviceId} unavailable`);
         const price = Number(serv.price);
-        subtotal += price * item.quantity;
+        serviceSubtotal += price * item.quantity;
         preparedItems.push({
           itemType: OrderItemType.SERVICE,
           serviceId: serv.id,
@@ -237,8 +256,15 @@ export const executeCheckoutTx = async (
       }
     }
 
-    if (data.receivedAmount < subtotal) {
-      throw new Error(`Received amount ($${data.receivedAmount}) is less than total ($${subtotal})`);
+    const subtotal = productSubtotal + serviceSubtotal;
+    const discountAmount = Math.min(
+      Math.round((productSubtotal * discountRate) / 100 * 100) / 100,
+      productSubtotal,
+    );
+    const finalTotal = Math.max(0, Math.round((subtotal - discountAmount) * 100) / 100);
+
+    if (data.receivedAmount < finalTotal) {
+      throw new Error(`Received amount (฿${data.receivedAmount}) is less than total (฿${finalTotal})`);
     }
 
     const customerType = data.memberId ? CustomerType.MEMBER : CustomerType.GUEST;
@@ -256,7 +282,9 @@ export const executeCheckoutTx = async (
           motorId: data.motorId,
           customerType,
           subtotal,
-          finalTotal: subtotal,
+          discountRate,
+          discountAmount,
+          finalTotal,
           orderItems: {
             deleteMany: {},
             create: preparedItems,
@@ -278,7 +306,9 @@ export const executeCheckoutTx = async (
         motorId: data.motorId,
         customerType,
         subtotal,
-        finalTotal: subtotal,
+        discountRate,
+        discountAmount,
+        finalTotal,
         status: OrderStatus.COMPLETED,
         paymentMethod: data.paymentMethod,
         receivedAmount: data.receivedAmount,

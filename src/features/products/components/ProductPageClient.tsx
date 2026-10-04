@@ -18,15 +18,18 @@ import {
 import type { ProductDTO } from "../types";
 import type { ProductCategoryDTO } from "@/features/categories/types";
 import type { ProductFormData } from "./ProductForm";
+import { ProductDiscountSetting } from "./ProductDiscountSetting";
 
 interface ProductPageClientProps {
   initialProducts: ProductDTO[];
   categories: ProductCategoryDTO[];
+  initialProductDiscountRate: number;
 }
 
 export const ProductPageClient: React.FC<ProductPageClientProps> = ({
   initialProducts,
   categories,
+  initialProductDiscountRate,
 }) => {
   const [products, setProducts] = useState(initialProducts);
   const [search, setSearch] = useState("");
@@ -217,6 +220,8 @@ export const ProductPageClient: React.FC<ProductPageClientProps> = ({
         actionLabel="Add Product"
         onAction={() => setCreateOpen(true)}
       />
+
+      <ProductDiscountSetting initialRate={initialProductDiscountRate} />
 
       <ProductStats products={products} />
 

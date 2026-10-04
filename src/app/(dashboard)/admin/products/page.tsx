@@ -4,6 +4,7 @@ import { findAllProducts } from "@/features/products/services/product.service";
 import { findAllCategories } from "@/features/categories/services/category.service";
 import { getR2PublicUrl } from "@/features/products/services/r2.service";
 import { ProductPageClient } from "@/features/products/components/ProductPageClient";
+import { getProductDiscountRate } from "@/features/products/services/discount-setting.service";
 
 export const metadata: Metadata = {
   title: "Products & Inventory - HrungMoto",
@@ -13,9 +14,10 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 
 export default async function AdminProductsPage() {
-  const [rawProducts, rawCategories] = await Promise.all([
+  const [rawProducts, rawCategories, productDiscountRate] = await Promise.all([
     findAllProducts(),
     findAllCategories({ isActive: true }),
+    getProductDiscountRate(),
   ]);
 
   const products = rawProducts.map((p) => ({
@@ -45,5 +47,5 @@ export default async function AdminProductsPage() {
     _count: c._count,
   }));
 
-  return <ProductPageClient initialProducts={products} categories={categories as any} />;
+  return <ProductPageClient initialProducts={products} categories={categories as any} initialProductDiscountRate={productDiscountRate} />;
 }

@@ -7,12 +7,15 @@ interface AdminOrder {
   status: string;
   paymentMethod: string | null;
   subtotal: number;
+  discountRate: number;
   discountAmount: number;
   finalTotal: number;
   createdAt: string;
   completedAt: string | null;
   member: { id: number; firstName: string; lastName: string } | null;
   handledBy: { id: number; firstName: string; lastName: string };
+  cancellationReason: string | null;
+  cancelledBy: { id: number; firstName: string; lastName: string } | null;
   motor: { id: number; model: string; type: string; brand: { id: number; name: string } } | null;
   items: Array<{ id: number; itemType: string; itemNameSnapshot: string; quantity: number; unitPrice: number; lineTotal: number }>;
 }
@@ -46,8 +49,12 @@ export function AdminOrdersTable({ orders }: { orders: AdminOrder[] }) {
               <div><p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Order items</p><div className="space-y-2">{order.items.map((item) => <div key={item.id} className="flex items-center justify-between gap-4 text-sm"><span className="min-w-0 truncate text-foreground">{item.itemNameSnapshot} <span className="text-xs text-muted-foreground">× {item.quantity} · {item.itemType.toLowerCase()}</span></span><span className="shrink-0 tabular-nums text-foreground">{money(item.lineTotal)}</span></div>)}</div></div>
               <dl className="space-y-2 rounded-xl border border-border/70 bg-card p-3 text-sm">
                 <div className="flex justify-between"><dt className="text-muted-foreground">Handled by</dt><dd className="text-foreground">{order.handledBy.firstName} {order.handledBy.lastName}</dd></div>
+                {order.status === "CANCELLED" && <>
+                  <div className="flex justify-between gap-3"><dt className="text-muted-foreground">Cancelled by</dt><dd className="text-right text-foreground">{order.cancelledBy ? `${order.cancelledBy.firstName} ${order.cancelledBy.lastName}` : "Unknown user"}</dd></div>
+                  <div className="border-t border-border/60 pt-2"><dt className="text-muted-foreground">Cancellation reason</dt><dd className="mt-1 text-foreground">{order.cancellationReason || "Not recorded"}</dd></div>
+                </>}
                 <div className="flex justify-between"><dt className="text-muted-foreground">Subtotal</dt><dd className="tabular-nums text-foreground">{money(order.subtotal)}</dd></div>
-                <div className="flex justify-between"><dt className="text-muted-foreground">Discount</dt><dd className="tabular-nums text-foreground">−{money(order.discountAmount)}</dd></div>
+                <div className="flex justify-between"><dt className="text-muted-foreground">Product discount{order.discountAmount > 0 ? ` (${order.discountRate}%)` : ""}</dt><dd className="tabular-nums text-foreground">−{money(order.discountAmount)}</dd></div>
                 <div className="flex justify-between border-t border-border/60 pt-2 font-semibold"><dt>Total</dt><dd className="tabular-nums">{money(order.finalTotal)}</dd></div>
               </dl>
             </div>

@@ -32,8 +32,14 @@ export const PosSearch: React.FC<PosSearchProps> = ({
   useEffect(() => {
     const focusScanner = (event: KeyboardEvent) => {
       if (event.key !== "F2" || event.repeat || event.defaultPrevented) return;
+      if (document.visibilityState !== "visible") return;
       const target = event.target;
-      if (target instanceof HTMLElement && (target.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName))) return;
+      if (target instanceof HTMLElement && (
+        target.isContentEditable
+        || /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName)
+        || target.closest('[data-pos-modal="true"]')
+      )) return;
+      if (document.querySelector('[data-pos-modal="true"]')) return;
       event.preventDefault();
       skuRef.current?.focus();
     };
@@ -92,11 +98,12 @@ export const PosSearch: React.FC<PosSearchProps> = ({
           onChange={(e) => setSku(e.target.value)}
           onKeyDown={handleSkuSubmit}
           placeholder="Scan or enter SKU (press Enter)"
-          aria-label="Scan or enter product SKU; press F2 to focus this field"
+          aria-label="Scan or enter product SKU. Press F2 to focus, then Enter to add the exact SKU."
           aria-keyshortcuts="F2"
           autoComplete="off"
           className="h-11 rounded-xl border border-input bg-card pl-9 text-sm text-foreground placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-primary shadow-xs"
         />
+        <p className="sr-only">Press F2 to focus the scanner. Press Enter after scanning to add the matching product.</p>
       </div>
     </section>
   );

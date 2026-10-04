@@ -4,14 +4,16 @@ import { findAllProducts } from "@/features/products/services/product.service";
 import { findAllServices } from "@/features/services/services/motoService.service";
 import { getR2PublicUrl } from "@/features/products/services/r2.service";
 import { PosPageClient } from "@/features/orders/components/pos/PosPageClient";
+import { getProductDiscountRate } from "@/features/products/services/discount-setting.service";
 
 export const dynamic = "force-dynamic";
 
 export default async function StaffPosPage() {
-  const [categories, rawProducts, rawServices] = await Promise.all([
+  const [categories, rawProducts, rawServices, productDiscountRate] = await Promise.all([
     findAllCategories({ isActive: true }),
     findAllProducts({ isActive: true }),
     findAllServices({ isActive: true }),
+    getProductDiscountRate(),
   ]);
 
   const products = rawProducts.map((p) => ({
@@ -39,6 +41,7 @@ export default async function StaffPosPage() {
       categories={categories.map((c) => ({ id: c.id, name: c.name }))}
       products={products}
       services={services}
+      productDiscountRate={productDiscountRate}
     />
   );
 }

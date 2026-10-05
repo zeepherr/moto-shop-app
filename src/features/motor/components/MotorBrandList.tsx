@@ -105,8 +105,9 @@ export const MotorBrandList: React.FC<{ initialBrands: MotorBrandDTO[] }> = ({
   };
 
   return (
-    <ManagementLayout>
+    <ManagementLayout className="!space-y-4 sm:!space-y-6">
       <PageHeader
+        compactOnMobile
         title="Motorcycle Brands"
         description="Manage motorcycle manufacturers and vehicle makes"
         count={initialBrands.length}

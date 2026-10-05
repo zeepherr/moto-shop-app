@@ -105,8 +105,9 @@ export const CategoryList: React.FC<{
   };
 
   return (
-    <ManagementLayout>
+    <ManagementLayout className="!space-y-4 sm:!space-y-6">
       <PageHeader
+        compactOnMobile
         title="Product Categories"
         description="Organize spare parts, consumables, fluids, and accessories catalog"
         count={initialCategories.length}

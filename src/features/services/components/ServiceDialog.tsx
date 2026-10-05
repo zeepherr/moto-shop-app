@@ -74,7 +74,7 @@ const ServiceDialogForm: React.FC<Omit<ServiceDialogProps, "open">> = ({
   };
 
   return (
-    <DialogContent className="sm:max-w-md">
+    <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto p-4 sm:max-h-[90vh] sm:p-6 sm:max-w-md">
         <DialogHeader>
           <DialogTitle>{service ? "Edit Repair Service" : "Add Repair Service"}</DialogTitle>
           <DialogDescription>

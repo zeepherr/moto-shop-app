@@ -39,7 +39,7 @@ export const DockedTableCard: React.FC<DockedTableCardProps> = ({
   return (
     <div className="rounded-2xl border border-border/80 bg-card shadow-xs overflow-hidden">
       {/* Docked Top Toolbar */}
-      <div className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between border-b border-border/60 bg-card/60">
+      <div className="flex flex-col gap-3 border-b border-border/60 bg-card/60 p-3 sm:flex-row sm:items-center sm:justify-between sm:p-4">
         <div className="flex flex-1 flex-col gap-2.5 sm:flex-row sm:items-center sm:max-w-2xl">
           {/* Search Input */}
           <div className="relative w-full sm:min-w-64 sm:flex-1">
@@ -48,7 +48,7 @@ export const DockedTableCard: React.FC<DockedTableCardProps> = ({
               value={search}
               onChange={(e) => onSearchChange(e.target.value)}
               placeholder={searchPlaceholder}
-              className="h-9.5 rounded-xl border border-input/80 bg-background/50 pl-9 text-sm text-foreground placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-primary shadow-2xs"
+              className="h-11 rounded-xl border border-input/80 bg-background/50 pl-9 text-sm text-foreground placeholder:text-muted-foreground shadow-2xs focus-visible:ring-1 focus-visible:ring-primary sm:h-9.5"
             />
             {search && (
               <button
@@ -66,9 +66,9 @@ export const DockedTableCard: React.FC<DockedTableCardProps> = ({
         </div>
 
         {/* Status segmented tabs & clear */}
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex w-full shrink-0 items-center justify-between gap-2 sm:w-auto sm:justify-start">
           {status !== undefined && onStatusChange && (
-            <div className="flex items-center rounded-xl bg-muted/60 p-1 border border-border/50 text-xs">
+            <div className="flex max-w-full items-center overflow-x-auto rounded-xl border border-border/50 bg-muted/60 p-1 text-xs">
               {[
                 { value: "all", label: "All", count: statusCounts?.all },
                 { value: "active", label: "Active", count: statusCounts?.active },
@@ -80,7 +80,7 @@ export const DockedTableCard: React.FC<DockedTableCardProps> = ({
                     key={tab.value}
                     type="button"
                     onClick={() => onStatusChange(tab.value)}
-                    className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1 font-medium transition-all cursor-pointer ${
+                    className={`flex min-h-9 shrink-0 cursor-pointer items-center gap-1.5 rounded-lg px-2.5 py-1 font-medium transition-all sm:min-h-8 ${
                       isActive
                         ? "bg-card text-foreground shadow-2xs"
                         : "text-muted-foreground hover:text-foreground"
@@ -116,7 +116,7 @@ export const DockedTableCard: React.FC<DockedTableCardProps> = ({
               variant="ghost"
               size="sm"
               onClick={onClearFilters}
-              className="h-9 px-2.5 text-xs text-muted-foreground hover:text-foreground gap-1.5 cursor-pointer"
+              className="h-10 shrink-0 gap-1.5 px-2.5 text-xs text-muted-foreground hover:text-foreground sm:h-9"
             >
               <X className="size-3.5" />
               <span>Clear</span>
@@ -129,7 +129,7 @@ export const DockedTableCard: React.FC<DockedTableCardProps> = ({
       <div className="overflow-x-auto">{children}</div>
 
       {/* Docked Card Footer */}
-      <div className="flex items-center justify-between border-t border-border/60 bg-muted/20 px-4 py-3 text-xs text-muted-foreground">
+      <div className="flex items-center justify-between border-t border-border/60 bg-muted/20 px-3 py-3 text-xs text-muted-foreground sm:px-4">
         <span>
           Showing{" "}
           <strong className="font-semibold text-foreground tabular-nums">

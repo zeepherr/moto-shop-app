@@ -121,8 +121,9 @@ export const MotorList: React.FC<{
   };
 
   return (
-    <ManagementLayout>
+    <ManagementLayout className="!space-y-4 sm:!space-y-6">
       <PageHeader
+        compactOnMobile
         title="Motorcycle Models"
         description="Catalog vehicle models, engine platforms, and transmission types"
         count={initialMotors.length}

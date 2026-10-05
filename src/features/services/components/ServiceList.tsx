@@ -116,8 +116,9 @@ export const ServiceList: React.FC<{ initialServices: MotoServiceDTO[] }> = ({
   };
 
   return (
-    <ManagementLayout>
+    <ManagementLayout className="!space-y-4 sm:!space-y-6">
       <PageHeader
+        compactOnMobile
         title="Workshop Services"
         description="Manage repair labor, maintenance packages, and diagnostic rates"
         count={initialServices.length}

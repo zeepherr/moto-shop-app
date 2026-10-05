@@ -18,6 +18,7 @@ export const UserStats: React.FC<UserStatsProps> = ({
   return (
     <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
       <QuickStatCard
+        compactOnMobile
         label="Total Accounts"
         value={total}
         subtext="All registered users"
@@ -25,6 +26,7 @@ export const UserStats: React.FC<UserStatsProps> = ({
         tone="blue"
       />
       <QuickStatCard
+        compactOnMobile
         label="Administrators"
         value={adminCount}
         subtext="Full system access"
@@ -32,6 +34,7 @@ export const UserStats: React.FC<UserStatsProps> = ({
         tone="blue"
       />
       <QuickStatCard
+        compactOnMobile
         label="Staff Members"
         value={staffCount}
         subtext="Technicians & cashiers"
@@ -39,6 +42,7 @@ export const UserStats: React.FC<UserStatsProps> = ({
         tone="success"
       />
       <QuickStatCard
+        compactOnMobile
         label="Customers"
         value={memberCount}
         subtext="Registered vehicle owners"

@@ -18,8 +18,9 @@ export const ProductStats: React.FC<{ products: ProductDTO[] }> = ({
   );
 
   return (
-    <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+    <div className="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-4">
       <QuickStatCard
+        compactOnMobile
         label="Total SKUs"
         value={total}
         subtext={`${inStock} items in active stock`}
@@ -27,6 +28,7 @@ export const ProductStats: React.FC<{ products: ProductDTO[] }> = ({
         tone="blue"
       />
       <QuickStatCard
+        compactOnMobile
         label="Stock Health"
         value={`${total > 0 ? Math.round((inStock / total) * 100) : 0}%`}
         subtext={`${outOfStock} out of stock`}
@@ -34,6 +36,7 @@ export const ProductStats: React.FC<{ products: ProductDTO[] }> = ({
         tone={outOfStock > 0 ? "warning" : "success"}
       />
       <QuickStatCard
+        compactOnMobile
         label="Low Stock Alert"
         value={lowStock}
         subtext="Items with <= 5 units remaining"
@@ -41,6 +44,7 @@ export const ProductStats: React.FC<{ products: ProductDTO[] }> = ({
         tone={lowStock > 0 ? "warning" : "default"}
       />
       <QuickStatCard
+        compactOnMobile
         label="Inventory Value"
         value={`฿${Math.round(inventoryValuation).toLocaleString()}`}
         subtext="Total retail value on hand"

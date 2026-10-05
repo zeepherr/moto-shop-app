@@ -3,6 +3,7 @@
 import React from "react";
 import { ArrowDown, ArrowUp, ArrowUpDown, PackageOpen } from "lucide-react";
 import { ProductRow } from "./ProductRow";
+import { ProductMobileCard } from "./ProductMobileCard";
 import type { ProductDTO } from "../types";
 
 type ProductSortKey = "name" | "sellingPrice" | "stockQuantity";
@@ -25,6 +26,11 @@ export const ProductTable: React.FC<ProductTableProps> = ({
   onDelete,
 }) => {
   return (
+    <>
+    <div className="space-y-2 p-2 md:hidden">
+      {products.map((product) => <ProductMobileCard key={product.id} product={product} onEdit={onEdit} onStatusChange={onStatusChange} onDelete={onDelete} />)}
+    </div>
+    <div className="hidden overflow-x-auto md:block">
     <table className="w-full min-w-[750px] text-sm">
           <thead>
             <tr className="border-b border-border/60 bg-muted/30">
@@ -67,6 +73,8 @@ export const ProductTable: React.FC<ProductTableProps> = ({
             )}
           </tbody>
         </table>
+    </div>
+    </>
   );
 };
 

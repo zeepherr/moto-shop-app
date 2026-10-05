@@ -92,8 +92,8 @@ export function UsersPageClient({ initialUsers, initialEnrollments }: Props) {
   };
 
   const tableFilter = view === "people" ? roleFilter : enrollmentStatus;
-  return <ManagementLayout>
-    <PageHeader title="People" description="Create verified shop accounts, keep access current, and resolve enrollment work before customers leave the counter." count={users.length}>
+  return <ManagementLayout className="!space-y-4 sm:!space-y-6">
+    <PageHeader compactOnMobile title="People" description="Create verified shop accounts, keep access current, and resolve enrollment work before customers leave the counter." count={users.length}>
       <Button type="button" variant="outline" onClick={() => { setEnrollmentDefaults(null); setMethod("SELF_SERVICE"); }}>Send registration link</Button>
       <Button type="button" onClick={() => { setEnrollmentDefaults(null); setMethod("ASSISTED"); }}>Register at counter</Button>
     </PageHeader>

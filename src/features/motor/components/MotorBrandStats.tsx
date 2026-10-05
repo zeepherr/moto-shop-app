@@ -14,8 +14,9 @@ export const MotorBrandStats: React.FC<{ brands: MotorBrandDTO[] }> = ({
   );
 
   return (
-    <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+    <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-3">
       <QuickStatCard
+        compactOnMobile
         label="Total Brands"
         value={total}
         subtext="Registered manufacturers"
@@ -23,6 +24,7 @@ export const MotorBrandStats: React.FC<{ brands: MotorBrandDTO[] }> = ({
         tone="blue"
       />
       <QuickStatCard
+        compactOnMobile
         label="Active Brands"
         value={active}
         subtext={`${total > 0 ? Math.round((active / total) * 100) : 0}% active catalog rate`}
@@ -30,6 +32,7 @@ export const MotorBrandStats: React.FC<{ brands: MotorBrandDTO[] }> = ({
         tone="success"
       />
       <QuickStatCard
+        compactOnMobile
         label="Models Linked"
         value={totalModels}
         subtext="Assigned motorcycle models"

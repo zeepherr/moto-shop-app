@@ -13,8 +13,9 @@ export const MotorStats: React.FC<{
   const manualCount = motors.filter((m) => m.type === "MANUAL").length;
 
   return (
-    <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+    <div className="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-4">
       <QuickStatCard
+        compactOnMobile
         label="Total Models"
         value={total}
         subtext={`${brands.length} manufacturers`}
@@ -22,6 +23,7 @@ export const MotorStats: React.FC<{
         tone="blue"
       />
       <QuickStatCard
+        compactOnMobile
         label="Active Models"
         value={active}
         subtext={`${total > 0 ? Math.round((active / total) * 100) : 0}% active catalog`}
@@ -29,6 +31,7 @@ export const MotorStats: React.FC<{
         tone="success"
       />
       <QuickStatCard
+        compactOnMobile
         label="Automatic"
         value={automaticCount}
         subtext="Scooter & CVT models"
@@ -36,6 +39,7 @@ export const MotorStats: React.FC<{
         tone="default"
       />
       <QuickStatCard
+        compactOnMobile
         label="Manual"
         value={manualCount}
         subtext="Clutch & gear models"

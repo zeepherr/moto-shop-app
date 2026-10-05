@@ -34,6 +34,24 @@ export const ServiceTable: React.FC<ServiceTableProps> = ({
   }
 
   return (
+    <>
+    <div className="space-y-2 p-2 md:hidden">
+      {services.map((service) => (
+        <article key={service.id} className="rounded-xl border border-border/70 bg-background p-3.5">
+          <header className="flex items-center gap-3">
+            <div className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-border/70 bg-muted/50"><Wrench className="size-4 text-primary" /></div>
+            <div className="min-w-0 flex-1"><p className="truncate text-sm font-semibold text-foreground">{service.name}</p><p className="text-xs text-muted-foreground">Repair & maintenance</p></div>
+            <div className="-mr-1 -mt-1 [&>button]:size-11 [&>button]:rounded-xl"><RowActions isActive={service.isActive} onEdit={() => onEdit(service)} onStatusChange={() => onToggleStatus(service)} onDelete={() => onDelete(service)} label="service" /></div>
+          </header>
+          <p className="mt-3 line-clamp-2 text-xs leading-5 text-muted-foreground">{service.description || "Standard technician labor service"}</p>
+          <div className="mt-3 flex items-center justify-between gap-2 border-t border-border/60 pt-3">
+            <div><p className="text-xs text-muted-foreground">Standard rate</p><p className="mt-0.5 text-sm font-semibold tabular-nums text-foreground">฿{Number(service.price).toLocaleString()}</p></div>
+            <StatusBadge isActive={service.isActive} />
+          </div>
+        </article>
+      ))}
+    </div>
+    <div className="hidden overflow-x-auto md:block">
     <table className="w-full min-w-[700px] text-sm">
       <thead>
         <tr className="border-b border-border/60 bg-muted/30">
@@ -103,5 +121,7 @@ export const ServiceTable: React.FC<ServiceTableProps> = ({
         ))}
       </tbody>
     </table>
+    </div>
+    </>
   );
 };

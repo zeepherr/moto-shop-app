@@ -16,8 +16,9 @@ export const ServiceStats: React.FC<{ services: MotoServiceDTO[] }> = ({
   const maxPrice = total > 0 ? Math.max(...prices) : 0;
 
   return (
-    <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+    <div className="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-4">
       <QuickStatCard
+        compactOnMobile
         label="Total Services"
         value={total}
         subtext="Available packages & labor"
@@ -25,6 +26,7 @@ export const ServiceStats: React.FC<{ services: MotoServiceDTO[] }> = ({
         tone="blue"
       />
       <QuickStatCard
+        compactOnMobile
         label="Active Offerings"
         value={active}
         subtext={`${total > 0 ? Math.round((active / total) * 100) : 0}% active service rate`}
@@ -32,6 +34,7 @@ export const ServiceStats: React.FC<{ services: MotoServiceDTO[] }> = ({
         tone="success"
       />
       <QuickStatCard
+        compactOnMobile
         label="Average Rate"
         value={`฿${avgPrice.toLocaleString()}`}
         subtext="Across standard catalog"
@@ -39,6 +42,7 @@ export const ServiceStats: React.FC<{ services: MotoServiceDTO[] }> = ({
         tone="default"
       />
       <QuickStatCard
+        compactOnMobile
         label="Premium Service"
         value={`฿${maxPrice.toLocaleString()}`}
         subtext="Highest tier service price"

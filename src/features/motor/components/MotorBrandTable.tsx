@@ -34,6 +34,23 @@ export const MotorBrandTable: React.FC<MotorBrandTableProps> = ({
   }
 
   return (
+    <>
+    <div className="space-y-2 p-2 md:hidden">
+      {brands.map((brand) => (
+        <article key={brand.id} className="rounded-xl border border-border/70 bg-background p-3.5">
+          <header className="flex items-center gap-3">
+            <div className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-border/70 bg-muted/50 text-xs font-bold uppercase tracking-wider text-foreground">{brand.name.slice(0, 2)}</div>
+            <div className="min-w-0 flex-1"><p className="truncate text-sm font-semibold text-foreground">{brand.name}</p><p className="text-xs text-muted-foreground">Motorcycle manufacturer</p></div>
+            <div className="-mr-1 -mt-1 [&>button]:size-11 [&>button]:rounded-xl"><RowActions isActive={brand.isActive} onEdit={() => onEdit(brand)} onStatusChange={() => onToggleStatus(brand)} onDelete={() => onDelete(brand)} label="brand" /></div>
+          </header>
+          <div className="mt-3 flex items-center justify-between gap-2 border-t border-border/60 pt-3">
+            <span className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground"><Bike className="size-3.5" />{brand._count?.motors ?? 0} {brand._count?.motors === 1 ? "model" : "models"}</span>
+            <StatusBadge isActive={brand.isActive} />
+          </div>
+        </article>
+      ))}
+    </div>
+    <div className="hidden overflow-x-auto md:block">
     <table className="w-full min-w-[650px] text-sm">
       <thead>
         <tr className="border-b border-border/60 bg-muted/30">
@@ -100,5 +117,7 @@ export const MotorBrandTable: React.FC<MotorBrandTableProps> = ({
         ))}
       </tbody>
     </table>
+    </div>
+    </>
   );
 };

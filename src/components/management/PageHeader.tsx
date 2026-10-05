@@ -43,13 +43,13 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
           </p>
         </div>
 
-        <div className="flex items-center gap-2 shrink-0">
+        <div className={`flex shrink-0 items-center gap-2 ${compact ? "w-full flex-col items-stretch [&>*]:w-full sm:w-auto sm:flex-row sm:items-center sm:[&>*]:w-auto" : ""}`}>
           {children}
           {actionLabel && onAction && (
             <Button
               type="button"
               onClick={onAction}
-              className="h-10 rounded-xl bg-[#0066cc] px-4 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#0071e3] active:scale-[0.98] cursor-pointer"
+              className={`h-10 rounded-xl bg-[#0066cc] px-4 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#0071e3] active:scale-[0.98] cursor-pointer ${compact ? "w-full justify-center sm:w-auto" : ""}`}
             >
               <Plus className="size-4" />
               <span>{actionLabel}</span>

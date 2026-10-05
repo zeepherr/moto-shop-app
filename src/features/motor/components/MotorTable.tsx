@@ -34,6 +34,23 @@ export const MotorTable: React.FC<MotorTableProps> = ({
   }
 
   return (
+    <>
+    <div className="space-y-2 p-2 md:hidden">
+      {motors.map((motor) => (
+        <article key={motor.id} className="rounded-xl border border-border/70 bg-background p-3.5">
+          <header className="flex items-center gap-3">
+            <div className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-border/70 bg-muted/50 text-xs font-bold uppercase tracking-wider text-foreground">{motor.model.slice(0, 2)}</div>
+            <div className="min-w-0 flex-1"><p className="truncate text-sm font-semibold text-foreground">{motor.model}</p><p className="truncate text-xs text-muted-foreground">{motor.motorBrand?.name || "No manufacturer"}</p></div>
+            <div className="-mr-1 -mt-1 [&>button]:size-11 [&>button]:rounded-xl"><RowActions isActive={motor.isActive} onEdit={() => onEdit(motor)} onStatusChange={() => onToggleStatus(motor)} onDelete={() => onDelete(motor)} label="model" /></div>
+          </header>
+          <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-border/60 pt-3">
+            <span className="rounded-lg border border-border/50 bg-muted/50 px-2.5 py-1 text-xs font-medium text-foreground">{motor.type === "AUTOMATIC" ? "Automatic (CVT)" : "Manual (Clutch)"}</span>
+            <StatusBadge isActive={motor.isActive} />
+          </div>
+        </article>
+      ))}
+    </div>
+    <div className="hidden overflow-x-auto md:block">
     <table className="w-full min-w-[700px] text-sm">
       <thead>
         <tr className="border-b border-border/60 bg-muted/30">
@@ -103,5 +120,7 @@ export const MotorTable: React.FC<MotorTableProps> = ({
         ))}
       </tbody>
     </table>
+    </div>
+    </>
   );
 };

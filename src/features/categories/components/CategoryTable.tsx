@@ -34,6 +34,23 @@ export const CategoryTable: React.FC<CategoryTableProps> = ({
   }
 
   return (
+    <>
+    <div className="space-y-2 p-2 md:hidden">
+      {categories.map((category) => (
+        <article key={category.id} className="rounded-xl border border-border/70 bg-background p-3.5">
+          <header className="flex items-center gap-3">
+            <div className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-border/70 bg-muted/50 text-xs font-bold uppercase tracking-wider text-foreground">{category.name.slice(0, 2)}</div>
+            <div className="min-w-0 flex-1"><p className="truncate text-sm font-semibold text-foreground">{category.name}</p><p className="text-xs text-muted-foreground">Product category</p></div>
+            <div className="-mr-1 -mt-1 [&>button]:size-11 [&>button]:rounded-xl"><RowActions isActive={category.isActive} onEdit={() => onEdit(category)} onStatusChange={() => onToggleStatus(category)} onDelete={() => onDelete(category)} label="category" /></div>
+          </header>
+          <div className="mt-3 flex items-center justify-between gap-2 border-t border-border/60 pt-3">
+            <span className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground"><Package className="size-3.5" />{category._count?.products ?? 0} {category._count?.products === 1 ? "product" : "products"}</span>
+            <StatusBadge isActive={category.isActive} />
+          </div>
+        </article>
+      ))}
+    </div>
+    <div className="hidden overflow-x-auto md:block">
     <table className="w-full min-w-[650px] text-sm">
       <thead>
         <tr className="border-b border-border/60 bg-muted/30">
@@ -98,5 +115,7 @@ export const CategoryTable: React.FC<CategoryTableProps> = ({
         ))}
       </tbody>
     </table>
+    </div>
+    </>
   );
 };

@@ -6,6 +6,7 @@ interface QuickStatCardProps {
   subtext?: string;
   icon?: React.ReactNode;
   tone?: "default" | "blue" | "success" | "warning";
+  compactOnMobile?: boolean;
 }
 
 const toneStyles = {
@@ -21,26 +22,28 @@ export const QuickStatCard: React.FC<QuickStatCardProps> = ({
   subtext,
   icon,
   tone = "default",
+  compactOnMobile = false,
 }) => {
+  const compact = compactOnMobile;
   return (
-    <div className="rounded-2xl border border-border/70 bg-card p-4 shadow-xs transition-colors hover:border-border">
-      <div className="flex items-center justify-between gap-3">
+    <div className={`rounded-2xl border border-border/70 bg-card shadow-xs transition-colors hover:border-border ${compact ? "p-3 sm:p-4" : "p-4"}`}>
+      <div className={`flex items-center justify-between ${compact ? "gap-2 sm:gap-3" : "gap-3"}`}>
         <p className="text-xs font-medium text-muted-foreground">{label}</p>
         {icon && (
           <div
-            className={`flex size-8 shrink-0 items-center justify-center rounded-xl border ${toneStyles[tone]}`}
+            className={`flex shrink-0 items-center justify-center rounded-xl border ${compact ? "size-7 sm:size-8" : "size-8"} ${toneStyles[tone]}`}
           >
             {icon}
           </div>
         )}
       </div>
       <div className="mt-2 flex items-baseline gap-2">
-        <span className="text-2xl font-semibold tracking-tight text-foreground tabular-nums">
+        <span className={`font-semibold tracking-tight text-foreground tabular-nums ${compact ? "break-words text-xl sm:text-2xl" : "text-2xl"}`}>
           {value}
         </span>
       </div>
       {subtext && (
-        <p className="mt-1 text-xs text-muted-foreground">{subtext}</p>
+        <p className={`mt-1 text-muted-foreground ${compact ? "text-xs leading-4" : "text-xs"}`}>{subtext}</p>
       )}
     </div>
   );

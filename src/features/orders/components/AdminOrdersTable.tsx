@@ -28,23 +28,36 @@ const statusClass: Record<string, string> = {
   CANCELLED: "border-destructive/20 bg-destructive/10 text-destructive",
 };
 
-export function AdminOrdersTable({ orders }: { orders: AdminOrder[] }) {
+export function AdminOrdersTable({ orders, mobile = false }: { orders: AdminOrder[]; mobile?: boolean }) {
   if (!orders.length) {
     return <div className="flex flex-col items-center py-16 text-center"><PackageOpen className="size-8 text-muted-foreground/50" /><p className="mt-3 text-sm font-semibold text-foreground">No matching orders</p><p className="mt-1 text-xs text-muted-foreground">Adjust or clear the current filters.</p></div>;
   }
   return (
     <div className="divide-y divide-border/60">
       {orders.map((order) => (
-        <details key={order.id} className="group">
-          <summary className="grid cursor-pointer list-none grid-cols-[minmax(190px,1.3fr)_minmax(150px,1fr)_minmax(150px,1fr)_110px_120px_24px] items-center gap-4 px-5 py-4 hover:bg-muted/30">
+        <details key={order.id} className={`group ${mobile ? "mb-2 overflow-hidden rounded-xl border border-border/70 bg-card" : ""}`}>
+          <summary className={mobile ? "flex cursor-pointer list-none items-center justify-between gap-2 p-3" : "grid cursor-pointer list-none grid-cols-[minmax(190px,1.3fr)_minmax(150px,1fr)_minmax(150px,1fr)_110px_120px_24px] items-center gap-4 px-5 py-4 hover:bg-muted/30"}>
+            {mobile ? (
+              <div className="min-w-0 flex-1">
+                <div className="flex min-w-0 items-center gap-2">
+                  <p className="truncate text-sm font-semibold text-foreground">{order.orderNumber}</p>
+                  <span className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-medium ${statusClass[order.status]}`}>{order.status.toLowerCase()}</span>
+                </div>
+                <p className="mt-1 truncate text-xs text-foreground">{order.member ? `${order.member.firstName} ${order.member.lastName}` : "Walk-in customer"}</p>
+                <p className="mt-0.5 truncate text-xs text-muted-foreground">{order.motor ? `${order.motor.brand.name} ${order.motor.model}` : "No motorcycle"}</p>
+                <p className="mt-0.5 truncate text-xs text-muted-foreground">{new Date(order.createdAt).toLocaleString("en-GB", { timeZone: "Asia/Bangkok", dateStyle: "medium", timeStyle: "short" })}</p>
+                <p className="mt-1.5 text-sm font-semibold tabular-nums text-foreground">{money(order.finalTotal)} <span className="text-xs font-normal text-muted-foreground">· {order.paymentMethod ?? "Unpaid"}</span></p>
+              </div>
+            ) : <>
             <div><p className="font-semibold text-foreground">{order.orderNumber}</p><p className="mt-0.5 text-xs text-muted-foreground">{new Date(order.createdAt).toLocaleString("en-GB", { timeZone: "Asia/Bangkok", dateStyle: "medium", timeStyle: "short" })}</p></div>
             <div><p className="truncate text-sm text-foreground">{order.member ? `${order.member.firstName} ${order.member.lastName}` : "Walk-in customer"}</p><p className="mt-0.5 text-xs text-muted-foreground">{order.customerType}</p></div>
             <div><p className="truncate text-sm text-foreground">{order.motor ? `${order.motor.brand.name} ${order.motor.model}` : "No motorcycle"}</p><p className="mt-0.5 text-xs text-muted-foreground">{order.motor?.type ?? "—"}</p></div>
             <div><span className={`inline-flex rounded-full border px-2 py-1 text-xs font-medium ${statusClass[order.status]}`}>{order.status.toLowerCase()}</span></div>
             <div className="text-right"><p className="font-semibold tabular-nums text-foreground">{money(order.finalTotal)}</p><p className="mt-0.5 text-xs text-muted-foreground">{order.paymentMethod ?? "Unpaid"}</p></div>
+            </>}
             <ChevronDown className="size-4 text-muted-foreground transition-transform group-open:rotate-180" />
           </summary>
-          <div className="border-t border-border/50 bg-muted/20 px-5 py-4">
+          <div className={`border-t border-border/50 bg-muted/20 ${mobile ? "px-3 py-3" : "px-5 py-4"}`}>
             <div className="grid gap-5 lg:grid-cols-[1fr_280px]">
               <div><p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Order items</p><div className="space-y-2">{order.items.map((item) => <div key={item.id} className="flex items-center justify-between gap-4 text-sm"><span className="min-w-0 truncate text-foreground">{item.itemNameSnapshot} <span className="text-xs text-muted-foreground">× {item.quantity} · {item.itemType.toLowerCase()}</span></span><span className="shrink-0 tabular-nums text-foreground">{money(item.lineTotal)}</span></div>)}</div></div>
               <dl className="space-y-2 rounded-xl border border-border/70 bg-card p-3 text-sm">

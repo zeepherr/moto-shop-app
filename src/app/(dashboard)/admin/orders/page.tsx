@@ -35,30 +35,31 @@ export default async function AdminOrdersPage({
   const currentPage = report.filters.page;
 
   return (
-    <ManagementLayout>
-      <PageHeader title="Orders" description="Review sales, customers, motorcycles, payments, and order line details" count={report.metrics.total}>
+    <ManagementLayout className="!space-y-4 sm:!space-y-6">
+      <PageHeader compactOnMobile title="Orders" description="Review sales, customers, motorcycles, payments, and order line details" count={report.metrics.total}>
         <Link href="/admin" className="inline-flex h-10 items-center gap-2 rounded-xl border border-border bg-card px-3 text-sm font-medium text-foreground transition-colors hover:bg-muted">
           <ArrowLeft className="size-4" /> Dashboard
         </Link>
       </PageHeader>
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <QuickStatCard label="Filtered order value" value={money(report.metrics.totalValue)} subtext="Across current filter results" icon={<Banknote className="size-4" />} tone="blue" />
-        <QuickStatCard label="Completed" value={report.metrics.statusCounts.COMPLETED} subtext="Successfully paid orders" icon={<CheckCircle2 className="size-4" />} tone="success" />
-        <QuickStatCard label="Pending" value={report.metrics.statusCounts.PENDING} subtext="Orders waiting for checkout" icon={<Clock3 className="size-4" />} tone="warning" />
-        <QuickStatCard label="Average value" value={money(report.metrics.averageValue)} subtext={`${report.metrics.statusCounts.CANCELLED} cancelled orders`} icon={<ReceiptText className="size-4" />} />
+      <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-2 sm:gap-4 xl:grid-cols-4">
+        <QuickStatCard compactOnMobile label="Filtered order value" value={money(report.metrics.totalValue)} subtext="Across current filter results" icon={<Banknote className="size-4" />} tone="blue" />
+        <QuickStatCard compactOnMobile label="Completed" value={report.metrics.statusCounts.COMPLETED} subtext="Successfully paid orders" icon={<CheckCircle2 className="size-4" />} tone="success" />
+        <QuickStatCard compactOnMobile label="Pending" value={report.metrics.statusCounts.PENDING} subtext="Orders waiting for checkout" icon={<Clock3 className="size-4" />} tone="warning" />
+        <QuickStatCard compactOnMobile label="Average value" value={money(report.metrics.averageValue)} subtext={`${report.metrics.statusCounts.CANCELLED} cancelled orders`} icon={<ReceiptText className="size-4" />} />
       </div>
 
       <AdminOrderFilters filters={filters} {...report.options} />
 
       <section className="overflow-hidden rounded-2xl border border-border/70 bg-card">
-        <div className="flex items-center justify-between border-b border-border/60 px-5 py-4">
+        <div className="flex items-center justify-between gap-3 border-b border-border/60 px-3.5 py-3.5 sm:px-5 sm:py-4">
           <div><h2 className="text-base font-semibold text-foreground">Order results</h2><p className="mt-1 text-xs text-muted-foreground">Expand any order to inspect items and totals</p></div>
           <p className="text-xs tabular-nums text-muted-foreground">Page {currentPage} of {report.filters.totalPages}</p>
         </div>
-        <div className="overflow-x-auto"><div className="min-w-[900px]"><AdminOrdersTable orders={report.orders} /></div></div>
+        <div className="px-2 py-2 sm:hidden"><AdminOrdersTable orders={report.orders} mobile /></div>
+        <div className="hidden overflow-x-auto sm:block"><div className="min-w-[900px]"><AdminOrdersTable orders={report.orders} /></div></div>
         {report.filters.totalPages > 1 && (
-          <nav className="flex items-center justify-between border-t border-border/60 px-5 py-4" aria-label="Order pages">
+          <nav className="flex items-center justify-between border-t border-border/60 px-3.5 py-3.5 sm:px-5 sm:py-4" aria-label="Order pages">
             {currentPage > 1 ? <Link href={buildPageHref(filters, currentPage - 1)} className="rounded-lg border border-border px-3 py-2 text-sm font-medium text-foreground hover:bg-muted">Previous</Link> : <span />}
             {currentPage < report.filters.totalPages ? <Link href={buildPageHref(filters, currentPage + 1)} className="rounded-lg border border-border px-3 py-2 text-sm font-medium text-foreground hover:bg-muted">Next</Link> : <span />}
           </nav>

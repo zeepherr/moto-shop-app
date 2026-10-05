@@ -34,10 +34,10 @@ export default async function AdminDashboardPage() {
         };
 
   return (
-    <ManagementLayout>
+    <ManagementLayout className="!space-y-4 sm:!space-y-6">
       <DashboardHeader />
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4">
         <MetricCard
           label="Total Revenue"
           href="/admin/revenue"
@@ -86,14 +86,14 @@ export default async function AdminDashboardPage() {
 
       <TodayOperations {...summary.today} />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2">
           <RevenueTrendChart data={summary.revenueTrend} />
         </div>
         <DashboardActionCenter {...summary.attention} />
       </div>
 
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 sm:gap-6 xl:grid-cols-2">
         <DashboardSalesOverview
           products={summary.salesMix.products}
           services={summary.salesMix.services}
@@ -105,7 +105,7 @@ export default async function AdminDashboardPage() {
 
       <StaffActivity items={summary.staffActivity} />
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2">
           <RecentOrdersList orders={summary.recentOrders} />
         </div>

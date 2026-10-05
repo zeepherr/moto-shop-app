@@ -42,8 +42,18 @@ function DonutCard({ title, data }: { title: string; data: Array<{ name: string;
   return (
     <section className="rounded-2xl border border-border/70 bg-card p-5">
       <h2 className="text-sm font-semibold text-foreground">{title}</h2>
-      <div className="mt-4 grid grid-cols-[132px_1fr] items-center gap-4">
-        <div className="h-32" aria-hidden="true">
+      <div className="mt-3 grid grid-cols-[96px_minmax(0,1fr)] items-center gap-3 sm:mt-4 sm:grid-cols-[132px_1fr] sm:gap-4">
+        <div className="h-24 w-24 sm:hidden" aria-hidden="true">
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Pie data={data} dataKey="value" nameKey="name" innerRadius={27} outerRadius={39} paddingAngle={2} strokeWidth={0}>
+                {data.map((item) => <Cell key={item.name} fill={item.color} />)}
+              </Pie>
+              <Tooltip formatter={(value) => money(Number(value))} />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+        <div className="hidden h-32 w-[132px] sm:block" aria-hidden="true">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie data={data} dataKey="value" nameKey="name" innerRadius={40} outerRadius={58} paddingAngle={2} strokeWidth={0}>
@@ -53,7 +63,7 @@ function DonutCard({ title, data }: { title: string; data: Array<{ name: string;
             </PieChart>
           </ResponsiveContainer>
         </div>
-        <div className="space-y-3">
+        <div className="min-w-0 space-y-2 sm:space-y-3">
           {data.map((item) => (
             <div key={item.name} className="flex items-center justify-between gap-3 text-xs">
               <span className="flex items-center gap-2 text-muted-foreground">
@@ -84,7 +94,7 @@ export function RevenueReportCharts(props: RevenueReportChartsProps) {
           <h2 className="text-base font-semibold text-foreground">Revenue over time</h2>
           <p className="mt-1 text-xs text-muted-foreground">Completed sales grouped in Bangkok time</p>
         </div>
-        <div className="mt-5 h-72" aria-hidden="true">
+        <div className="mt-4 h-56 sm:mt-5 sm:h-72" aria-hidden="true">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={props.trend} margin={{ left: -12, right: 8 }}>
               <CartesianGrid vertical={false} stroke="var(--border)" strokeOpacity={0.6} />
@@ -102,7 +112,7 @@ export function RevenueReportCharts(props: RevenueReportChartsProps) {
         </table>
       </section>
 
-      <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-1">
+      <div className="grid gap-3 sm:grid-cols-2 sm:gap-6 xl:grid-cols-1">
         <DonutCard title="Revenue mix" data={[
           { name: "Products", value: props.productRevenue, color: "#2997ff" },
           { name: "Services", value: props.serviceRevenue, color: "#7a7a7a" },

@@ -13,28 +13,28 @@ export const DashboardHeader: React.FC = () => {
   }).format(new Date());
 
   return (
-    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between pb-2">
+    <div className="flex flex-col gap-3 pb-1 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:pb-2">
       <div>
         <p className="mb-1 text-xs font-medium text-muted-foreground">{currentDate}</p>
-        <h1 className="text-3xl font-semibold tracking-tight text-foreground">
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
           Workshop Cockpit
         </h1>
-        <p className="text-sm text-muted-foreground mt-0.5">
+        <p className="mt-1 text-xs leading-5 text-muted-foreground sm:mt-0.5 sm:text-sm">
           Real-time metrics, revenue performance, and inventory health
         </p>
       </div>
 
-      <div className="flex items-center gap-2.5 shrink-0">
+      <div className="grid grid-cols-2 gap-2 sm:flex sm:shrink-0 sm:items-center sm:gap-2.5">
         <Link
           href="/admin/products"
-          className="inline-flex items-center gap-1.5 rounded-full border border-border/80 bg-card/80 backdrop-blur-md px-4 py-2 text-xs sm:text-sm font-medium text-foreground hover:bg-muted/80 active:scale-95 transition-all cursor-pointer"
+          className="inline-flex min-h-10 items-center justify-center gap-1.5 rounded-full border border-border/80 bg-card/80 px-3 py-2 text-xs font-medium text-foreground backdrop-blur-md transition-all hover:bg-muted/80 active:scale-95 sm:px-4 sm:text-sm"
         >
           <Plus className="h-3.5 w-3.5" />
           <span>Add Product</span>
         </Link>
         <Link
           href="/admin/pos"
-          className="inline-flex items-center gap-2 rounded-full bg-[#0066cc] hover:bg-[#0071e3] text-white px-5 py-2 text-xs sm:text-sm font-medium shadow-xs active:scale-95 transition-all cursor-pointer"
+          className="inline-flex min-h-10 items-center justify-center gap-1.5 rounded-full bg-[#0066cc] px-3 py-2 text-xs font-medium text-white shadow-xs transition-all hover:bg-[#0071e3] active:scale-95 sm:gap-2 sm:px-5 sm:text-sm"
         >
           <ShoppingBag className="h-4 w-4" />
           <span>Launch POS</span>

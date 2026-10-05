@@ -36,8 +36,8 @@ export function RevenueTrendChart({ data }: ChartProps) {
   const tickInterval = Math.max(0, Math.ceil(visibleData.length / 6) - 1);
 
   return (
-    <div className="rounded-2xl border border-border/70 bg-card/60 p-5 backdrop-blur-md">
-      <div className="flex flex-col gap-3 border-b border-border/40 pb-4 sm:flex-row sm:items-center sm:justify-between">
+    <div className="rounded-2xl border border-border/70 bg-card/60 p-3.5 backdrop-blur-md sm:p-5">
+      <div className="flex flex-col gap-3 border-b border-border/40 pb-3 sm:flex-row sm:items-center sm:justify-between sm:pb-4">
         <div>
           <h2 className="text-base font-semibold tracking-tight text-foreground">Revenue Analytics</h2>
           <p className="mt-0.5 text-xs text-muted-foreground">
@@ -45,7 +45,7 @@ export function RevenueTrendChart({ data }: ChartProps) {
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center justify-between gap-2">
           <div className="flex items-center rounded-full border border-border/50 bg-muted/50 p-1 text-xs" aria-label="Revenue period">
             {(["7D", "30D", "90D", "1Y"] as const).map((option) => (
               <button
@@ -53,7 +53,7 @@ export function RevenueTrendChart({ data }: ChartProps) {
                 type="button"
                 onClick={() => setPeriod(option)}
                 aria-pressed={period === option}
-                className={`rounded-full px-3 py-1 font-medium transition-colors ${
+                className={`min-h-8 rounded-full px-2.5 py-1 font-medium transition-colors sm:px-3 ${
                   period === option
                     ? "bg-card text-foreground shadow-xs"
                     : "text-muted-foreground hover:text-foreground"
@@ -63,13 +63,13 @@ export function RevenueTrendChart({ data }: ChartProps) {
               </button>
             ))}
           </div>
-          <Link href="/admin/revenue" aria-label="Open revenue details" className="flex size-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">
+          <Link href="/admin/revenue" aria-label="Open revenue details" className="flex size-9 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground sm:size-8">
             <ArrowRight className="size-4" />
           </Link>
         </div>
       </div>
 
-      <div className="h-[280px] w-full pt-4" aria-hidden="true">
+      <div className="h-[220px] w-full pt-3 sm:h-[280px] sm:pt-4" aria-hidden="true">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={visibleData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
             <defs>

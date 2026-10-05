@@ -31,7 +31,7 @@ function Ranking({ title, items, icon: Icon }: { title: string; items: RankedIte
 
 export function BestSellers({ products, services }: { products: RankedItem[]; services: RankedItem[] }) {
   return (
-    <section className="rounded-2xl border border-border/70 bg-card p-5">
+    <section className="rounded-2xl border border-border/70 bg-card p-3.5 sm:p-5">
       <div className="flex items-start justify-between gap-4 border-b border-border/60 pb-4">
         <div>
           <h2 className="text-base font-semibold text-foreground">Best sellers</h2>
@@ -41,7 +41,7 @@ export function BestSellers({ products, services }: { products: RankedItem[]; se
           Sales details <ArrowRight className="size-3" />
         </Link>
       </div>
-      <div className="grid gap-6 pt-5 md:grid-cols-2 md:divide-x md:divide-border/60">
+      <div className="grid gap-4 pt-4 md:grid-cols-2 md:gap-6 md:pt-5 md:divide-x md:divide-border/60">
         <Ranking title="Products" items={products} icon={Package} />
         <div className="md:pl-6"><Ranking title="Services" items={services} icon={Wrench} /></div>
       </div>

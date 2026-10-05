@@ -11,6 +11,7 @@ interface PageHeaderProps {
   actionLabel?: string;
   onAction?: () => void;
   children?: React.ReactNode;
+  compactOnMobile?: boolean;
 }
 
 export const PageHeader: React.FC<PageHeaderProps> = ({
@@ -20,13 +21,15 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
   actionLabel,
   onAction,
   children,
+  compactOnMobile = false,
 }) => {
+  const compact = compactOnMobile;
   return (
-    <header className="border-b border-border/60 pb-5 pt-5 sm:pb-6 sm:pt-6">
+    <header className={`border-b border-border/60 ${compact ? "pb-4 pt-3 sm:pb-6 sm:pt-6" : "pb-5 pt-5 sm:pb-6 sm:pt-6"}`}>
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div className="min-w-0">
           <div className="flex items-center gap-3">
-            <h1 className="text-[1.75rem] font-semibold leading-tight tracking-[-0.025em] text-foreground">
+            <h1 className={`font-semibold leading-tight tracking-[-0.025em] text-foreground ${compact ? "text-2xl sm:text-[1.75rem]" : "text-[1.75rem]"}`}>
               {title}
             </h1>
             {count !== undefined && (
@@ -35,7 +38,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
               </span>
             )}
           </div>
-          <p className="mt-1.5 max-w-2xl text-sm leading-5 text-muted-foreground">
+          <p className={`mt-1.5 max-w-2xl leading-5 text-muted-foreground ${compact ? "text-xs sm:text-sm" : "text-sm"}`}>
             {description}
           </p>
         </div>

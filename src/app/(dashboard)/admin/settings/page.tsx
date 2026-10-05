@@ -26,18 +26,28 @@ export default function AdminSettingsPage() {
               {isDark ? "Dark theme" : "Light theme"}
             </span>
           </span>
-          <button
-            type="button"
-            role="switch"
-            aria-checked={isDark}
-            aria-label="Dark theme"
-            onClick={() => setTheme(isDark ? "light" : "dark")}
-            className={`relative h-7 w-12 shrink-0 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-card ${isDark ? "bg-primary" : "bg-muted-foreground/40"}`}
+          <div
+            role="group"
+            aria-label="Color theme"
+            className="grid h-11 shrink-0 grid-cols-2 gap-1 rounded-full border border-border/70 bg-muted/60 p-1"
           >
-            <span
-              className={`absolute top-1 size-5 rounded-full bg-white shadow-sm transition-transform ${isDark ? "translate-x-6" : "translate-x-1"}`}
-            />
-          </button>
+            <button
+              type="button"
+              aria-pressed={!isDark}
+              onClick={() => setTheme("light")}
+              className={`rounded-full px-4 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${!isDark ? "bg-card text-primary" : "text-muted-foreground hover:text-foreground"}`}
+            >
+              Light
+            </button>
+            <button
+              type="button"
+              aria-pressed={isDark}
+              onClick={() => setTheme("dark")}
+              className={`rounded-full px-4 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${isDark ? "bg-card text-primary" : "text-muted-foreground hover:text-foreground"}`}
+            >
+              Dark
+            </button>
+          </div>
         </div>
         <p className="p-5 text-sm text-muted-foreground sm:p-6">
           Additional shop settings are coming soon.

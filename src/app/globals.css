@@ -117,7 +117,24 @@
 /* Compact utility spacing on short laptop viewports without changing type size. */
 @media (min-width: 1024px) and (max-height: 950px) {
   :root {
-    --spacing: 0.22rem;
+    --spacing: 0.2rem;
+  }
+
+  .management-page-header {
+    padding-block: 0.75rem;
+  }
+
+  .management-page-header h1 {
+    font-size: var(--text-2xl);
+  }
+
+  .quick-stat-card {
+    padding: 0.75rem;
+  }
+
+  .quick-stat-card-value {
+    font-size: var(--text-xl);
+    line-height: 1.2;
   }
 
   .product-discount-setting {

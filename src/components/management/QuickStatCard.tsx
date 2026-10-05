@@ -26,7 +26,7 @@ export const QuickStatCard: React.FC<QuickStatCardProps> = ({
 }) => {
   const compact = compactOnMobile;
   return (
-    <div className={`rounded-2xl border border-border/70 bg-card shadow-xs transition-colors hover:border-border ${compact ? "p-3 sm:p-4" : "p-4"}`}>
+    <div className={`quick-stat-card rounded-2xl border border-border/70 bg-card shadow-xs transition-colors hover:border-border ${compact ? "p-3 sm:p-4" : "p-4"}`}>
       <div className={`flex items-center justify-between ${compact ? "gap-2 sm:gap-3" : "gap-3"}`}>
         <p className="text-xs font-medium text-muted-foreground">{label}</p>
         {icon && (
@@ -38,7 +38,7 @@ export const QuickStatCard: React.FC<QuickStatCardProps> = ({
         )}
       </div>
       <div className="mt-2 flex items-baseline gap-2">
-        <span className={`font-semibold tracking-tight text-foreground tabular-nums ${compact ? "break-words text-xl sm:text-2xl" : "text-2xl"}`}>
+        <span className={`quick-stat-card-value font-semibold tracking-tight text-foreground tabular-nums ${compact ? "break-words text-xl sm:text-2xl" : "text-2xl"}`}>
           {value}
         </span>
       </div>

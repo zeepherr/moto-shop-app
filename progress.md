@@ -59,6 +59,12 @@
 - **Verification**: Shared foundation type check passes; UI detector reports 0 anti-patterns and 10 advisory notes in existing files; `git diff --check` passes. Production build is prohibited.
 - **Status**: Route review and implementation pass complete. The shared laptop-density rule covers all routes; Products, POS, Dashboard, Revenue, Member Profile, and public landing received additional page-specific sizing. Admin list pages, Settings, profiles, Staff/Member routes, all auth routes, and unauthorized page inherit shared sizing. Each code step passed TypeScript, the UI detector (0 anti-patterns; 10 existing advisories), and `git diff --check`. Browser screenshot QA was unavailable; verify the result at the user's actual viewport when the app is opened.
 
+### Follow-up: Laptop Cards Still Too Large (2026-10-05)
+- **User feedback**: The first density pass remained too subtle. The dashboard screenshot shows oversized summary cards still consuming too much of the laptop viewport. Continue with actual card height/type/padding adjustments across shared components, not only utility spacing.
+- **Scope remains**: Laptop viewport only (`min-width: 1024px`, `max-height: 950px`); no mobile or taller desktop styling changes and no application logic changes.
+- **Shared management step**: Strengthen the laptop spacing scale and compact shared page headers and summary cards; commit this separately before page-specific card work.
+- **Dashboard step**: Compact the dashboard metric cards and Today Operations row further; commit as its own page step.
+
 ### A. Global Shell & Surface System (desktop complete; admin mobile refresh planned)
 - [x] **`AppShell` & Layout**: Responsive container bounded to `max-w-7xl mx-auto` for management screens to eliminate widescreen voids on 1440p/4K monitors.
 - [x] **`AppHeader`**: Compact light/dark adaptive utility bar with role-aware breadcrumbs and theme switch.

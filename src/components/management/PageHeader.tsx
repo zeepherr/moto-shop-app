@@ -25,7 +25,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
 }) => {
   const compact = compactOnMobile;
   return (
-    <header className={`border-b border-border/60 ${compact ? "pb-4 pt-3 sm:pb-6 sm:pt-6" : "pb-5 pt-5 sm:pb-6 sm:pt-6"}`}>
+    <header className={`management-page-header border-b border-border/60 ${compact ? "pb-4 pt-3 sm:pb-6 sm:pt-6" : "pb-5 pt-5 sm:pb-6 sm:pt-6"}`}>
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div className="min-w-0">
           <div className="flex items-center gap-3">

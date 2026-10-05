@@ -13,20 +13,10 @@ function MixPanel({ title, description, data }: { title: string; description: st
   const total = data.reduce((sum, item) => sum + item.revenue, 0);
   return (
     <div className="grid min-w-0 grid-cols-[88px_minmax(0,1fr)] items-center gap-3 sm:grid-cols-[120px_minmax(0,1fr)]">
-      <div className="h-24 w-[88px] sm:hidden" aria-hidden="true">
+      <div className="h-24 w-[88px] sm:h-28 sm:w-[120px]" aria-hidden="true">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
-            <Pie data={data} dataKey="revenue" nameKey="label" innerRadius={26} outerRadius={37} paddingAngle={2} strokeWidth={0}>
-              {data.map((item) => <Cell key={item.label} fill={item.color} />)}
-            </Pie>
-            <Tooltip formatter={(value) => `฿${Number(value).toLocaleString()}`} />
-          </PieChart>
-        </ResponsiveContainer>
-      </div>
-      <div className="hidden h-28 w-[120px] sm:block" aria-hidden="true">
-        <ResponsiveContainer width="100%" height="100%">
-          <PieChart>
-            <Pie data={data} dataKey="revenue" nameKey="label" innerRadius={34} outerRadius={50} paddingAngle={2} strokeWidth={0}>
+            <Pie data={data} dataKey="revenue" nameKey="label" innerRadius="34%" outerRadius="48%" paddingAngle={2} strokeWidth={0}>
               {data.map((item) => <Cell key={item.label} fill={item.color} />)}
             </Pie>
             <Tooltip formatter={(value) => `฿${Number(value).toLocaleString()}`} />

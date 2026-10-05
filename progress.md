@@ -40,6 +40,13 @@
 
 ## 4. Current Implementation Status (Vault Synchronized)
 
+### Admin Orders Filter Redesign (2026-10-05)
+- **User-approved scope**: Redesign the `/admin/orders` filter to use less vertical space while keeping every existing condition available. Preserve its GET query names, report behavior, and mobile/desktop responsiveness; do not add saved-view functionality or change order logic.
+- **Plan**: Keep search and status in a compact toolbar; place payment, customer, product, member, brand, motorcycle type, staff, and date range in a native expandable section. Show the number of active secondary conditions and retain Apply/Clear actions.
+- **Implementation**: Replaced the tall always-open filter grid with a compact search/status toolbar and an expandable “More filters” panel containing all other existing conditions. The panel shows an active-filter count and opens automatically when secondary conditions are applied. Apply and Clear preserve the existing query behavior; no report or order logic changed.
+- **Verification**: `cmd.exe /c "npx tsc --noEmit"`, focused ESLint on `AdminOrderFilters.tsx`, Impeccable detector (0 anti-patterns; 19 existing advisories in unrelated files), and `git diff --check` pass. Browser screenshot verification was unavailable.
+- **Status**: Implementation and verification complete; commit pending.
+
 ### POS Receipt Printing Follow-Up (2026-10-05)
 - **User report**: Chrome print preview opens as a blank page; add a visible Cancel action on the initial completed-sale receipt view.
 - **Investigation**: The current print CSS hides the entire page and forces a nested receipt inside a fixed, scrollable dialog to `position: fixed`; the supplied preview confirms that this print-only layout is not producing receipt content.

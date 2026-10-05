@@ -25,8 +25,8 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
 }) => {
   const compact = compactOnMobile;
   return (
-    <header className="management-page-header border-b border-border/60 py-3 sm:py-4">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <header className="management-page-header border-b border-border/60 py-3 sm:py-4 min-[1536px]:pb-6 min-[1536px]:pt-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-[1536px]:gap-4 min-[1536px]:items-end">
         <div className="min-w-0">
           <div className="flex items-center gap-3">
             <h1 className="sr-only min-[1536px]:not-sr-only min-[1536px]:block min-[1536px]:text-[1.75rem] min-[1536px]:font-semibold min-[1536px]:leading-tight min-[1536px]:tracking-[-0.025em] min-[1536px]:text-foreground">
@@ -38,7 +38,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
               </span>
             )}
           </div>
-          <p className="max-w-2xl text-xs leading-5 text-muted-foreground sm:text-sm">
+          <p className="max-w-2xl text-xs leading-5 text-muted-foreground sm:text-sm min-[1536px]:mt-1.5">
             {description}
           </p>
         </div>

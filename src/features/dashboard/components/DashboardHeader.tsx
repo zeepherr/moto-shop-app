@@ -16,7 +16,7 @@ export const DashboardHeader: React.FC = () => {
     <div className="dashboard-page-header flex flex-col gap-3 pb-1 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:pb-2">
       <div className="min-w-0">
         <p className="mb-1 hidden text-xs font-medium text-muted-foreground min-[1536px]:block">{currentDate}</p>
-        <h1 className="dashboard-page-title sr-only min-[1536px]:not-sr-only min-[1536px]:block min-[1536px]:text-2xl min-[1536px]:font-semibold min-[1536px]:tracking-tight min-[1536px]:text-foreground">
+        <h1 className="dashboard-page-title sr-only min-[1536px]:not-sr-only min-[1536px]:block min-[1536px]:text-3xl min-[1536px]:font-semibold min-[1536px]:tracking-tight min-[1536px]:text-foreground">
           Workshop Cockpit
         </h1>
         <p className="mt-1 hidden text-xs leading-5 text-muted-foreground sm:mt-0.5 sm:text-sm min-[1536px]:block">

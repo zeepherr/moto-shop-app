@@ -29,7 +29,7 @@ export const PosPageClient: React.FC<PosPageClientProps> = ({
   return (
     <div className="mx-auto flex w-full max-w-[1800px] flex-col gap-3 sm:px-2.5 lg:h-[calc(100dvh-1.5rem)] lg:min-h-0 lg:flex-col lg:p-4">
       <h1 className="sr-only">Point of sale</h1>
-      <div className="-mx-2 flex justify-end px-2 sm:-mx-3 sm:px-3 2xl:hidden">
+      <div className="sticky top-2 z-30 -mx-2 flex justify-end px-2 sm:-mx-3 sm:px-3 2xl:hidden">
         <div className="flex min-h-11 items-center justify-end gap-2">
           {activeView === "catalog" ? (
             <button

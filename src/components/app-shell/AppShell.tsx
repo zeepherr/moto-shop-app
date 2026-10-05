@@ -62,7 +62,7 @@ export const AppShell: React.FC<AppShellProps> = ({
     : role === ROLES.STAFF
       ? "pb-[calc(88px+env(safe-area-inset-bottom))] md:pb-5"
       : "pb-3 sm:pb-4 lg:pb-5";
-  const mainTopSpacing = "pt-[calc(env(safe-area-inset-top)+1.25rem)] md:pt-6 min-[1536px]:pt-16";
+  const mainTopSpacing = "pt-[calc(env(safe-area-inset-top)+1.25rem)] md:pt-[1.5rem] min-[1536px]:mt-16 min-[1536px]:pt-0";
 
   return (
     <div className="flex h-dvh overflow-hidden bg-background">

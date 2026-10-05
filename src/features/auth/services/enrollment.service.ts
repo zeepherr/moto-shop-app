@@ -122,6 +122,17 @@ export const incrementEnrollmentOtpAttempts = async (id: number, db = defaultDb)
   });
 };
 
+export const clearSelfServiceOtpCooldown = async (email: string, db = defaultDb) => {
+  return await db.enrollment.updateMany({
+    where: {
+      email,
+      method: EnrollmentMethod.SELF_SERVICE,
+      status: EnrollmentStatus.AWAITING_OTP,
+    },
+    data: { otpLastSentAt: null },
+  });
+};
+
 export const findEnrollmentById = async (id: number, db = defaultDb) => {
   return await db.enrollment.findUnique({ where: { id } });
 };
@@ -273,4 +284,3 @@ export const createUserFromSelfServiceEnrollment = async (
     return user;
   });
 };
-

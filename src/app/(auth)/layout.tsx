@@ -1,6 +1,16 @@
 import React from "react";
+import { redirect } from "next/navigation";
+import { getCurrentUser } from "@/features/auth/actions/session.action";
+import { ROLES } from "@/features/auth/constants";
 
-export default function AuthLayout({ children }: { children: React.ReactNode }) {
+export default async function AuthLayout({ children }: { children: React.ReactNode }) {
+  const user = await getCurrentUser();
+  if (user) {
+    if (user.role === ROLES.ADMIN) redirect("/admin");
+    if (user.role === ROLES.STAFF) redirect("/staff");
+    redirect("/member");
+  }
+
   return (
     <div className="min-h-screen w-full flex items-center justify-center p-4 bg-background relative overflow-hidden">
       {/* Decorative gradient glow */}

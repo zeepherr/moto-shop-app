@@ -35,6 +35,10 @@ export const RegisterForm: React.FC = () => {
     startTransition(async () => {
       const res = await registerAction(formData);
       if (!res.success) {
+        if (res.code === "OTP_DELIVERY_FAILED") {
+          router.push(`/verify-email?email=${encodeURIComponent(formData.email)}&delivery=retry`);
+          return;
+        }
         setError(res.error || "Failed to register");
         return;
       }

@@ -9,6 +9,7 @@ import {
 import type { ActionResult } from "../types";
 import {
   createUserFromSelfServiceEnrollment,
+  clearSelfServiceOtpCooldown,
   findSelfServiceOtpEnrollment,
   incrementEnrollmentOtpAttempts,
   recordEnrollmentEvent,
@@ -109,6 +110,7 @@ export const resendOtpAction = async (input: ResendVerificationInput): Promise<A
   try {
     await sendRegistrationOtpEmail(email, otp);
   } catch {
+    await clearSelfServiceOtpCooldown(email);
     await recordEnrollmentEvent({
       enrollmentId: pending.id,
       action: UserAuditAction.ENROLLMENT_OTP_DELIVERY_FAILED,

@@ -9,7 +9,29 @@ import { Label } from "@/components/ui/label";
 import { loginAction } from "../actions/login.action";
 import { ROLES } from "../constants";
 
-export const LoginForm: React.FC = () => {
+const getRoleHome = (role?: string) => {
+  if (role === ROLES.ADMIN) return "/admin";
+  if (role === ROLES.STAFF) return "/staff";
+  return "/member";
+};
+
+const getSafeRoleRedirect = (redirectTo: string | undefined, role?: string) => {
+  if (!redirectTo || !redirectTo.startsWith("/") || redirectTo.startsWith("//") || redirectTo.includes("\\")) {
+    return null;
+  }
+
+  const home = getRoleHome(role);
+  try {
+    const target = new URL(redirectTo, "https://hrungmoto.invalid");
+    if (target.origin !== "https://hrungmoto.invalid") return null;
+    if (target.pathname !== home && !target.pathname.startsWith(`${home}/`)) return null;
+    return `${target.pathname}${target.search}${target.hash}`;
+  } catch {
+    return null;
+  }
+};
+
+export const LoginForm: React.FC<{ redirectTo?: string }> = ({ redirectTo }) => {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -33,9 +55,7 @@ export const LoginForm: React.FC = () => {
 
         toast.success(`Welcome back, ${(res.data as { firstName?: string })?.firstName || "there"}`);
         const role = (res.data as { role?: string })?.role;
-        if (role === ROLES.ADMIN) router.push("/admin");
-        else if (role === ROLES.STAFF) router.push("/staff");
-        else router.push("/member");
+        router.push(getSafeRoleRedirect(redirectTo, role) ?? getRoleHome(role));
         router.refresh();
       } catch {
         const message = "Unable to sign in right now. Please try again.";

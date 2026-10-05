@@ -8,7 +8,14 @@ export const metadata: Metadata = {
   description: "Sign in to your HrungMoto account",
 };
 
-export default function LoginPage() {
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ redirect?: string | string[] }>;
+}) {
+  const params = await searchParams;
+  const redirectTo = Array.isArray(params.redirect) ? params.redirect[0] : params.redirect;
+
   return (
     <Card className="border-border/60 shadow-lg">
       <CardHeader>
@@ -18,7 +25,7 @@ export default function LoginPage() {
         />
       </CardHeader>
       <CardContent>
-        <LoginForm />
+        <LoginForm redirectTo={redirectTo} />
       </CardContent>
     </Card>
   );

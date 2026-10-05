@@ -13,12 +13,15 @@ export const VerifyEmailForm: React.FC = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const emailParam = searchParams.get("email") || "";
+  const deliveryFailed = searchParams.get("delivery") === "retry";
 
   const [isPending, startTransition] = useTransition();
   const [email, setEmail] = useState(emailParam);
   const [code, setCode] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [info, setInfo] = useState<string | null>(null);
+  const [info, setInfo] = useState<string | null>(
+    deliveryFailed ? "We couldn't deliver the first code. You can request a new one now." : null,
+  );
   const [cooldown, setCooldown] = useState(0);
 
   useEffect(() => {

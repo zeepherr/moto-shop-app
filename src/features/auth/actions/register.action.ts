@@ -7,6 +7,7 @@ import { findUserByEmail } from "../services/auth.service";
 import {
   beginSelfServiceRegistration,
   findSelfServiceOtpEnrollment,
+  clearSelfServiceOtpCooldown,
   recordEnrollmentEvent,
 } from "../services/enrollment.service";
 import { UserAuditAction } from "@prisma/client";
@@ -48,6 +49,7 @@ export const registerAction = async (input: RegisterInput): Promise<ActionResult
   try {
     await sendRegistrationOtpEmail(email, otp);
   } catch {
+    await clearSelfServiceOtpCooldown(email);
     const enrollment = await findSelfServiceOtpEnrollment(email);
     if (enrollment) {
       await recordEnrollmentEvent({
@@ -58,6 +60,7 @@ export const registerAction = async (input: RegisterInput): Promise<ActionResult
     // If SMTP fails, notify user but do not crash
     return {
       success: false,
+      code: "OTP_DELIVERY_FAILED",
       error: "Failed to send verification email. Please check your email configuration.",
     };
   }

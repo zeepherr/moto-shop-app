@@ -5,7 +5,7 @@ import { loginSchema, type LoginInput } from "../schemas";
 import type { ActionResult } from "../types";
 import { findUserByEmail, createAuthSession } from "../services/auth.service";
 import { createAccessToken, createRefreshToken, hashRefreshToken } from "../services/token.service";
-import { setAuthCookies } from "../services/cookie.service";
+import { clearAuthCookies, setAuthCookies } from "../services/cookie.service";
 
 export const loginAction = async (input: LoginInput): Promise<ActionResult> => {
   const parsed = loginSchema.safeParse(input);
@@ -21,6 +21,7 @@ export const loginAction = async (input: LoginInput): Promise<ActionResult> => {
   }
 
   if (!user.isActive) {
+    await clearAuthCookies();
     return { success: false, error: "Your account has been deactivated" };
   }
 

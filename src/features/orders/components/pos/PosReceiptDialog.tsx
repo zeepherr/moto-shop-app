@@ -3,16 +3,23 @@
 import { Printer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { toast } from "sonner";
 import type { CheckoutReceipt } from "../../types";
+import { money, openReceiptPrintWindow } from "../../utils/receipt-print";
 
 interface PosReceiptDialogProps {
   receipt: CheckoutReceipt | null;
   onOpenChange: (open: boolean) => void;
 }
 
-const money = (amount: number) => `฿${amount.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-
 export function PosReceiptDialog({ receipt, onOpenChange }: PosReceiptDialogProps) {
+  const handlePrint = () => {
+    if (!receipt) return;
+    if (!openReceiptPrintWindow(receipt)) {
+      toast.error("Printing was blocked. Allow pop-ups for this site, then try again.");
+    }
+  };
+
   return (
     <Dialog open={receipt !== null} onOpenChange={onOpenChange}>
       <DialogContent data-pos-modal="true" className="max-h-[calc(100dvh-2rem)] overflow-y-auto p-4 sm:max-w-lg sm:p-6">
@@ -21,7 +28,11 @@ export function PosReceiptDialog({ receipt, onOpenChange }: PosReceiptDialogProp
           <DialogDescription>Review or print the customer receipt.</DialogDescription>
         </DialogHeader>
         {receipt && <>
-          <section id="printable-receipt" aria-label="Completed sale receipt" className="space-y-4 rounded-xl border border-border/70 bg-background p-3 text-foreground sm:space-y-5 sm:p-5">
+          <div className="mb-4 flex justify-end gap-2">
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
+            <Button type="button" onClick={handlePrint} className="gap-2"><Printer className="size-4" />Print receipt</Button>
+          </div>
+          <section aria-label="Completed sale receipt" className="space-y-4 rounded-xl border border-border/70 bg-background p-3 text-foreground sm:space-y-5 sm:p-5">
             <header className="border-b border-border/60 pb-4 text-center">
               <p className="text-lg font-semibold">HrungMoto</p>
               <p className="text-sm text-muted-foreground">Sales receipt</p>
@@ -40,8 +51,6 @@ export function PosReceiptDialog({ receipt, onOpenChange }: PosReceiptDialogProp
             <dl className="ml-auto max-w-52 space-y-1 text-sm"><div className="flex justify-between"><dt className="text-muted-foreground">Subtotal</dt><dd>{money(receipt.subtotal)}</dd></div>{receipt.discountAmount > 0 && <div className="flex justify-between gap-4 text-emerald-700 dark:text-emerald-400"><dt>Products discount ({receipt.discountRate}%)</dt><dd>−{money(receipt.discountAmount)}</dd></div>}<div className="flex justify-between border-t border-border/60 pt-2 font-semibold"><dt>Total</dt><dd>{money(receipt.total)}</dd></div><div className="flex justify-between"><dt className="text-muted-foreground">Received</dt><dd>{money(receipt.receivedAmount)}</dd></div>{receipt.paymentMethod === "CASH" && <div className="flex justify-between"><dt className="text-muted-foreground">Change</dt><dd>{money(Math.max(receipt.receivedAmount - receipt.total, 0))}</dd></div>}</dl>
             <footer className="border-t border-border/60 pt-3 text-center text-xs text-muted-foreground">Thank you for choosing HrungMoto.</footer>
           </section>
-          <div className="flex justify-end" data-no-print><Button type="button" onClick={() => window.print()} className="gap-2"><Printer className="size-4" />Print receipt</Button></div>
-          <style>{`@page { margin: 12mm; } @media print { html, body { background: #fff !important; } body * { visibility: hidden !important; } #printable-receipt, #printable-receipt * { visibility: visible !important; } #printable-receipt { position: fixed; inset: 0; z-index: 9999; width: 100%; max-width: none; border: 0 !important; padding: 0 !important; background: #fff !important; color: #000 !important; box-shadow: none !important; } #printable-receipt .text-muted-foreground { color: #555 !important; } [data-no-print] { display: none !important; } }`}</style>
         </>}
       </DialogContent>
     </Dialog>

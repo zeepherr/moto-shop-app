@@ -40,6 +40,12 @@
 
 ## 4. Current Implementation Status (Vault Synchronized)
 
+### POS Receipt Printing Follow-Up (2026-10-05)
+- **User report**: Chrome print preview opens as a blank page; add a visible Cancel action on the initial completed-sale receipt view.
+- **Investigation**: The current print CSS hides the entire page and forces a nested receipt inside a fixed, scrollable dialog to `position: fixed`; the supplied preview confirms that this print-only layout is not producing receipt content.
+- **Scope**: Fix receipt printing and add a Cancel action that closes the completed-sale receipt dialog (the order is already completed and must not be retroactively cancelled). Review POS workflows without creating/cancelling live orders or changing production data.
+- **Verification**: TypeScript and focused POS ESLint pass (one existing `<img>` performance warning in `PosProductCard.tsx`); Impeccable reports 0 anti-patterns (19 advisory notes); `git diff --check` passes. A temporary mocked POS check passed cart conversion, stock limits/resume adjustment, cart mutation/reset, safe receipt output, print invocation/cleanup, and blocked-popup handling. No live orders were created or cancelled. Browser automation runtime is unavailable, so Chrome print preview and the on-screen Cancel click are not visually verified end to end.
+
 ### Error and Not-Found Pages (2026-10-05)
 - Added a root route error boundary for transient server/network failures, with retry and home recovery actions and no database details exposed to users.
 - Added a branded root not-found page for unknown URLs.

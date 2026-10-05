@@ -141,6 +141,10 @@
   .revenue-report-trend {
     height: 224px;
   }
+
+  .member-profile-banner {
+    height: 96px;
+  }
 }
 
 body {

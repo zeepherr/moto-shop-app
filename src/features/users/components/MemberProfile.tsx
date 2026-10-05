@@ -54,7 +54,7 @@ export const MemberProfile: React.FC<{ user: UserProfileData | null }> = ({ user
   return (
     <div className="mx-auto w-full max-w-6xl space-y-6">
       <Card className="overflow-hidden border-border/60 shadow-xs">
-        <div className="h-28 bg-gradient-to-r from-primary/20 via-primary/10 to-background sm:h-36" />
+        <div className="member-profile-banner h-28 bg-gradient-to-r from-primary/20 via-primary/10 to-background sm:h-36" />
         <CardContent className="relative px-5 pb-6 sm:px-8">
           <div className="-mt-12 flex flex-col gap-5 sm:-mt-14 sm:flex-row sm:items-end sm:justify-between">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-end">

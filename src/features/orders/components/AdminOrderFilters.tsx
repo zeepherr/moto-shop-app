@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Search, SlidersHorizontal } from "lucide-react";
 import type { AdminOrderFilters as FilterValues } from "../services/admin-order-report.service";
 import { Select } from "@/components/ui/select";
+import { DatePicker } from "@/components/ui/date-picker";
 
 interface Option { id: number; name: string }
 
@@ -51,8 +52,8 @@ export function AdminOrderFilters({ filters, products, members, brands, handlers
         <Select name="handledById" defaultValue={filters.handledById ?? ""} className={selectClass} aria-label="Handled by" options={[
           { value: "", label: "All staff" }, ...handlers.map((handler) => ({ value: String(handler.id), label: `${handler.firstName} ${handler.lastName}` })),
         ]} />
-        <label><span className="mb-1 block text-xs text-muted-foreground">From</span><input name="from" type="date" defaultValue={filters.from} className={`${selectClass} w-full`} /></label>
-        <label><span className="mb-1 block text-xs text-muted-foreground">To</span><input name="to" type="date" defaultValue={filters.to} className={`${selectClass} w-full`} /></label>
+        <label><span className="mb-1 block text-xs text-muted-foreground">From</span><DatePicker name="from" defaultValue={filters.from} className={`${selectClass} w-full`} placeholder="Choose start date" /></label>
+        <label><span className="mb-1 block text-xs text-muted-foreground">To</span><DatePicker name="to" defaultValue={filters.to} className={`${selectClass} w-full`} placeholder="Choose end date" /></label>
       </div>
       <div className="mt-4 flex justify-end gap-2 border-t border-border/60 pt-4">
         <Link href="/admin/orders" className="inline-flex h-9 items-center rounded-lg px-3 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground">Clear</Link>

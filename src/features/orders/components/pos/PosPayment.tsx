@@ -30,7 +30,7 @@ export const PosPayment: React.FC<PosPaymentProps> = ({
   isPaymentRequired = true,
 }) => {
   return (
-    <div className="border-b border-border/60 px-3 py-3 lg:px-4 lg:py-2">
+    <div className="pos-payment-panel border-b border-border/60 px-3 py-3 lg:px-4 lg:py-2">
       {!isPaymentRequired ? (
         <p className="rounded-lg bg-muted/50 px-3 py-3 text-sm font-medium text-foreground">No payment due after the product discount.</p>
       ) : <>

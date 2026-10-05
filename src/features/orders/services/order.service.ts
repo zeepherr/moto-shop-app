@@ -35,6 +35,34 @@ async function assertMemberOwnsMotor(
   if (!association) throw new Error("Selected motorcycle is not registered to this customer");
 }
 
+async function loadCatalogItems(
+  tx: Prisma.TransactionClient,
+  items: OrderItemInput[],
+) {
+  const productIds = [...new Set(
+    items.flatMap((item) =>
+      item.itemType === OrderItemType.PRODUCT && item.productId ? [item.productId] : [],
+    ),
+  )];
+  const serviceIds = [...new Set(
+    items.flatMap((item) =>
+      item.itemType === OrderItemType.SERVICE && item.serviceId ? [item.serviceId] : [],
+    ),
+  )];
+
+  const products = productIds.length
+    ? await tx.product.findMany({ where: { id: { in: productIds } } })
+    : [];
+  const services = serviceIds.length
+    ? await tx.service.findMany({ where: { id: { in: serviceIds } } })
+    : [];
+
+  return {
+    productsById: new Map(products.map((product) => [product.id, product])),
+    servicesById: new Map(services.map((service) => [service.id, service])),
+  };
+}
+
 export const findPendingOrders = async (db = defaultDb) => {
   return await db.order.findMany({
     where: { status: OrderStatus.PENDING },
@@ -105,12 +133,13 @@ export const holdPendingOrder = async (
 ) => {
   return await db.$transaction(async (tx) => {
     await assertMemberOwnsMotor(tx, data.memberId, data.motorId);
+    const { productsById, servicesById } = await loadCatalogItems(tx, data.items);
     let subtotal = 0;
     const preparedItems = [];
 
     for (const item of data.items) {
       if (item.itemType === OrderItemType.PRODUCT && item.productId) {
-        const prod = await tx.product.findUnique({ where: { id: item.productId } });
+        const prod = productsById.get(item.productId);
         if (!prod) throw new Error(`Product #${item.productId} not found`);
         const price = Number(prod.sellingPrice);
         subtotal += price * item.quantity;
@@ -123,7 +152,7 @@ export const holdPendingOrder = async (
           lineTotal: price * item.quantity,
         });
       } else if (item.itemType === OrderItemType.SERVICE && item.serviceId) {
-        const serv = await tx.service.findUnique({ where: { id: item.serviceId } });
+        const serv = servicesById.get(item.serviceId);
         if (!serv) throw new Error(`Service #${item.serviceId} not found`);
         const price = Number(serv.price);
         subtotal += price * item.quantity;
@@ -220,6 +249,10 @@ export const executeCheckoutTx = async (
       await lockPendingOrder(tx, data.pendingOrderId, true);
     }
 
+    const { productsById, servicesById } = await loadCatalogItems(tx, data.items);
+    const remainingStockByProductId = new Map(
+      [...productsById].map(([productId, product]) => [productId, product.stockQuantity]),
+    );
     let productSubtotal = 0;
     let serviceSubtotal = 0;
     const preparedItems = [];
@@ -227,10 +260,11 @@ export const executeCheckoutTx = async (
     // Verify stock & calculate totals
     for (const item of data.items) {
       if (item.itemType === OrderItemType.PRODUCT && item.productId) {
-        const prod = await tx.product.findUnique({ where: { id: item.productId } });
+        const prod = productsById.get(item.productId);
         if (!prod || !prod.isActive) throw new Error(`Product #${item.productId} unavailable`);
-        if (prod.stockQuantity < item.quantity) {
-          throw new Error(`Insufficient stock for "${prod.name}" (Available: ${prod.stockQuantity})`);
+        const remainingStock = remainingStockByProductId.get(prod.id) ?? 0;
+        if (remainingStock < item.quantity) {
+          throw new Error(`Insufficient stock for "${prod.name}" (Available: ${remainingStock})`);
         }
 
         const stockUpdated = await tx.product.updateMany({
@@ -238,8 +272,9 @@ export const executeCheckoutTx = async (
           data: { stockQuantity: { decrement: item.quantity } },
         });
         if (stockUpdated.count === 0) {
-          throw new Error(`Insufficient stock for "${prod.name}" (Available: ${prod.stockQuantity})`);
+          throw new Error(`Insufficient stock for "${prod.name}" (Available: ${remainingStock})`);
         }
+        remainingStockByProductId.set(prod.id, remainingStock - item.quantity);
 
         const price = Number(prod.sellingPrice);
         productSubtotal += price * item.quantity;
@@ -252,7 +287,7 @@ export const executeCheckoutTx = async (
           lineTotal: price * item.quantity,
         });
       } else if (item.itemType === OrderItemType.SERVICE && item.serviceId) {
-        const serv = await tx.service.findUnique({ where: { id: item.serviceId } });
+        const serv = servicesById.get(item.serviceId);
         if (!serv || !serv.isActive) throw new Error(`Service #${item.serviceId} unavailable`);
         const price = Number(serv.price);
         serviceSubtotal += price * item.quantity;

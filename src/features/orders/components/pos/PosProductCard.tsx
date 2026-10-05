@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useRef } from "react";
 import { ImageOff, Plus, PackageCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { usePosStore } from "../../stores/usePosStore";
@@ -23,10 +23,12 @@ export interface PosProduct {
 
 interface PosProductCardProps {
   product: PosProduct;
+  onProductAdded?: (imageElement: HTMLImageElement | null) => void;
 }
 
-export const PosProductCard: React.FC<PosProductCardProps> = ({ product }) => {
+export const PosProductCard: React.FC<PosProductCardProps> = ({ product, onProductAdded }) => {
   const addItem = usePosStore((store) => store.addItem);
+  const imageRef = useRef<HTMLImageElement>(null);
 
   const stock = Number(product.stockQuantity) || 0;
   const isOutOfStock = stock <= 0;
@@ -44,7 +46,10 @@ export const PosProductCard: React.FC<PosProductCardProps> = ({ product }) => {
 
     if (!added) {
       toast.warning("Maximum available stock reached.");
+      return;
     }
+
+    onProductAdded?.(imageRef.current);
   };
 
   return (
@@ -59,6 +64,7 @@ export const PosProductCard: React.FC<PosProductCardProps> = ({ product }) => {
         {product.imageUrl ? (
           <img
             src={product.imageUrl}
+            ref={imageRef}
             alt={product.name}
             loading="lazy"
             decoding="async"

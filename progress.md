@@ -40,6 +40,14 @@
 
 ## 4. Current Implementation Status (Vault Synchronized)
 
+### Active Workstream: Laptop Viewport Density Pass (2026-10-05)
+- **User-approved scope**: Review and tighten visual density across the full application, including authentication pages, for laptop-sized usable viewports. Process one page/surface at a time and create a separate commit for each completed step.
+- **Responsive boundary**: Apply styling only to the constrained laptop viewport range selected after measuring the app's real shell and routes. Preserve existing mobile and roomy desktop presentation; do not use device detection. Height as well as width must be considered because the reported issue is vertical crowding.
+- **Behavior boundary**: Visual layout and sizing only. Do not change business logic, data flow, navigation, validation, or interaction behavior.
+- **Workflow**: Inventory routes and shared components first; sequence shared shell and auth surfaces alongside management pages without allowing a shared change to unintentionally alter mobile or roomy desktop. For each page step, make the targeted layout change, run the required type and UI checks, review the diff, update this progress section, and commit that step before proceeding.
+- **Known examples**: Products page stacks its heading, POS discount setting, four inventory metrics, and table controls before the first rows; POS cart content is clipped/visually crowded at the reported viewport. Treat the cart visibility issue as a page-specific layout concern within the visual-only boundary.
+- **Status**: Planning recorded. Route inventory, exact laptop viewport thresholds, and first page step are pending. No implementation changes have been made under this workstream yet.
+
 ### A. Global Shell & Surface System (desktop complete; admin mobile refresh planned)
 - [x] **`AppShell` & Layout**: Responsive container bounded to `max-w-7xl mx-auto` for management screens to eliminate widescreen voids on 1440p/4K monitors.
 - [x] **`AppHeader`**: Compact light/dark adaptive utility bar with role-aware breadcrumbs and theme switch.

@@ -46,7 +46,7 @@ export function PasswordField({
           onChange={onChange}
           disabled={disabled}
           required={required}
-          className="pr-12"
+          className="pr-12 text-base"
         />
         <button
           type="button"
@@ -59,7 +59,7 @@ export function PasswordField({
           {visible ? <EyeOff size={18} aria-hidden="true" /> : <Eye size={18} aria-hidden="true" />}
         </button>
       </div>
-      {hint ? <p className="text-xs leading-relaxed text-muted-foreground">{hint}</p> : null}
+      {hint ? <p className="text-sm leading-relaxed text-muted-foreground">{hint}</p> : null}
     </div>
   );
 }

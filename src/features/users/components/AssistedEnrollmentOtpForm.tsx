@@ -61,7 +61,7 @@ export function AssistedEnrollmentOtpForm({ enrollmentId, email }: AssistedEnrol
     <form className="mx-auto max-w-2xl space-y-5" onSubmit={verify}>
       <OtpMotionScene compact verified={verified} />
       {message ? <p role="status" aria-live="polite" className="text-center text-sm text-success">{message}</p> : null}
-      <p className="text-sm leading-6 text-muted-foreground">
+      <p className="text-base leading-7 text-muted-foreground">
         Ask the customer for the six-digit code delivered to <span className="font-medium text-foreground">{email}</span>.
       </p>
       <div className="space-y-1.5">

@@ -65,6 +65,7 @@ export const RegisterForm: React.FC = () => {
           autoComplete="email"
           autoCapitalize="none"
           spellCheck={false}
+          className="text-base"
           required
           placeholder="Use the email approved by the shop"
           value={formData.email}
@@ -96,7 +97,7 @@ export const RegisterForm: React.FC = () => {
         disabled={isPending}
       />
 
-      <Button type="submit" className="w-full h-11" disabled={isPending}>
+      <Button type="submit" className="w-full h-11 text-base" disabled={isPending}>
         {isPending ? "Sending verification code..." : "Continue"}
       </Button>
 

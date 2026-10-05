@@ -103,6 +103,7 @@ export const VerifyEmailForm: React.FC = () => {
           autoComplete="email"
           autoCapitalize="none"
           spellCheck={false}
+          className="text-base"
           required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
@@ -115,7 +116,7 @@ export const VerifyEmailForm: React.FC = () => {
         <OtpCodeInput id="code" value={code} onChange={(value) => { setCode(value); setError(null); }} disabled={isPending} invalid={!!error} verified={verified} />
       </div>
 
-      <Button type="submit" className="w-full h-11" disabled={isPending || code.length !== 6}>
+      <Button type="submit" className="w-full h-11 text-base" disabled={isPending || code.length !== 6}>
         {isPending ? "Verifying..." : "Verify Email"}
       </Button>
 

@@ -82,6 +82,7 @@ export const LoginForm: React.FC<{ redirectTo?: string }> = ({ redirectTo }) => 
           autoComplete="email"
           autoCapitalize="none"
           spellCheck={false}
+          className="text-base"
           placeholder="name@example.com"
           required
           value={email}
@@ -100,7 +101,7 @@ export const LoginForm: React.FC<{ redirectTo?: string }> = ({ redirectTo }) => 
         disabled={isPending}
       />
 
-      <Button type="submit" className="w-full h-11" disabled={isPending}>
+      <Button type="submit" className="w-full h-11 text-base" disabled={isPending}>
         {isPending ? "Logging in..." : "Sign in"}
       </Button>
 

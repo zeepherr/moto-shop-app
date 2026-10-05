@@ -67,7 +67,7 @@ export function PasswordSetupForm() {
             autoComplete="new-password"
             disabled={isPending}
           />
-          <Button className="h-11 w-full" disabled={isPending} type="submit">
+          <Button className="h-11 w-full text-base" disabled={isPending} type="submit">
             {isPending ? "Saving password..." : "Set password"}
           </Button>
         </>

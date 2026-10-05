@@ -83,6 +83,8 @@
 - [x] Added a reduced-motion path that removes ambient tracking and decorative loops while preserving verification state feedback.
 - **Motion thesis**: orbiting security signal settles into a verified shield/check after a successful code; cursor light follows the visitor as a quiet Action Blue focus cue. CSS only, no canvas/WebGL or added dependency.
 - **Verification**: `npx tsc --noEmit`, focused ESLint on changed TS/TSX files, bundled Impeccable detector (0 findings), and `git diff --check` pass. The `npx impeccable` form could not reach npm from the sandbox; used the project's local Impeccable launcher. Browser screenshots are unavailable, so responsive/theme behavior was reviewed from token-driven CSS and route composition.
+- **Typography final check (2026-10-05)**: Auth headings retain the system sans hierarchy; supporting prose and form values use 16px for readable mobile entry, labels and utility links remain 14px, OTP digits remain enlarged/tabular, and password hints are raised to 14px. Auth descriptions retain a 42ch measure. Type detector reports no findings.
+- **Final validation**: TypeScript passes; repository-wide ESLint completes with 0 errors and 476 existing warnings outside these typography edits; Impeccable type/UI scans and `git diff --check` pass. No test script is configured and production build is prohibited by project rules.
 
 ### B. Admin Management Modules
 - [x] **Admin Dashboard (`/admin`) — operational reporting complete**

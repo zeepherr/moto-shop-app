@@ -5,7 +5,7 @@ import { ROLES, type UserRole } from "@/features/auth/constants";
 
 const getSecretKey = () => new TextEncoder().encode(appConfig.auth.jwtSecret);
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const token = request.cookies.get(appConfig.auth.cookieName)?.value;
 

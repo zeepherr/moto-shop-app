@@ -40,7 +40,7 @@
 
 ## 3. Technology Stack & Key Infrastructure
 
-- **Application Framework**: Next.js 15 (App Router), React 19, TypeScript
+- **Application Framework**: Next.js 16 (App Router), React 19, TypeScript
 - **Styling & Design System**: Tailwind CSS v4, Motion (`motion/react`), Lucide React icons
 - **Database & ORM**: PostgreSQL (Neon Serverless) + Prisma ORM
 - **Object Storage**: Cloudflare R2 via presigned S3 URLs (`@aws-sdk/client-s3`, `@aws-sdk/s3-request-presigner`)

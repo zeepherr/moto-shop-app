@@ -43,20 +43,10 @@ function DonutCard({ title, data }: { title: string; data: Array<{ name: string;
     <section className="rounded-2xl border border-border/70 bg-card p-5">
       <h2 className="text-sm font-semibold text-foreground">{title}</h2>
       <div className="mt-3 grid grid-cols-[96px_minmax(0,1fr)] items-center gap-3 sm:mt-4 sm:grid-cols-[132px_1fr] sm:gap-4">
-        <div className="h-24 w-24 sm:hidden" aria-hidden="true">
+        <div className="h-24 w-24 sm:h-32 sm:w-[132px]" aria-hidden="true">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
-              <Pie data={data} dataKey="value" nameKey="name" innerRadius={27} outerRadius={39} paddingAngle={2} strokeWidth={0}>
-                {data.map((item) => <Cell key={item.name} fill={item.color} />)}
-              </Pie>
-              <Tooltip formatter={(value) => money(Number(value))} />
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
-        <div className="hidden h-32 w-[132px] sm:block" aria-hidden="true">
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie data={data} dataKey="value" nameKey="name" innerRadius={40} outerRadius={58} paddingAngle={2} strokeWidth={0}>
+              <Pie data={data} dataKey="value" nameKey="name" innerRadius="60%" outerRadius="88%" paddingAngle={2} strokeWidth={0}>
                 {data.map((item) => <Cell key={item.name} fill={item.color} />)}
               </Pie>
               <Tooltip formatter={(value) => money(Number(value))} />

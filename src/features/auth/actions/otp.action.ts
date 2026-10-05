@@ -37,15 +37,19 @@ export const verifyOtpAction = async (input: VerifyEmailInput): Promise<ActionRe
   const pending = await findSelfServiceOtpEnrollment(email);
 
   if (!pending) {
-    return { success: false, error: "No pending registration found" };
+    return { success: false, code: "REGISTRATION_NOT_FOUND", error: "No pending registration found" };
   }
 
-  if (pending.expiresAt < new Date() || !pending.otpExpiresAt || pending.otpExpiresAt < new Date()) {
-    return { success: false, error: "Verification code has expired. Please request a new code." };
+  if (pending.expiresAt < new Date()) {
+    return { success: false, code: "ENROLLMENT_EXPIRED", error: "Registration approval has expired. Please ask the shop team to approve it again." };
+  }
+
+  if (!pending.otpExpiresAt || pending.otpExpiresAt < new Date()) {
+    return { success: false, code: "OTP_EXPIRED", error: "Verification code has expired. Request a new code to continue." };
   }
 
   if (pending.otpAttempts >= MAX_OTP_ATTEMPTS) {
-    return { success: false, error: "Too many incorrect attempts. Please request a new code." };
+    return { success: false, code: "OTP_ATTEMPTS_EXHAUSTED", error: "Too many incorrect attempts. Request a new code to continue." };
   }
 
   const submittedHash = hashOtp(code);
@@ -91,7 +95,7 @@ export const resendOtpAction = async (input: ResendVerificationInput): Promise<A
   const { email } = parsed.data;
   const pending = await findSelfServiceOtpEnrollment(email);
   if (!pending) {
-    return { success: false, error: "Registration has expired or does not exist. Please register again." };
+    return { success: false, code: "REGISTRATION_NOT_FOUND", error: "No pending registration was found. Start again with your approved email." };
   }
 
   const cooldown = pending.otpLastSentAt ? getOtpCooldownSeconds(pending.otpLastSentAt) : 0;
@@ -105,7 +109,7 @@ export const resendOtpAction = async (input: ResendVerificationInput): Promise<A
 
   const updated = await resendSelfServiceOtp({ email, otpHash, otpExpiresAt: expiresAt });
   if (!updated) {
-    return { success: false, error: "Registration approval has expired. Please ask the shop team for help." };
+    return { success: false, code: "ENROLLMENT_EXPIRED", error: "Registration approval has expired. Please ask the shop team to approve it again." };
   }
   try {
     await sendRegistrationOtpEmail(email, otp);

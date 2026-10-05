@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { registerAction } from "../actions/register.action";
+import { PasswordField } from "./PasswordField";
 
 export const RegisterForm: React.FC = () => {
   const router = useRouter();
@@ -43,14 +44,14 @@ export const RegisterForm: React.FC = () => {
         return;
       }
 
-      router.push(`/verify-email?email=${encodeURIComponent(formData.email)}`);
+      router.push(`/verify-email?email=${encodeURIComponent(formData.email)}&sent=1`);
     });
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       {error && (
-        <div className="rounded-xl border border-destructive/20 bg-destructive/10 p-3 text-sm text-destructive">
+        <div role="alert" className="rounded-xl border border-destructive/20 bg-destructive/10 p-3 text-sm text-destructive">
           {error}
         </div>
       )}
@@ -61,6 +62,9 @@ export const RegisterForm: React.FC = () => {
           id="email"
           name="email"
           type="email"
+          autoComplete="email"
+          autoCapitalize="none"
+          spellCheck={false}
           required
           placeholder="Use the email approved by the shop"
           value={formData.email}
@@ -69,33 +73,28 @@ export const RegisterForm: React.FC = () => {
         />
       </div>
 
-      <div className="space-y-1.5">
-        <Label htmlFor="password">Password</Label>
-        <Input
-          id="password"
-          name="password"
-          type="password"
-          required
-          placeholder="At least 4 characters"
-          value={formData.password}
-          onChange={handleChange}
-          disabled={isPending}
-        />
-      </div>
+      <PasswordField
+        id="password"
+        name="password"
+        label="Password"
+        value={formData.password}
+        onChange={handleChange}
+        autoComplete="new-password"
+        placeholder="At least 4 characters"
+        hint="Use at least 4 characters."
+        disabled={isPending}
+      />
 
-      <div className="space-y-1.5">
-        <Label htmlFor="confirmPassword">Confirm password</Label>
-        <Input
-          id="confirmPassword"
-          name="confirmPassword"
-          type="password"
-          required
-          placeholder="Repeat password"
-          value={formData.confirmPassword}
-          onChange={handleChange}
-          disabled={isPending}
-        />
-      </div>
+      <PasswordField
+        id="confirmPassword"
+        name="confirmPassword"
+        label="Confirm password"
+        value={formData.confirmPassword}
+        onChange={handleChange}
+        autoComplete="new-password"
+        placeholder="Repeat password"
+        disabled={isPending}
+      />
 
       <Button type="submit" className="w-full h-11" disabled={isPending}>
         {isPending ? "Sending verification code..." : "Continue"}

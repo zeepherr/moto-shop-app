@@ -14,15 +14,21 @@ export const VerifyEmailForm: React.FC = () => {
   const searchParams = useSearchParams();
   const emailParam = searchParams.get("email") || "";
   const deliveryFailed = searchParams.get("delivery") === "retry";
+  const codeSent = searchParams.get("sent") === "1";
 
   const [isPending, startTransition] = useTransition();
   const [email, setEmail] = useState(emailParam);
   const [code, setCode] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(
-    deliveryFailed ? "We couldn't deliver the first code. You can request a new one now." : null,
+    deliveryFailed
+      ? "We couldn't deliver the first code. You can request a new one now."
+      : codeSent
+        ? "A verification code was sent. Check your inbox and spam folder."
+        : null,
   );
-  const [cooldown, setCooldown] = useState(0);
+  const [cooldown, setCooldown] = useState(deliveryFailed ? 0 : codeSent ? 60 : 0);
+  const [showRegisterAgain, setShowRegisterAgain] = useState(false);
 
   useEffect(() => {
     if (cooldown <= 0) return;
@@ -39,6 +45,7 @@ export const VerifyEmailForm: React.FC = () => {
       const res = await verifyOtpAction({ email, code });
       if (!res.success) {
         setError(res.error || "Verification failed");
+        setShowRegisterAgain(res.code === "REGISTRATION_NOT_FOUND");
         return;
       }
 
@@ -59,10 +66,12 @@ export const VerifyEmailForm: React.FC = () => {
       const res = await resendOtpAction({ email });
       if (!res.success) {
         setError(res.error || "Failed to resend code");
+        setShowRegisterAgain(res.code === "REGISTRATION_NOT_FOUND");
         return;
       }
 
       setInfo(res.message || "A new code has been sent");
+      setShowRegisterAgain(false);
       setCooldown(60);
     });
   };
@@ -70,12 +79,12 @@ export const VerifyEmailForm: React.FC = () => {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       {error && (
-        <div className="rounded-xl border border-destructive/20 bg-destructive/10 p-3 text-sm text-destructive">
+        <div role="alert" className="rounded-xl border border-destructive/20 bg-destructive/10 p-3 text-sm text-destructive">
           {error}
         </div>
       )}
       {info && (
-        <div className="rounded-xl border border-success/20 bg-success/10 p-3 text-sm text-success">
+        <div role="status" aria-live="polite" className="rounded-xl border border-success/20 bg-success/10 p-3 text-sm text-success">
           {info}
         </div>
       )}
@@ -85,6 +94,9 @@ export const VerifyEmailForm: React.FC = () => {
         <Input
           id="email"
           type="email"
+          autoComplete="email"
+          autoCapitalize="none"
+          spellCheck={false}
           required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
@@ -97,6 +109,8 @@ export const VerifyEmailForm: React.FC = () => {
         <Input
           id="code"
           type="text"
+          inputMode="numeric"
+          autoComplete="one-time-code"
           maxLength={6}
           placeholder="123456"
           required
@@ -125,6 +139,11 @@ export const VerifyEmailForm: React.FC = () => {
           Back to Login
         </Link>
       </div>
+      {showRegisterAgain ? (
+        <p className="text-center text-sm text-muted-foreground">
+          Have an approved email? <Link href="/register" className="font-semibold text-primary hover:underline">Start registration again</Link>
+        </p>
+      ) : null}
     </form>
   );
 };

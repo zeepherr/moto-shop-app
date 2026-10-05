@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { AuthHeader } from "@/features/auth/components/AuthHeader";
 import { LoginForm } from "@/features/auth/components/LoginForm";
 
@@ -17,16 +16,12 @@ export default async function LoginPage({
   const redirectTo = Array.isArray(params.redirect) ? params.redirect[0] : params.redirect;
 
   return (
-    <Card className="border-border/60 shadow-lg">
-      <CardHeader>
+    <div className="space-y-8">
         <AuthHeader
           title="Welcome back"
           description="Sign in to continue to your HrungMoto account"
         />
-      </CardHeader>
-      <CardContent>
         <LoginForm redirectTo={redirectTo} />
-      </CardContent>
-    </Card>
+    </div>
   );
 }

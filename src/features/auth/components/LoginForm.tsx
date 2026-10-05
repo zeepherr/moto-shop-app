@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PasswordField } from "./PasswordField";
 import { loginAction } from "../actions/login.action";
 import { ROLES } from "../constants";
 
@@ -68,7 +69,7 @@ export const LoginForm: React.FC<{ redirectTo?: string }> = ({ redirectTo }) => 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       {error && (
-        <div className="rounded-xl border border-destructive/20 bg-destructive/10 p-3 text-sm text-destructive">
+        <div role="alert" className="rounded-xl border border-destructive/20 bg-destructive/10 p-3 text-sm text-destructive">
           {error}
         </div>
       )}
@@ -78,6 +79,9 @@ export const LoginForm: React.FC<{ redirectTo?: string }> = ({ redirectTo }) => 
         <Input
           id="email"
           type="email"
+          autoComplete="email"
+          autoCapitalize="none"
+          spellCheck={false}
           placeholder="name@example.com"
           required
           value={email}
@@ -86,18 +90,15 @@ export const LoginForm: React.FC<{ redirectTo?: string }> = ({ redirectTo }) => 
         />
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="password">Password</Label>
-        <Input
-          id="password"
-          type="password"
-          placeholder="Enter your password"
-          required
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          disabled={isPending}
-        />
-      </div>
+      <PasswordField
+        id="password"
+        label="Password"
+        value={password}
+        onChange={(event) => setPassword(event.target.value)}
+        autoComplete="current-password"
+        placeholder="Enter your password"
+        disabled={isPending}
+      />
 
       <Button type="submit" className="w-full h-11" disabled={isPending}>
         {isPending ? "Logging in..." : "Sign in"}

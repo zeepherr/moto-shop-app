@@ -57,6 +57,24 @@
 - **Phase 1 verification**: TypeScript and focused ESLint on changed files pass. Repository-wide `npm run lint` reports 18 errors in other files; this shell change adds none. POS cart controls are in normal page flow and remain visible within the padded content area above the persistent bar.
 - **Approved interaction choices**: Keep the bar visible while scrolling and keep it visible on POS. Staff center-button behavior and member navigation are outside this admin-first phase.
 
+### Active Workstream: Authentication UX Redesign (2026-10-05)
+- **Design references**: GetLayers `Baseline` (precision layout, clear rules, structured surfaces) and `Halden` (quiet typography and minimal chrome), adapted to the existing Apple-inspired design and Action Blue commitment in `DESIGN.md`/`PRODUCT.md`. Do not introduce a new global design system or add WebGL/3D effects to authentication.
+- **Visual direction correction (user feedback, 2026-10-05)**: The first pass was too card-based and too generic. It is superseded. Auth forms must not be placed in cards; mobile is a full-page, flat form experience. Desktop uses a spacious split composition with the identity context separated from a directly placed form, not a card-in-a-card shell.
+- **Scope**: Desktop and mobile auth experience for `/login`, `/register`, `/verify-email`, and `/set-password`. Preserve all approved enrollment, OTP, login, and password setup business rules. This work is auth-only; do not redesign dashboard surfaces.
+- **Page direction**:
+  - `/login`: desktop identity panel plus focused sign-in form; mobile single-column form with a compact brand header.
+  - `/register`: same shell, with the shop-approved email requirement made clear before submission.
+  - `/verify-email`: make the target email and six-digit task prominent, with clear resend timing and recovery.
+  - `/set-password`: compact setup form with a useful invalid/expired-link recovery state.
+- **Revised implementation order**:
+  1. [x] Remove all auth form card wrappers and rebuild the shared desktop split/mobile full-page shell.
+  2. [x] Re-compose `/login` and `/register` as direct, left-aligned form surfaces with clear task hierarchy.
+  3. [x] Re-compose `/verify-email` and `/set-password` so code/setup tasks and recovery states work naturally in the flat layout.
+  4. [x] Review responsive structure and run focused verification. Browser screenshot capture is unavailable in this environment.
+- **Preserved behavior from first pass**: login redirects, OTP delivery recovery, password visibility/autofill, verification resend timing, and invalid setup-link recovery remain in place unless this visual pass reveals a specific regression.
+- **Verification**: `tsc --noEmit`, focused ESLint, `impeccable detect src --no-advisory` (0 anti-patterns), `git diff --check`, and a route card scan (no card wrappers remain) pass.
+- **Status**: Revised no-card direction implemented across all four routes. The earlier card-based implementation was superseded.
+
 ### B. Admin Management Modules
 - [x] **Admin Dashboard (`/admin`) — operational reporting complete**
   - [x] Baseline: real-data metric cards, recent transactions, inventory alerts, revenue and completed-order drilldowns.
@@ -184,4 +202,4 @@ src/components/management/
 └── ItemDialog.tsx           # Generic single-field item modal
 ```
 
-*Last Updated*: 2026-10-04 (Admin mobile shell and POS mobile layout implemented; remaining admin pages next)
+*Last Updated*: 2026-10-05 (Authentication UX redesign implemented for desktop and mobile; Admin mobile page work remains next)

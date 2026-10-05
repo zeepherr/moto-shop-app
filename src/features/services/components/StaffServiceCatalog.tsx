@@ -46,7 +46,7 @@ export function StaffServiceCatalog({ services }: { services: CatalogService[] }
         entityName="services"
       >
         {filteredServices.length > 0 ? (
-          <table className="w-full min-w-[640px] text-left text-sm">
+          <table className="management-data-table w-full min-w-[640px] text-left text-sm">
             <thead className="border-b border-border/60 bg-muted/20">
               <tr>
                 <th className="px-4 py-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">

@@ -64,6 +64,7 @@
 - **Scope remains**: Laptop viewport only (`min-width: 1024px`, `max-height: 950px`); no mobile or taller desktop styling changes and no application logic changes.
 - **Shared management step**: Strengthen the laptop spacing scale and compact shared page headers and summary cards. Completed and committed as `2429944` (`style(management): densify laptop summary cards`).
 - **Dashboard step**: Compact dashboard metric card padding/value size and Today Operations row spacing, scoped to the laptop media query. TypeScript and `git diff --check` pass. The Impeccable CLI is not installed locally; `npx` could not reach npm registry from the sandbox, so its detector remains unverified for this step. Commit as its own page step.
+- **Management tables and auth shell step**: Tighten shared table toolbars, inputs, summary rows, table cell padding, and authentication shell vertical padding within the same laptop-only query. This covers category/product/motor/service/user/enrollment/revenue tables and all authentication routes; enrollment, table, and auth behavior are unchanged. TypeScript and `git diff --check` pass; the Impeccable CLI remains unavailable locally and the network sandbox blocks its `npx` download. Commit as a shared UI step.
 
 ### A. Global Shell & Surface System (desktop complete; admin mobile refresh planned)
 - [x] **`AppShell` & Layout**: Responsive container bounded to `max-w-7xl mx-auto` for management screens to eliminate widescreen voids on 1440p/4K monitors.

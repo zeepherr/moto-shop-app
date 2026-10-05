@@ -31,7 +31,7 @@ export const ProductTable: React.FC<ProductTableProps> = ({
       {products.map((product) => <ProductMobileCard key={product.id} product={product} onEdit={onEdit} onStatusChange={onStatusChange} onDelete={onDelete} />)}
     </div>
     <div className="hidden overflow-x-auto md:block">
-    <table className="w-full min-w-[750px] text-sm">
+    <table className="management-data-table w-full min-w-[750px] text-sm">
           <thead>
             <tr className="border-b border-border/60 bg-muted/30">
               <TableHeading label="Product" sortKey="name" sort={sort} onSort={onSort} />

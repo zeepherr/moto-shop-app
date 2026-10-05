@@ -52,7 +52,7 @@ export const ServiceTable: React.FC<ServiceTableProps> = ({
       ))}
     </div>
     <div className="hidden overflow-x-auto md:block">
-    <table className="w-full min-w-[700px] text-sm">
+    <table className="management-data-table w-full min-w-[700px] text-sm">
       <thead>
         <tr className="border-b border-border/60 bg-muted/30">
           <th className="px-4 py-3 text-left font-medium text-muted-foreground text-xs uppercase tracking-wider">

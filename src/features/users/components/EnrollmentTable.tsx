@@ -82,7 +82,7 @@ export function EnrollmentTable({ enrollments, onVerify, onResendOtp, onResendRe
       })}
     </div>
     <div className="hidden overflow-x-auto md:block">
-    <table className="w-full min-w-[900px] text-sm">
+    <table className="management-data-table w-full min-w-[900px] text-sm">
       <thead><tr className="border-b border-border/60 bg-muted/30 text-left text-xs uppercase tracking-wider text-muted-foreground">
         <th className="px-4 py-3 font-medium">Person</th><th className="px-4 py-3 font-medium">Method</th><th className="px-4 py-3 font-medium">Next step</th><th className="px-4 py-3 font-medium">Delivery</th><th className="px-4 py-3 font-medium">Expires</th><th className="w-16 px-4 py-3"><span className="sr-only">Actions</span></th>
       </tr></thead>

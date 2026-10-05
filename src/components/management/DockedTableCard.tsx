@@ -39,7 +39,7 @@ export const DockedTableCard: React.FC<DockedTableCardProps> = ({
   return (
     <div className="rounded-2xl border border-border/80 bg-card shadow-xs overflow-hidden">
       {/* Docked Top Toolbar */}
-      <div className="flex flex-col gap-3 border-b border-border/60 bg-card/60 p-3 sm:flex-row sm:items-center sm:justify-between sm:p-4">
+      <div className="management-table-toolbar flex flex-col gap-3 border-b border-border/60 bg-card/60 p-3 sm:flex-row sm:items-center sm:justify-between sm:p-4">
         <div className="flex flex-1 flex-col gap-2.5 sm:flex-row sm:items-center sm:max-w-2xl">
           {/* Search Input */}
           <div className="relative w-full sm:min-w-64 sm:flex-1">
@@ -129,7 +129,7 @@ export const DockedTableCard: React.FC<DockedTableCardProps> = ({
       <div className="overflow-x-auto">{children}</div>
 
       {/* Docked Card Footer */}
-      <div className="flex items-center justify-between border-t border-border/60 bg-muted/20 px-3 py-3 text-xs text-muted-foreground sm:px-4">
+      <div className="management-table-footer flex items-center justify-between border-t border-border/60 bg-muted/20 px-3 py-3 text-xs text-muted-foreground sm:px-4">
         <span>
           Showing{" "}
           <strong className="font-semibold text-foreground tabular-nums">

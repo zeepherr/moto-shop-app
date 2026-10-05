@@ -83,7 +83,7 @@ export function UserTable({ users, onView, onRoleChange, onAccessChange, isPendi
       })}
     </div>
     <div className="hidden overflow-x-auto md:block">
-    <table className="w-full min-w-[920px] text-sm">
+    <table className="management-data-table w-full min-w-[920px] text-sm">
       <thead>
         <tr className="border-b border-border/60 bg-muted/30 text-left text-xs uppercase tracking-wider text-muted-foreground">
           <th className="px-4 py-3 font-medium">Person</th>

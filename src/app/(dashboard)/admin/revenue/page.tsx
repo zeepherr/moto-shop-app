@@ -76,7 +76,7 @@ export default async function RevenueDetailsPage({ searchParams }: { searchParam
           )) : <p className="px-4 py-10 text-center text-sm text-muted-foreground">No completed orders in this period.</p>}
         </div>
         <div className="hidden overflow-x-auto sm:block">
-          <table className="w-full min-w-[760px] text-sm">
+          <table className="management-data-table w-full min-w-[760px] text-sm">
             <thead className="bg-muted/30 text-left text-xs uppercase tracking-wider text-muted-foreground">
               <tr><th className="px-5 py-3">Order</th><th className="px-5 py-3">Customer</th><th className="px-5 py-3">Handled by</th><th className="px-5 py-3">Payment</th><th className="px-5 py-3 text-right">Total</th></tr>
             </thead>

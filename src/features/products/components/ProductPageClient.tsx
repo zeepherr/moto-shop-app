@@ -19,6 +19,7 @@ import type { ProductDTO } from "../types";
 import type { ProductCategoryDTO } from "@/features/categories/types";
 import type { ProductFormData } from "./ProductForm";
 import { ProductDiscountSetting } from "./ProductDiscountSetting";
+import { Select } from "@/components/ui/select";
 
 interface ProductPageClientProps {
   initialProducts: ProductDTO[];
@@ -237,18 +238,15 @@ export const ProductPageClient: React.FC<ProductPageClientProps> = ({
         onStatusChange={setStatus}
         statusCounts={counts}
         filterSlot={
-          <select
+          <Select
             value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
+            onValueChange={setSelectedCategory}
+            options={[
+              { value: "all", label: "All Categories" },
+              ...categories.map((category) => ({ value: String(category.id), label: category.name })),
+            ]}
             className="h-9.5 rounded-xl border border-input/80 bg-background/50 px-3 text-xs sm:text-sm text-foreground shadow-2xs outline-none focus:ring-1 focus:ring-primary sm:w-44 cursor-pointer"
-          >
-            <option value="all">All Categories</option>
-            {categories.map((c) => (
-              <option key={c.id} value={String(c.id)}>
-                {c.name}
-              </option>
-            ))}
-          </select>
+          />
         }
         hasActiveFilters={
           search.trim() !== "" ||

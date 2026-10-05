@@ -11,6 +11,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { Select } from "@/components/ui/select";
 import type { MotorDTO, MotorBrandDTO } from "../types";
 
 interface MotorDialogProps {
@@ -99,19 +100,14 @@ const MotorDialogForm: React.FC<Omit<MotorDialogProps, "open">> = ({
 
           <div className="space-y-1.5">
             <Label htmlFor="dlg-motor-brand">Manufacturer / Brand</Label>
-            <select
+            <Select
               id="dlg-motor-brand"
               className="flex h-10 w-full rounded-xl border border-input bg-card px-3 text-sm text-foreground shadow-xs outline-none focus:ring-2 focus:ring-primary cursor-pointer"
-              value={motorBrandId}
-              onChange={(e) => setMotorBrandId(Number(e.target.value))}
+              value={String(motorBrandId)}
+              onValueChange={(value) => setMotorBrandId(Number(value))}
               disabled={isPending}
-            >
-              {brands.map((b) => (
-                <option key={b.id} value={b.id}>
-                  {b.name}
-                </option>
-              ))}
-            </select>
+              options={brands.map((brand) => ({ value: String(brand.id), label: brand.name }))}
+            />
           </div>
 
           <div className="space-y-1.5">
@@ -130,16 +126,17 @@ const MotorDialogForm: React.FC<Omit<MotorDialogProps, "open">> = ({
 
           <div className="space-y-1.5">
             <Label htmlFor="dlg-motor-type">Transmission Type</Label>
-            <select
+            <Select
               id="dlg-motor-type"
               className="flex h-10 w-full rounded-xl border border-input bg-card px-3 text-sm text-foreground shadow-xs outline-none focus:ring-2 focus:ring-primary cursor-pointer"
               value={type}
-              onChange={(e) => setType(e.target.value as "AUTOMATIC" | "MANUAL")}
+              onValueChange={(value) => setType(value as "AUTOMATIC" | "MANUAL")}
               disabled={isPending}
-            >
-              <option value="AUTOMATIC">AUTOMATIC</option>
-              <option value="MANUAL">MANUAL</option>
-            </select>
+              options={[
+                { value: "AUTOMATIC", label: "AUTOMATIC" },
+                { value: "MANUAL", label: "MANUAL" },
+              ]}
+            />
           </div>
 
           <div className="flex justify-end gap-2 pt-2 border-t border-border/50">

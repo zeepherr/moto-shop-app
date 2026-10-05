@@ -4,6 +4,7 @@ import React from "react";
 import { Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
 import type { ProductDTO } from "../types";
 
 interface ProductFiltersProps {
@@ -50,28 +51,26 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
         />
       </div>
 
-      <select
+      <Select
         value={selectedCategory}
-        onChange={(e) => setSelectedCategory(e.target.value)}
+        onValueChange={setSelectedCategory}
+        options={[
+          { value: "all", label: "All categories" },
+          ...categories.map((category) => ({ value: String(category.id), label: category.name })),
+        ]}
         className="h-10 w-full rounded-xl border border-input bg-card px-3 text-sm text-foreground shadow-xs outline-none focus:ring-2 focus:ring-primary sm:w-44 cursor-pointer"
-      >
-        <option value="all">All categories</option>
-        {categories.map((c) => (
-          <option key={c.id} value={String(c.id)}>
-            {c.name}
-          </option>
-        ))}
-      </select>
+      />
 
-      <select
+      <Select
         value={selectedStatus}
-        onChange={(e) => setSelectedStatus(e.target.value)}
+        onValueChange={setSelectedStatus}
+        options={[
+          { value: "all", label: "All status" },
+          { value: "active", label: "Active" },
+          { value: "inactive", label: "Inactive" },
+        ]}
         className="h-10 w-full rounded-xl border border-input bg-card px-3 text-sm text-foreground shadow-xs outline-none focus:ring-2 focus:ring-primary sm:w-36 cursor-pointer"
-      >
-        <option value="all">All status</option>
-        <option value="active">Active</option>
-        <option value="inactive">Inactive</option>
-      </select>
+      />
 
       {hasActiveFilters && (
         <Button

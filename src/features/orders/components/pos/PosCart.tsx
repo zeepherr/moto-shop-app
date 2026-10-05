@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { Clock3, ShoppingCart } from "lucide-react";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
+import { Select } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { usePosStore } from "../../stores/usePosStore";
 import { PosCustomerSelector } from "./PosCustomerSelector";
@@ -274,10 +275,10 @@ export const PosCart: React.FC<{ productDiscountRate: number }> = ({ productDisc
           <DialogDescription>This held ticket will be marked cancelled. This cannot be undone.</DialogDescription>
         </DialogHeader>
       <label className="mb-2 block text-sm font-medium" htmlFor="current-cancel-reason">Reason for cancellation</label>
-      <select id="current-cancel-reason" value={cancelReason} onChange={(event) => setCancelReason(event.target.value)} className="mb-4 h-12 w-full rounded-xl border border-input bg-background px-3 text-base">
-        <option value="">Select a reason</option>
-        {ORDER_CANCELLATION_REASONS.map((reason) => <option key={reason} value={reason}>{reason}</option>)}
-      </select>
+      <Select id="current-cancel-reason" value={cancelReason} onValueChange={setCancelReason} className="mb-4 h-12 w-full rounded-xl border border-input bg-background px-3 text-base" placeholder="Select a reason" options={[
+        { value: "", label: "Select a reason" },
+        ...ORDER_CANCELLATION_REASONS.map((reason) => ({ value: reason, label: reason })),
+      ]} />
         <DialogFooter className="flex-col-reverse space-x-0 sm:flex-row sm:space-x-2">
         <Button type="button" variant="outline" disabled={isActionPending} onClick={() => { setIsCancelConfirmOpen(false); setCancelReason(""); }} className="min-h-11 w-full sm:w-auto">Keep order</Button>
         <Button type="button" variant="destructive" disabled={isActionPending || !cancelReason} onClick={handleCancelCurrentOrder} className="min-h-11 w-full sm:w-auto">

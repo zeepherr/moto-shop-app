@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select } from "@/components/ui/select";
 import { ProductImageField } from "./ProductImageField";
 import type { ProductCategoryDTO } from "@/features/categories/types";
 
@@ -137,19 +138,14 @@ export const ProductForm: React.FC<ProductFormProps> = ({
 
             <div className="space-y-1">
               <Label htmlFor="prod-cat">Category</Label>
-              <select
+              <Select
                 id="prod-cat"
-                value={form.productCategoryId}
-                onChange={(e) => setForm({ ...form, productCategoryId: Number(e.target.value) })}
+                value={String(form.productCategoryId)}
+                onValueChange={(value) => setForm({ ...form, productCategoryId: Number(value) })}
                 disabled={isPending}
                 className="flex h-10 w-full rounded-xl border border-input bg-card px-3 text-sm text-foreground shadow-xs outline-none focus:ring-2 focus:ring-primary cursor-pointer"
-              >
-                {categories.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name}
-                  </option>
-                ))}
-              </select>
+                options={categories.map((category) => ({ value: String(category.id), label: category.name }))}
+              />
             </div>
           </div>
         </div>
@@ -217,19 +213,14 @@ export const ProductForm: React.FC<ProductFormProps> = ({
 
           <div className="space-y-1">
             <Label htmlFor="prod-unit">Unit</Label>
-            <select
+            <Select
               id="prod-unit"
               value={form.unit}
-              onChange={(e) => setForm({ ...form, unit: e.target.value })}
+              onValueChange={(unit) => setForm({ ...form, unit })}
               disabled={isPending}
               className="flex h-10 w-full rounded-xl border border-input bg-card px-3 text-sm text-foreground shadow-xs outline-none focus:ring-2 focus:ring-primary cursor-pointer"
-            >
-              {PRODUCT_UNITS.map((u) => (
-                <option key={u.value} value={u.value}>
-                  {u.label}
-                </option>
-              ))}
-            </select>
+              options={PRODUCT_UNITS}
+            />
           </div>
         </div>
       </div>

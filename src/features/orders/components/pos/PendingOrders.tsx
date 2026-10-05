@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { Clock3, Loader2, Search, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { getPendingOrdersAction } from "../../actions/order-query.actions";
 import type { OrderDTO } from "../../types";
@@ -157,10 +158,10 @@ export const PendingOrders: React.FC<PendingOrdersProps> = ({
             </DialogDescription>
           </DialogHeader>
           <label className="mb-2 block text-sm font-medium" htmlFor="pending-cancel-reason">Reason for cancellation</label>
-          <select id="pending-cancel-reason" value={cancelReason} onChange={(event) => setCancelReason(event.target.value)} className="mb-4 h-12 w-full rounded-xl border border-input bg-background px-3 text-base">
-            <option value="">Select a reason</option>
-            {ORDER_CANCELLATION_REASONS.map((reason) => <option key={reason} value={reason}>{reason}</option>)}
-          </select>
+          <Select id="pending-cancel-reason" value={cancelReason} onValueChange={setCancelReason} className="mb-4 h-12 w-full rounded-xl border border-input bg-background px-3 text-base" placeholder="Select a reason" options={[
+            { value: "", label: "Select a reason" },
+            ...ORDER_CANCELLATION_REASONS.map((reason) => ({ value: reason, label: reason })),
+          ]} />
           <DialogFooter className="flex-col-reverse space-x-0 sm:flex-row sm:space-x-2">
             <Button type="button" variant="outline" disabled={isCancelling} onClick={() => { setOrderToCancel(null); setCancelReason(""); }} className="min-h-11 w-full sm:w-auto">Keep order</Button>
             <Button type="button" variant="destructive" disabled={isCancelling || !cancelReason} onClick={confirmCancel} className="min-h-11 w-full sm:w-auto">

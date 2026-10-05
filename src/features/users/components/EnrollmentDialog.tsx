@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Select } from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -76,10 +77,10 @@ export function EnrollmentDialog({ method, onOpenChange, onCreated, defaults, on
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="enrollment-role">Account role</Label>
-            <select id="enrollment-role" value={form.role} onChange={(event) => setForm((current) => ({ ...current, role: event.target.value as "MEMBER" | "STAFF" }))} className="h-10 w-full rounded-xl border border-input bg-background px-3 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary">
-              <option value="MEMBER">Member</option>
-              <option value="STAFF">Staff</option>
-            </select>
+            <Select id="enrollment-role" value={form.role} onValueChange={(role) => setForm((current) => ({ ...current, role: role as "MEMBER" | "STAFF" }))} options={[
+              { value: "MEMBER", label: "Member" },
+              { value: "STAFF", label: "Staff" },
+            ]} className="h-10 w-full rounded-xl border border-input bg-background px-3 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary" />
             <p className="text-xs text-muted-foreground">The account starts as “New {form.role === "STAFF" ? "Staff" : "Member"}”. The person can update this later in their profile.</p>
           </div>
           <DialogFooter>

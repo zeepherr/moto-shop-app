@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Search, SlidersHorizontal } from "lucide-react";
 import type { AdminOrderFilters as FilterValues } from "../services/admin-order-report.service";
+import { Select } from "@/components/ui/select";
 
 interface Option { id: number; name: string }
 
@@ -26,30 +27,30 @@ export function AdminOrderFilters({ filters, products, members, brands, handlers
           <Search className="pointer-events-none absolute left-3 top-3 size-4 text-muted-foreground" />
           <input name="search" defaultValue={filters.search} placeholder="Order number, member name, email or phone" className={`${selectClass} w-full pl-9`} />
         </label>
-        <select name="status" defaultValue={filters.status ?? ""} className={selectClass} aria-label="Order status">
-          <option value="">All statuses</option><option value="COMPLETED">Completed</option><option value="PENDING">Pending</option><option value="CANCELLED">Cancelled</option>
-        </select>
-        <select name="payment" defaultValue={filters.payment ?? ""} className={selectClass} aria-label="Payment method">
-          <option value="">All payments</option><option value="CASH">Cash</option><option value="QR">QR</option>
-        </select>
-        <select name="customerType" defaultValue={filters.customerType ?? ""} className={selectClass} aria-label="Customer type">
-          <option value="">All customers</option><option value="MEMBER">Members</option><option value="GUEST">Walk-ins</option>
-        </select>
-        <select name="productId" defaultValue={filters.productId ?? ""} className={selectClass} aria-label="Product">
-          <option value="">All products</option>{products.map((product) => <option key={product.id} value={product.id}>{product.name} · {product.sku}</option>)}
-        </select>
-        <select name="memberId" defaultValue={filters.memberId ?? ""} className={selectClass} aria-label="Member">
-          <option value="">All members</option>{members.map((member) => <option key={member.id} value={member.id}>{member.firstName} {member.lastName}</option>)}
-        </select>
-        <select name="brandId" defaultValue={filters.brandId ?? ""} className={selectClass} aria-label="Motorcycle brand">
-          <option value="">All motor brands</option>{brands.map((brand) => <option key={brand.id} value={brand.id}>{brand.name}</option>)}
-        </select>
-        <select name="motorType" defaultValue={filters.motorType ?? ""} className={selectClass} aria-label="Motorcycle type">
-          <option value="">All motor types</option><option value="AUTOMATIC">Automatic</option><option value="MANUAL">Manual</option>
-        </select>
-        <select name="handledById" defaultValue={filters.handledById ?? ""} className={selectClass} aria-label="Handled by">
-          <option value="">All staff</option>{handlers.map((handler) => <option key={handler.id} value={handler.id}>{handler.firstName} {handler.lastName}</option>)}
-        </select>
+        <Select name="status" defaultValue={filters.status ?? ""} className={selectClass} aria-label="Order status" options={[
+          { value: "", label: "All statuses" }, { value: "COMPLETED", label: "Completed" }, { value: "PENDING", label: "Pending" }, { value: "CANCELLED", label: "Cancelled" },
+        ]} />
+        <Select name="payment" defaultValue={filters.payment ?? ""} className={selectClass} aria-label="Payment method" options={[
+          { value: "", label: "All payments" }, { value: "CASH", label: "Cash" }, { value: "QR", label: "QR" },
+        ]} />
+        <Select name="customerType" defaultValue={filters.customerType ?? ""} className={selectClass} aria-label="Customer type" options={[
+          { value: "", label: "All customers" }, { value: "MEMBER", label: "Members" }, { value: "GUEST", label: "Walk-ins" },
+        ]} />
+        <Select name="productId" defaultValue={filters.productId ?? ""} className={selectClass} aria-label="Product" options={[
+          { value: "", label: "All products" }, ...products.map((product) => ({ value: String(product.id), label: `${product.name} · ${product.sku}` })),
+        ]} />
+        <Select name="memberId" defaultValue={filters.memberId ?? ""} className={selectClass} aria-label="Member" options={[
+          { value: "", label: "All members" }, ...members.map((member) => ({ value: String(member.id), label: `${member.firstName} ${member.lastName}` })),
+        ]} />
+        <Select name="brandId" defaultValue={filters.brandId ?? ""} className={selectClass} aria-label="Motorcycle brand" options={[
+          { value: "", label: "All motor brands" }, ...brands.map((brand) => ({ value: String(brand.id), label: brand.name })),
+        ]} />
+        <Select name="motorType" defaultValue={filters.motorType ?? ""} className={selectClass} aria-label="Motorcycle type" options={[
+          { value: "", label: "All motor types" }, { value: "AUTOMATIC", label: "Automatic" }, { value: "MANUAL", label: "Manual" },
+        ]} />
+        <Select name="handledById" defaultValue={filters.handledById ?? ""} className={selectClass} aria-label="Handled by" options={[
+          { value: "", label: "All staff" }, ...handlers.map((handler) => ({ value: String(handler.id), label: `${handler.firstName} ${handler.lastName}` })),
+        ]} />
         <label><span className="mb-1 block text-xs text-muted-foreground">From</span><input name="from" type="date" defaultValue={filters.from} className={`${selectClass} w-full`} /></label>
         <label><span className="mb-1 block text-xs text-muted-foreground">To</span><input name="to" type="date" defaultValue={filters.to} className={`${selectClass} w-full`} /></label>
       </div>

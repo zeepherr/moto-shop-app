@@ -3,6 +3,7 @@
 import React from "react";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
 
 interface UserToolbarProps {
   searchTerm: string;
@@ -29,15 +30,16 @@ export const UserToolbar: React.FC<UserToolbarProps> = ({
         />
       </div>
 
-      <select
+      <Select
         value={roleFilter}
-        onChange={(e) => setRoleFilter(e.target.value)}
+        onValueChange={setRoleFilter}
+        options={[
+          { value: "ALL", label: "All roles" },
+          { value: "MEMBER", label: "Members" },
+          { value: "STAFF", label: "Staff" },
+        ]}
         className="h-10 w-full rounded-xl border border-input bg-card px-3 text-sm text-foreground shadow-xs outline-none focus:ring-2 focus:ring-primary sm:w-40 cursor-pointer"
-      >
-        <option value="ALL">All roles</option>
-        <option value="MEMBER">Members</option>
-        <option value="STAFF">Staff</option>
-      </select>
+      />
     </div>
   );
 };

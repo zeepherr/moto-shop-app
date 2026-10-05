@@ -2,6 +2,7 @@
 
 import { Bike } from "lucide-react";
 import type { SelectedMotor } from "../../types";
+import { Select } from "@/components/ui/select";
 
 interface PosVehicleSelectorProps {
   vehicles: SelectedMotor[];
@@ -17,14 +18,15 @@ export function PosVehicleSelector({ vehicles, selectedMotorId, onVehicleChange 
   return (
     <label className="mt-3 block space-y-1.5">
       <span className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground"><Bike className="size-4" />Vehicle for this order</span>
-      <select
-        value={selectedMotorId ?? ""}
-        onChange={(event) => onVehicleChange(event.target.value ? Number(event.target.value) : null)}
+      <Select
+        value={selectedMotorId === null ? "" : String(selectedMotorId)}
+        onValueChange={(value) => onVehicleChange(value ? Number(value) : null)}
         className="h-12 w-full rounded-xl border border-input bg-background px-3 text-base text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring"
-      >
-        <option value="">No vehicle selected</option>
-        {vehicles.map((vehicle) => <option key={vehicle.id} value={vehicle.id}>{vehicle.label}</option>)}
-      </select>
+        options={[
+          { value: "", label: "No vehicle selected" },
+          ...vehicles.map((vehicle) => ({ value: String(vehicle.id), label: vehicle.label })),
+        ]}
+      />
     </label>
   );
 }

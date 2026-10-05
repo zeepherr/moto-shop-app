@@ -15,6 +15,7 @@ import {
   deleteMotorAction,
 } from "../actions/motor.actions";
 import type { MotorDTO, MotorBrandDTO } from "../types";
+import { Select } from "@/components/ui/select";
 
 export const MotorList: React.FC<{
   initialMotors: MotorDTO[];
@@ -139,18 +140,15 @@ export const MotorList: React.FC<{
         onStatusChange={setStatus}
         statusCounts={counts}
         filterSlot={
-          <select
+          <Select
             value={selectedBrand}
-            onChange={(e) => setSelectedBrand(e.target.value)}
+            onValueChange={setSelectedBrand}
+            options={[
+              { value: "all", label: "All Brands" },
+              ...brands.map((brand) => ({ value: String(brand.id), label: brand.name })),
+            ]}
             className="h-9.5 rounded-xl border border-input/80 bg-background/50 px-3 text-xs sm:text-sm text-foreground shadow-2xs outline-none focus:ring-1 focus:ring-primary sm:w-44 cursor-pointer"
-          >
-            <option value="all">All Brands</option>
-            {brands.map((b) => (
-              <option key={b.id} value={String(b.id)}>
-                {b.name}
-              </option>
-            ))}
-          </select>
+          />
         }
         hasActiveFilters={
           search.trim() !== "" ||

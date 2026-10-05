@@ -4,16 +4,15 @@ import React, { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
 import { AppSidebar } from "./AppSidebar";
-import { AppHeader } from "./AppHeader";
 import { ROLES } from "@/features/auth/constants";
 import type { AuthUserDTO } from "@/features/auth/types";
 import { getMoreNavigation, getNavigation } from "./navigation.config";
 import { isNavItemActive } from "./nav-utils";
+import { AppHeader } from "./AppHeader";
 import { MobileTabBar } from "./MobileTabBar";
 
 interface AppShellProps {
   user: AuthUserDTO | null;
-  section?: string;
   workspace?: string;
   initialSidebarCollapsed?: boolean;
   children: React.ReactNode;
@@ -21,7 +20,6 @@ interface AppShellProps {
 
 export const AppShell: React.FC<AppShellProps> = ({
   user,
-  section = "Shop Management",
   workspace = "Shop management",
   initialSidebarCollapsed = false,
   children,
@@ -54,12 +52,17 @@ export const AppShell: React.FC<AppShellProps> = ({
   const activeItem = [...navigation, ...getMoreNavigation(role)].find((item) =>
     isNavItemActive(pathname, item),
   ) ?? navigation[0];
+  const section = role === ROLES.ADMIN
+    ? "Administration"
+    : role === ROLES.STAFF
+      ? "Staff workspace"
+      : "Member portal";
   const mainPadding = isAdmin
-    ? "pb-[calc(64px+env(safe-area-inset-bottom)+12px)] md:pb-5"
-    : "pb-3 sm:pb-4 lg:pb-5";
-  const mainTopSpacing = isAdmin
-    ? "mt-0 pt-[env(safe-area-inset-top)] md:mt-16 md:pt-0"
-    : "mt-16";
+    ? "pb-[calc(88px+env(safe-area-inset-bottom))] md:pb-5"
+    : role === ROLES.STAFF
+      ? "pb-[calc(88px+env(safe-area-inset-bottom))] md:pb-5"
+      : "pb-3 sm:pb-4 lg:pb-5";
+  const mainTopSpacing = "pt-[calc(env(safe-area-inset-top)+1.25rem)] md:pt-6 min-[1536px]:pt-16";
 
   return (
     <div className="flex h-dvh overflow-hidden bg-background">
@@ -122,16 +125,14 @@ export const AppShell: React.FC<AppShellProps> = ({
         <AppHeader
           section={section}
           title={activeItem?.label}
-          showMobileMenu={!isAdmin}
-          hideOnMobile={isAdmin}
-          onMenuClick={() => setMobileOpen(true)}
+          hideOnMobile
+          showMobileMenu={false}
         />
-
         <main className={`relative ${mainTopSpacing} min-h-0 min-w-0 flex-1 overflow-y-auto scroll-smooth px-2 sm:px-3 lg:px-5 [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden ${mainPadding}`}>
           {children}
         </main>
       </div>
-      {isAdmin && <MobileTabBar user={user} />}
+      {(isAdmin || role === ROLES.STAFF) && <MobileTabBar user={user} />}
     </div>
   );
 };

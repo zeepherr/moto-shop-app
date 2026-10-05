@@ -27,16 +27,16 @@ export const PosPageClient: React.FC<PosPageClientProps> = ({
   );
 
   return (
-    <div className="mx-auto flex w-full max-w-[1800px] flex-col gap-3 sm:px-2.5 lg:h-[calc(100dvh-5.5rem)] lg:min-h-0 lg:flex-col lg:p-4">
-      <div className="sticky top-0 z-20 -mx-2 bg-background px-2 pb-2 pt-1 sm:-mx-3 sm:px-3 lg:static lg:mx-0 lg:bg-transparent lg:px-0 lg:pt-0 2xl:hidden">
-        <div className="flex min-h-12 items-center justify-between gap-2">
-          <h1 className="min-w-0 truncate text-base font-semibold tracking-tight text-foreground">Point of sale</h1>
+    <div className="mx-auto flex w-full max-w-[1800px] flex-col gap-3 sm:px-2.5 lg:h-[calc(100dvh-1.5rem)] lg:min-h-0 lg:flex-col lg:p-4">
+      <h1 className="sr-only">Point of sale</h1>
+      <div className="-mx-2 flex justify-end px-2 sm:-mx-3 sm:px-3 2xl:hidden">
+        <div className="flex min-h-11 items-center justify-end gap-2">
           {activeView === "catalog" ? (
             <button
               type="button"
               onClick={() => setActiveView("order")}
               aria-label={`Open cart with ${cartItemCount} ${cartItemCount === 1 ? "item" : "items"}`}
-              className="relative inline-flex min-h-11 shrink-0 items-center gap-2 rounded-xl border border-border bg-card px-3 text-sm font-semibold text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="relative inline-flex min-h-11 shrink-0 items-center gap-2 rounded-full border border-white/55 bg-white/75 px-4 text-sm font-semibold text-foreground shadow-[0_10px_28px_rgba(15,23,42,0.14),inset_0_1px_0_rgba(255,255,255,0.88)] backdrop-blur-2xl backdrop-saturate-150 transition-colors hover:bg-white/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring dark:border-white/15 dark:bg-card/75 dark:hover:bg-card/90"
             >
               <ShoppingCart className="size-4 text-primary" aria-hidden="true" />
               <span>Cart</span>
@@ -48,7 +48,7 @@ export const PosPageClient: React.FC<PosPageClientProps> = ({
             <button
               type="button"
               onClick={() => setActiveView("catalog")}
-              className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-xl px-3 text-sm font-semibold text-primary transition-colors hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-full border border-white/55 bg-white/75 px-4 text-sm font-semibold text-primary shadow-[0_10px_28px_rgba(15,23,42,0.14),inset_0_1px_0_rgba(255,255,255,0.88)] backdrop-blur-2xl backdrop-saturate-150 transition-colors hover:bg-white/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring dark:border-white/15 dark:bg-card/75 dark:hover:bg-card/90"
             >
               <ArrowLeft className="size-4" aria-hidden="true" />
               <span>Catalog</span>

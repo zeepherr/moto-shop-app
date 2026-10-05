@@ -25,20 +25,20 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
 }) => {
   const compact = compactOnMobile;
   return (
-    <header className={`management-page-header border-b border-border/60 ${compact ? "pb-4 pt-3 sm:pb-6 sm:pt-6" : "pb-5 pt-5 sm:pb-6 sm:pt-6"}`}>
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+    <header className="management-page-header border-b border-border/60 py-3 sm:py-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0">
           <div className="flex items-center gap-3">
-            <h1 className={`font-semibold leading-tight tracking-[-0.025em] text-foreground ${compact ? "text-2xl sm:text-[1.75rem]" : "text-[1.75rem]"}`}>
+            <h1 className="sr-only min-[1536px]:not-sr-only min-[1536px]:block min-[1536px]:text-[1.75rem] min-[1536px]:font-semibold min-[1536px]:leading-tight min-[1536px]:tracking-[-0.025em] min-[1536px]:text-foreground">
               {title}
             </h1>
             {count !== undefined && (
-              <span className="inline-flex min-w-7 items-center justify-center rounded-lg border border-border/70 bg-card px-2 py-1 text-xs font-semibold tabular-nums text-muted-foreground shadow-xs">
+              <span className="hidden min-w-7 items-center justify-center rounded-lg border border-border/70 bg-card px-2 py-1 text-xs font-semibold tabular-nums text-muted-foreground shadow-xs min-[1536px]:inline-flex">
                 {count}
               </span>
             )}
           </div>
-          <p className={`mt-1.5 max-w-2xl leading-5 text-muted-foreground ${compact ? "text-xs sm:text-sm" : "text-sm"}`}>
+          <p className="max-w-2xl text-xs leading-5 text-muted-foreground sm:text-sm">
             {description}
           </p>
         </div>

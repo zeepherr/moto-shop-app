@@ -25,6 +25,16 @@
    - Run `cmd.exe /c "npx impeccable detect src"` to ensure 0 UI anti-patterns.
    - **Never run production build** (`npm run build`).
 
+### Active Workstream: Readability and Maintainability Review
+- **Approved scope**: Implement the three narrow refactor steps from the Phase 1 audit on a new `codex/readability-maintenance-review` branch. Preserve existing workflows and behavior; do not commit.
+- **Step 1 — User Management workspace composition**: Extract People/Enrollment presentation from `UsersPageClient.tsx` while retaining shared state, filters, actions, and confirmation wiring. Preserve default view, counts, shortcuts, action behavior, optimistic updates, refresh, and responsive layouts.
+- **Step 2 — POS cart action orchestration**: Extract hold, checkout, cancellation, and pending-order resume handlers/state from `PosCart.tsx` into a cohesive hook or controller. Preserve payloads, payment rules, loading feedback, cancellation semantics, state resets, and receipt handling.
+- **Step 3 — User detail query readability**: Expand `getUserManagementDetail` query selection and event aggregation into named intermediate values without changing selected data or the 12/5x8/16 event limits and ordering.
+- **Execution checkpoint**: Complete one step at a time; after each step, run the narrowest required verification, record changed files and results here, and wait for user approval before starting the next step.
+- **Step 1 complete**: Extracted the People/Enrollment attention, tabs, filters, and table rendering into `UserManagementWorkspace.tsx`. `UsersPageClient.tsx` retains shared state, filtering, actions, dialogs, and refresh behavior. TypeScript passes; `git diff --check` passes. The required Impeccable detector reports 4 anti-patterns in the pre-existing email template code at `src/features/auth/services/otp.service.ts`, outside this step, plus advisory notes. No production data or workflows were exercised.
+- **Step 2 complete**: Extracted POS cart totals, local checkout state, and hold/checkout/cancel/resume orchestration into `usePosCartController.ts`; `PosCart.tsx` now focuses on the checkout and cart presentation. Existing checkout, cancellation, pending-order, payment, receipt, and reset behavior remains wired through the same actions and payload builders. TypeScript and `git diff --check` pass. The required Impeccable detector again reports 4 anti-patterns in the pre-existing `otp.service.ts` email templates, outside this step, plus advisory notes.
+- **Current checkpoint**: Steps 1 and 2 complete; waiting for user approval before Step 3. Step 3 remains unstarted.
+
 ---
 
 ## 3. Technology Stack & Key Infrastructure

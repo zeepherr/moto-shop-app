@@ -2,14 +2,11 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { AlertTriangle, CheckCircle2, MailCheck } from "lucide-react";
 import { toast } from "sonner";
 import { ConfirmActionDialog } from "@/components/ConfirmActionDialog";
-import { DockedTableCard } from "@/components/management/DockedTableCard";
 import { ManagementLayout } from "@/components/management/ManagementLayout";
 import { PageHeader } from "@/components/management/PageHeader";
 import { Button } from "@/components/ui/button";
-import { Select } from "@/components/ui/select";
 import { resendAssistedEnrollmentOtpAction } from "@/features/auth/actions/admin-enrollment-verification.action";
 import {
   cancelEnrollmentAction,
@@ -18,10 +15,11 @@ import {
 } from "@/features/auth/actions/admin-enrollment-recovery.action";
 import { updateUserAccessAction, updateUserRoleAction } from "../actions/user.actions";
 import { EnrollmentDialog } from "./EnrollmentDialog";
-import { EnrollmentTable, type EnrollmentItem } from "./EnrollmentTable";
+import type { EnrollmentItem } from "./EnrollmentTable";
 import { UserDetailDialog } from "./UserDetailDialog";
 import { UserStats } from "./UserStats";
-import { UserTable, type UserItem } from "./UserTable";
+import type { UserItem } from "./UserTable";
+import { UserManagementWorkspace } from "./UserManagementWorkspace";
 
 interface Props {
   initialUsers: UserItem[];
@@ -33,108 +31,6 @@ type UserView = "people" | "enrollments";
 type EnrollmentDefaults = { email: string; role: "MEMBER" | "STAFF" } | null;
 type PendingRoleChange = { user: UserItem; role: "STAFF" | "MEMBER" } | null;
 type PendingAccessChange = { user: UserItem; isActive: boolean } | null;
-
-interface EnrollmentAttentionProps {
-  codeCount: number;
-  setupCount: number;
-  deliveryCount: number;
-  onSelectStatus: (status: EnrollmentItem["status"]) => void;
-  onShowDeliveryIssues: () => void;
-}
-
-function EnrollmentAttention({
-  codeCount,
-  setupCount,
-  deliveryCount,
-  onSelectStatus,
-  onShowDeliveryIssues,
-}: EnrollmentAttentionProps) {
-  return (
-    <section className="flex flex-col gap-3 rounded-2xl border border-border/70 bg-card px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
-      <div>
-        <p className="text-sm font-semibold text-foreground">Enrollment queue</p>
-        <p className="text-xs text-muted-foreground">
-          Resolve the next customer action without losing the account context.
-        </p>
-      </div>
-      <div className="flex flex-wrap gap-2">
-        {codeCount > 0 && (
-          <button
-            type="button"
-            onClick={() => onSelectStatus("AWAITING_OTP")}
-            className="inline-flex items-center gap-1.5 rounded-lg bg-primary/10 px-2.5 py-1.5 text-xs font-medium text-primary"
-          >
-            <MailCheck className="size-3.5" />
-            {codeCount} code{codeCount === 1 ? "" : "s"} to verify
-          </button>
-        )}
-        {setupCount > 0 && (
-          <button
-            type="button"
-            onClick={() => onSelectStatus("AWAITING_PASSWORD_SETUP")}
-            className="inline-flex items-center gap-1.5 rounded-lg bg-muted px-2.5 py-1.5 text-xs font-medium text-foreground"
-          >
-            <CheckCircle2 className="size-3.5" />
-            {setupCount} setup pending
-          </button>
-        )}
-        {deliveryCount > 0 && (
-          <button
-            type="button"
-            onClick={onShowDeliveryIssues}
-            className="inline-flex items-center gap-1.5 rounded-lg bg-destructive/10 px-2.5 py-1.5 text-xs font-medium text-destructive"
-          >
-            <AlertTriangle className="size-3.5" />
-            {deliveryCount} delivery issue{deliveryCount === 1 ? "" : "s"}
-          </button>
-        )}
-        {codeCount === 0 && setupCount === 0 && deliveryCount === 0 && (
-          <span className="text-xs text-muted-foreground">
-            No enrollment work needs attention.
-          </span>
-        )}
-      </div>
-    </section>
-  );
-}
-
-interface UserViewTabsProps {
-  view: UserView;
-  enrollmentCount: number;
-  onChange: (view: UserView) => void;
-}
-
-function UserViewTabs({ view, enrollmentCount, onChange }: UserViewTabsProps) {
-  const tabs: Array<{ value: UserView; label: string }> = [
-    { value: "people", label: "People" },
-    { value: "enrollments", label: `Enrollment queue (${enrollmentCount})` },
-  ];
-
-  return (
-    <div
-      className="flex gap-1 border-b border-border/60"
-      role="tablist"
-      aria-label="User management views"
-    >
-      {tabs.map((tab) => (
-        <button
-          key={tab.value}
-          type="button"
-          role="tab"
-          aria-selected={view === tab.value}
-          onClick={() => onChange(tab.value)}
-          className={`border-b-2 px-3 py-2 text-sm font-medium ${
-            view === tab.value
-              ? "border-primary text-primary"
-              : "border-transparent text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          {tab.label}
-        </button>
-      ))}
-    </div>
-  );
-}
 
 export function UsersPageClient({ initialUsers, initialEnrollments }: Props) {
   const router = useRouter();
@@ -153,14 +49,6 @@ export function UsersPageClient({ initialUsers, initialEnrollments }: Props) {
   const [restartItem, setRestartItem] = useState<EnrollmentItem | null>(null);
   const [isPending, setIsPending] = useState(false);
 
-  const counts = useMemo(
-    () => ({
-      all: users.length,
-      active: users.filter((user) => user.isActive).length,
-      inactive: users.filter((user) => !user.isActive).length,
-    }),
-    [users],
-  );
   const stats = useMemo(
     () => ({
       admin: users.filter((user) => user.role === "ADMIN").length,
@@ -168,16 +56,6 @@ export function UsersPageClient({ initialUsers, initialEnrollments }: Props) {
       member: users.filter((user) => user.role === "MEMBER").length,
     }),
     [users],
-  );
-  const attention = useMemo(
-    () => ({
-      codes: initialEnrollments.filter((item) => item.status === "AWAITING_OTP").length,
-      setup: initialEnrollments.filter((item) => item.status === "AWAITING_PASSWORD_SETUP").length,
-      delivery: initialEnrollments.filter((item) =>
-        item.lastEvent?.action.endsWith("DELIVERY_FAILED"),
-      ).length,
-    }),
-    [initialEnrollments],
   );
   const searchTerm = search.trim().toLowerCase();
   const filteredUsers = useMemo(
@@ -216,8 +94,6 @@ export function UsersPageClient({ initialUsers, initialEnrollments }: Props) {
     setAccessFilter("all");
     setEnrollmentStatus("ALL");
   };
-  const hasFilters =
-    Boolean(search) || roleFilter !== "ALL" || accessFilter !== "all" || enrollmentStatus !== "ALL";
 
   const withPending = async <T,>(work: () => Promise<T>): Promise<T> => {
     setIsPending(true);
@@ -310,10 +186,6 @@ export function UsersPageClient({ initialUsers, initialEnrollments }: Props) {
     refresh();
   };
 
-  const tableFilter = view === "people" ? roleFilter : enrollmentStatus;
-  const filteredCount = view === "people" ? filteredUsers.length : filteredEnrollments.length;
-  const totalCount = view === "people" ? users.length : initialEnrollments.length;
-
   return (
     <ManagementLayout className="!space-y-4 sm:!space-y-6">
       <PageHeader
@@ -350,91 +222,33 @@ export function UsersPageClient({ initialUsers, initialEnrollments }: Props) {
         memberCount={stats.member}
       />
 
-      <EnrollmentAttention
-        codeCount={attention.codes}
-        setupCount={attention.setup}
-        deliveryCount={attention.delivery}
-        onSelectStatus={(status) => {
-          setView("enrollments");
-          setEnrollmentStatus(status);
-        }}
-        onShowDeliveryIssues={() => setView("enrollments")}
-      />
-
-      <UserViewTabs
+      <UserManagementWorkspace
         view={view}
-        enrollmentCount={initialEnrollments.length}
-        onChange={setView}
-      />
-
-      <DockedTableCard
+        onViewChange={setView}
+        users={users}
+        enrollments={initialEnrollments}
+        filteredUsers={filteredUsers}
+        filteredEnrollments={filteredEnrollments}
         search={search}
         onSearchChange={setSearch}
-        searchPlaceholder={
-          view === "people"
-            ? "Search people by name, email, or phone..."
-            : "Search enrollments..."
-        }
-        status={view === "people" ? accessFilter : undefined}
-        onStatusChange={view === "people" ? setAccessFilter : undefined}
-        statusCounts={counts}
-        filterSlot={
-          <Select
-            value={tableFilter}
-            onValueChange={(selected) =>
-              view === "people" ? setRoleFilter(selected) : setEnrollmentStatus(selected)
-            }
-            className="h-9.5 rounded-xl border border-input/80 bg-background/50 px-3 text-xs text-foreground outline-none focus:ring-1 focus:ring-primary sm:w-48"
-            options={
-              view === "people"
-                ? [
-                    { value: "ALL", label: "All roles" },
-                    { value: "ADMIN", label: "Administrators" },
-                    { value: "STAFF", label: "Staff" },
-                    { value: "MEMBER", label: "Members" },
-                  ]
-                : [
-                    { value: "ALL", label: "All enrollment states" },
-                    { value: "APPROVED", label: "Ready to register" },
-                    { value: "AWAITING_OTP", label: "Awaiting code" },
-                    { value: "AWAITING_PASSWORD_SETUP", label: "Password setup sent" },
-                  ]
-            }
-          />
-        }
-        hasActiveFilters={hasFilters}
+        roleFilter={roleFilter}
+        onRoleFilterChange={setRoleFilter}
+        accessFilter={accessFilter}
+        onAccessFilterChange={setAccessFilter}
+        enrollmentStatus={enrollmentStatus}
+        onEnrollmentStatusChange={setEnrollmentStatus}
         onClearFilters={clearFilters}
-        totalFiltered={filteredCount}
-        totalAll={totalCount}
-        entityName={view === "people" ? "people" : "enrollments"}
-      >
-        {view === "people" ? (
-          <UserTable
-            users={filteredUsers}
-            onView={setSelectedUser}
-            onRoleChange={(user, role) => setRoleUser({ user, role })}
-            onAccessChange={(user, isActive) => setAccessUser({ user, isActive })}
-            isPending={isPending}
-          />
-        ) : (
-          <EnrollmentTable
-            enrollments={filteredEnrollments}
-            isPending={isPending}
-            onVerify={(item) => router.push(`/admin/users/enrollments/${item.id}/verify`)}
-            onResendOtp={(item) =>
-              run(() => resendAssistedEnrollmentOtpAction(item.id), "Verification code sent.")
-            }
-            onResendRegistrationLink={(item) =>
-              run(() => resendSelfServiceRegistrationLinkAction(item.id), "Registration link sent.")
-            }
-            onResendPasswordLink={(item) =>
-              run(() => resendPasswordSetupLinkAction(item.id), "Password setup link sent.")
-            }
-            onCancel={setCancelItem}
-            onRestart={setRestartItem}
-          />
-        )}
-      </DockedTableCard>
+        onViewUser={setSelectedUser}
+        onRoleChange={(user, role) => setRoleUser({ user, role })}
+        onAccessChange={(user, isActive) => setAccessUser({ user, isActive })}
+        onVerifyEnrollment={(item) => router.push(`/admin/users/enrollments/${item.id}/verify`)}
+        onResendOtp={(item) => run(() => resendAssistedEnrollmentOtpAction(item.id), "Verification code sent.")}
+        onResendRegistrationLink={(item) => run(() => resendSelfServiceRegistrationLinkAction(item.id), "Registration link sent.")}
+        onResendPasswordLink={(item) => run(() => resendPasswordSetupLinkAction(item.id), "Password setup link sent.")}
+        onCancelEnrollment={setCancelItem}
+        onRestartEnrollment={setRestartItem}
+        isPending={isPending}
+      />
 
       <EnrollmentDialog
         key={`${method ?? "closed"}:${enrollmentDefaults?.email ?? ""}`}

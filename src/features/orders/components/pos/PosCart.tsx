@@ -1,12 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { Clock3, ShoppingCart } from "lucide-react";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { usePosStore } from "../../stores/usePosStore";
 import { PosCustomerSelector } from "./PosCustomerSelector";
 import { PosCartItem } from "./CartItem";
 import { PosPayment } from "./PosPayment";
@@ -14,39 +13,8 @@ import { PosCartActions } from "./PosCartAction";
 import { PendingOrders } from "./PendingOrders";
 import { PosReceiptDialog } from "./PosReceiptDialog";
 import type { PaymentMethod } from "@prisma/client";
-import { getMemberByIdAction } from "@/features/users/actions/user.actions";
-import { checkoutOrderAction, holdOrderAction, cancelPendingOrderAction } from "../../actions/order.actions";
-import { getOrderByIdAction } from "../../actions/order-query.actions";
-import { buildCheckoutPayload, buildHoldPayload, pendingOrderToCartItems } from "../../utils/cart.util";
-import { toast } from "sonner";
-import type { CheckoutReceipt, OrderDTO, PosCartItem as PosCartItemData } from "../../types";
 import { ORDER_CANCELLATION_REASONS } from "../../constants/cancellation-reasons";
-
-interface CartTotals {
-  itemCount: number;
-  productSubtotal: number;
-  serviceSubtotal: number;
-  hasItems: boolean;
-}
-
-function calculateCartTotals(cartItems: PosCartItemData[]): CartTotals {
-  return cartItems.reduce<CartTotals>(
-    (totals, item) => {
-      const lineTotal = (item.unitPrice ?? item.price) * item.quantity;
-      totals.itemCount += item.quantity;
-      totals.hasItems ||= item.quantity > 0;
-
-      if (item.itemType === "PRODUCT") {
-        totals.productSubtotal += lineTotal;
-      } else {
-        totals.serviceSubtotal += lineTotal;
-      }
-
-      return totals;
-    },
-    { itemCount: 0, productSubtotal: 0, serviceSubtotal: 0, hasItems: false },
-  );
-}
+import { usePosCartController } from "./usePosCartController";
 
 interface PosCheckoutPanelProps {
   itemCount: number;
@@ -233,149 +201,42 @@ function CancelOrderDialog({
 }
 
 export const PosCart: React.FC<{ productDiscountRate: number }> = ({ productDiscountRate }) => {
-  const cartItems = usePosStore((store) => store.cartItems);
-  const selectedMember = usePosStore((store) => store.selectedMember);
-  const selectedMotorId = usePosStore((store) => store.selectedMotorId);
-  const pendingOrderId = usePosStore((store) => store.pendingOrderId);
-  const setCartItems = usePosStore((store) => store.setCartItems);
-  const setSelectedMember = usePosStore((store) => store.setSelectedMember);
-  const setSelectedMotorId = usePosStore((store) => store.setSelectedMotorId);
-  const setPendingOrderId = usePosStore((store) => store.setPendingOrderId);
-  const resetOrder = usePosStore((store) => store.resetOrder);
-
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("CASH");
-  const [receivedAmount, setReceivedAmount] = useState("");
-  const [isPendingSheetOpen, setIsPendingSheetOpen] = useState(false);
-  const [isActionPending, setIsActionPending] = useState(false);
-  const [isLoadingPendingOrder, setIsLoadingPendingOrder] = useState(false);
-  const [receipt, setReceipt] = useState<CheckoutReceipt | null>(null);
-  const [qrConfirmedAmount, setQrConfirmedAmount] = useState<number | null>(null);
-  const [isCancelConfirmOpen, setIsCancelConfirmOpen] = useState(false);
-  const [cancelReason, setCancelReason] = useState("");
-
-  const { itemCount, productSubtotal, serviceSubtotal, hasItems } = calculateCartTotals(cartItems);
-  const subtotal = productSubtotal + serviceSubtotal;
-  const appliedDiscountRate = selectedMember ? productDiscountRate : 0;
-  const discountAmount = Math.min(Math.round((productSubtotal * appliedDiscountRate) / 100 * 100) / 100, productSubtotal);
-  const totalDue = Math.max(0, Math.round((subtotal - discountAmount) * 100) / 100);
-  const isQrPaymentConfirmed = qrConfirmedAmount === totalDue && qrConfirmedAmount !== null;
-  const numReceived = Number(receivedAmount) || 0;
-  const canComplete = hasItems && (totalDue === 0 || (paymentMethod === "QR"
-    ? isQrPaymentConfirmed
-    : numReceived >= totalDue));
-
-  const changeAmount =
-    paymentMethod === "CASH"
-      ? Math.max(numReceived - totalDue, 0)
-      : 0;
-
-  const withActionPending = async <T,>(action: () => Promise<T>): Promise<T> => {
-    setIsActionPending(true);
-    try {
-      return await action();
-    } finally {
-      setIsActionPending(false);
-    }
-  };
-
-  const handleClear = () => {
-    resetOrder();
-    setPaymentMethod("CASH");
-    setReceivedAmount("");
-    setQrConfirmedAmount(null);
-  };
-
-  const handleHoldOrder = async () => {
-    if (!hasItems) return;
-    await withActionPending(async () => {
-      const payload = buildHoldPayload({ cartItems, selectedMember, selectedMotorId, pendingOrderId });
-      const res = await holdOrderAction(payload);
-      if (res.success) {
-        toast.success(pendingOrderId ? "Pending order updated" : "Order held successfully");
-        handleClear();
-      } else {
-        toast.error(res.error || "Failed to hold order");
-      }
-    });
-  };
-
-  const handleCompleteSale = async () => {
-    if (!canComplete) return;
-    await withActionPending(async () => {
-      const finalReceived = totalDue === 0 ? 0 : paymentMethod === "QR" ? totalDue : numReceived;
-      const payload = buildCheckoutPayload({
-        cartItems,
-        selectedMember,
-        selectedMotorId,
-        paymentMethod: totalDue === 0 ? null : paymentMethod,
-        receivedAmount: finalReceived,
-        pendingOrderId,
-        discountRate: productDiscountRate,
-      });
-      const res = await checkoutOrderAction(payload);
-      if (res.success) {
-        toast.success("Order completed successfully!");
-        handleClear();
-        if ("data" in res && res.data) setReceipt(res.data);
-      } else {
-        toast.error(res.error || "Checkout failed");
-      }
-    });
-  };
-
-  const handleCancelOrder = (orderId: number, reason: string) =>
-    withActionPending(async () => {
-      const res = await cancelPendingOrderAction({ orderId, reason });
-      if (res.success) {
-        toast.success("Order cancelled");
-        if (orderId === pendingOrderId) handleClear();
-        return true;
-      } else {
-        toast.error(res.error || "Failed to cancel order");
-        return false;
-      }
-    });
-
-  const handleCancelCurrentOrder = async () => {
-    if (!pendingOrderId) return;
-    if (await handleCancelOrder(pendingOrderId, cancelReason)) {
-      setIsCancelConfirmOpen(false);
-      setCancelReason("");
-    }
-  };
-
-  const handleSelectPendingOrder = async (orderId: number) => {
-    setIsLoadingPendingOrder(true);
-    setIsActionPending(true);
-    try {
-      const res = await getOrderByIdAction(orderId);
-      if (res.success && res.data) {
-        const order: OrderDTO = res.data;
-        let member = order.member ?? null;
-        if (order.memberId) {
-          const memberResult = await getMemberByIdAction(order.memberId);
-          if (!memberResult.success || !("data" in memberResult) || !memberResult.data) {
-            toast.error(memberResult.error || "Unable to load the customer linked to this order.");
-            return;
-          }
-          member = memberResult.data;
-        }
-        setCartItems(pendingOrderToCartItems(order.orderItems));
-        setSelectedMember(member);
-        setSelectedMotorId(order.motorId);
-        setPaymentMethod(order.paymentMethod || "CASH");
-        setQrConfirmedAmount(null);
-        setReceivedAmount("");
-        setPendingOrderId(order.id);
-        setIsPendingSheetOpen(false);
-      } else {
-        toast.error("Failed to load order");
-      }
-    } finally {
-      setIsActionPending(false);
-      setIsLoadingPendingOrder(false);
-    }
-  };
+  const controller = usePosCartController(productDiscountRate);
+  const {
+    cartItems,
+    selectedMember,
+    pendingOrderId,
+    itemCount,
+    hasItems,
+    subtotal,
+    discountAmount,
+    appliedDiscountRate,
+    totalDue,
+    canComplete,
+    changeAmount,
+    isQrPaymentConfirmed,
+    paymentMethod,
+    setPaymentMethod,
+    receivedAmount,
+    setReceivedAmount,
+    setQrConfirmedAmount,
+    isPendingSheetOpen,
+    setIsPendingSheetOpen,
+    isActionPending,
+    isLoadingPendingOrder,
+    receipt,
+    setReceipt,
+    isCancelConfirmOpen,
+    setIsCancelConfirmOpen,
+    cancelReason,
+    setCancelReason,
+    clearOrder,
+    holdOrder,
+    completeSale,
+    cancelOrder,
+    cancelCurrentOrder,
+    selectPendingOrder,
+  } = controller;
 
   return (
     <>
@@ -403,7 +264,7 @@ export const PosCart: React.FC<{ productDiscountRate: number }> = ({ productDisc
                 <SheetDescription>Search recent held tickets to resume or cancel one.</SheetDescription>
               </SheetHeader>
               <div className="p-4">
-                <PendingOrders onSelectOrder={handleSelectPendingOrder} onCancelOrder={handleCancelOrder} isSelecting={isLoadingPendingOrder} />
+                <PendingOrders onSelectOrder={selectPendingOrder} onCancelOrder={cancelOrder} isSelecting={isLoadingPendingOrder} />
               </div>
             </SheetContent>
           </Sheet>
@@ -453,9 +314,9 @@ export const PosCart: React.FC<{ productDiscountRate: number }> = ({ productDisc
         isPending={isActionPending}
         canComplete={canComplete}
         isEditingPending={Boolean(pendingOrderId)}
-        onHold={handleHoldOrder}
-        onClear={handleClear}
-        onComplete={handleCompleteSale}
+        onHold={holdOrder}
+        onClear={clearOrder}
+        onComplete={completeSale}
         onCancel={() => {
           setCancelReason("");
           setIsCancelConfirmOpen(true);
@@ -472,7 +333,7 @@ export const PosCart: React.FC<{ productDiscountRate: number }> = ({ productDisc
         setIsCancelConfirmOpen(false);
         setCancelReason("");
       }}
-      onConfirmCancel={handleCancelCurrentOrder}
+      onConfirmCancel={cancelCurrentOrder}
     />
     <PosReceiptDialog receipt={receipt} onOpenChange={(open) => !open && setReceipt(null)} />
     </>

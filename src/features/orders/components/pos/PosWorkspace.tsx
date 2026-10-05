@@ -23,7 +23,7 @@ export const PosWorkspace: React.FC<PosWorkspaceProps> = ({
   const [selectedCategory, setSelectedCategory] = useState("all");
 
   return (
-    <section aria-label="Product and service catalog" className="mt-0 flex min-w-0 flex-col gap-3 sm:mt-4 lg:h-full lg:min-h-0 lg:gap-4">
+    <section aria-label="Product and service catalog" className="mt-0 flex min-w-0 flex-col gap-3 sm:mt-4 lg:mt-0 lg:h-full lg:min-h-0 lg:gap-4 2xl:mt-4">
       <PosSearch
         searchTerm={searchTerm}
         onSearchChange={setSearchTerm}

@@ -179,8 +179,8 @@ export const PosCart: React.FC<{ productDiscountRate: number }> = ({ productDisc
 
   return (
     <>
-    <aside className="flex min-w-0 flex-col overflow-hidden rounded-2xl border border-border/70 bg-card lg:h-full lg:min-h-0 sm:mt-4 mt-1.5 shadow-sm">
-      <div className="shrink-0">
+    <aside className="mt-1.5 flex min-w-0 flex-col overflow-hidden rounded-2xl border border-border/70 bg-card shadow-sm sm:mt-4 lg:mt-0 lg:h-full lg:min-h-0 2xl:mt-4 lg:max-2xl:grid lg:max-2xl:grid-cols-[minmax(0,1fr)_minmax(18rem,27rem)] lg:max-2xl:grid-rows-[auto_minmax(0,1fr)]">
+      <div className="shrink-0 lg:max-2xl:col-start-1 lg:max-2xl:row-start-1">
         <div className="flex items-center justify-between gap-3 border-b border-border/60 p-3 lg:p-4">
           <div>
             <h2 className="font-semibold text-foreground text-sm lg:text-base">Current Order</h2>
@@ -212,7 +212,7 @@ export const PosCart: React.FC<{ productDiscountRate: number }> = ({ productDisc
         <PosCustomerSelector />
       </div>
 
-      <div className="min-h-28 max-h-[35dvh] overflow-y-auto border-b border-border/60 p-3 scrollbar-none lg:min-h-0 lg:max-h-none lg:flex-1 lg:p-4">
+      <div className="min-h-28 max-h-[35dvh] overflow-y-auto border-b border-border/60 p-3 scrollbar-none lg:min-h-0 lg:max-h-none lg:flex-1 lg:p-4 lg:max-2xl:col-start-1 lg:max-2xl:row-start-2">
         {cartItems.length === 0 ? (
           <div className="flex h-full min-h-36 flex-col items-center justify-center text-center lg:min-h-0">
             <ShoppingCart className="mb-2 size-8 text-muted-foreground/40" />
@@ -228,7 +228,7 @@ export const PosCart: React.FC<{ productDiscountRate: number }> = ({ productDisc
         )}
       </div>
 
-      <div className="shrink-0">
+      <div className="shrink-0 lg:max-2xl:col-start-2 lg:max-2xl:row-span-2 lg:max-2xl:row-start-1 lg:max-2xl:overflow-y-auto lg:max-2xl:border-l lg:max-2xl:border-border/60">
         <div className="border-b border-border/60 px-3 py-2 lg:px-4">
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-1.5 text-xs text-muted-foreground">

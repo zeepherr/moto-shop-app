@@ -145,6 +145,14 @@
   .member-profile-banner {
     height: 96px;
   }
+
+  .public-home-hero {
+    padding-block: 2.5rem;
+  }
+
+  .public-home-title {
+    font-size: var(--text-5xl);
+  }
 }
 
 body {

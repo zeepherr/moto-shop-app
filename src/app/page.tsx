@@ -46,13 +46,13 @@ export default async function HomePage() {
             <div className="aspect-[1155/678] w-[68rem] bg-gradient-to-tr from-cyan-400 to-blue-600 opacity-20" />
           </div>
 
-          <div className="mx-auto max-w-3xl py-20 text-center">
+          <div className="public-home-hero mx-auto max-w-3xl py-20 text-center">
             <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-cyan-500/20 bg-cyan-500/10 px-3.5 py-1 text-xs font-semibold text-cyan-500">
               <Sparkles className="size-3.5" />
               Smart Motorcycle Workshop Management
             </div>
 
-            <h1 className="font-heading text-4xl font-extrabold tracking-tight text-foreground sm:text-6xl">
+            <h1 className="public-home-title font-heading text-4xl font-extrabold tracking-tight text-foreground sm:text-6xl">
               Power Your Repair Shop with{" "}
               <span className="text-[#2997ff]">
                 Precision POS

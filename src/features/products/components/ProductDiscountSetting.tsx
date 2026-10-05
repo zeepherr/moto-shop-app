@@ -25,7 +25,7 @@ export function ProductDiscountSetting({ initialRate }: { initialRate: number })
   };
 
   return (
-    <section className="flex flex-col gap-4 rounded-2xl border border-border/70 bg-card p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5" aria-labelledby="product-discount-title">
+    <section className="product-discount-setting flex flex-col gap-4 rounded-2xl border border-border/70 bg-card p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5" aria-labelledby="product-discount-title">
       <div className="flex items-start gap-3">
         <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary"><Percent className="size-5" /></span>
         <div>

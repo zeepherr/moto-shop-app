@@ -4,15 +4,67 @@ import { UserAuditAction, UserRole } from "@prisma/client";
 export const getUserManagementDetail = async (userId: number, db = defaultDb) => {
   const user = await db.user.findUnique({
     where: { id: userId },
-    select: { id: true, firstName: true, lastName: true, email: true, phone: true, role: true, isActive: true, emailVerifiedAt: true, createdAt: true, userInfo: { select: { photoUrl: true } }, userMotors: { select: { id: true } }, auditEventsAsSubject: { orderBy: { createdAt: "desc" }, take: 12, select: { action: true, detail: true, createdAt: true, actor: { select: { firstName: true, lastName: true, email: true } } } } },
+    select: {
+      id: true,
+      firstName: true,
+      lastName: true,
+      email: true,
+      phone: true,
+      role: true,
+      isActive: true,
+      emailVerifiedAt: true,
+      createdAt: true,
+      userInfo: { select: { photoUrl: true } },
+      userMotors: { select: { id: true } },
+      auditEventsAsSubject: {
+        orderBy: { createdAt: "desc" },
+        take: 12,
+        select: {
+          action: true,
+          detail: true,
+          createdAt: true,
+          actor: { select: { firstName: true, lastName: true, email: true } },
+        },
+      },
+    },
   });
   if (!user) return null;
-  const enrollmentQuery = user.email ? db.enrollment.findMany({
-    where: { email: user.email }, orderBy: { updatedAt: "desc" }, take: 5,
-    select: { auditEvents: { orderBy: { createdAt: "desc" }, take: 8, select: { action: true, detail: true, createdAt: true, actor: { select: { firstName: true, lastName: true, email: true } } } } },
-  }) : Promise.resolve([]);
-  const [completedOrders, enrollments] = await Promise.all([db.order.count({ where: { memberId: user.id, status: "COMPLETED" } }), enrollmentQuery]);
-  return { ...user, completedOrders, motorcycleCount: user.userMotors.length, events: [...user.auditEventsAsSubject, ...enrollments.flatMap((enrollment) => enrollment.auditEvents)].sort((left, right) => right.createdAt.getTime() - left.createdAt.getTime()).slice(0, 16) };
+  const enrollmentQuery = user.email
+    ? db.enrollment.findMany({
+        where: { email: user.email },
+        orderBy: { updatedAt: "desc" },
+        take: 5,
+        select: {
+          auditEvents: {
+            orderBy: { createdAt: "desc" },
+            take: 8,
+            select: {
+              action: true,
+              detail: true,
+              createdAt: true,
+              actor: { select: { firstName: true, lastName: true, email: true } },
+            },
+          },
+        },
+      })
+    : Promise.resolve([]);
+  const [completedOrders, enrollments] = await Promise.all([
+    db.order.count({ where: { memberId: user.id, status: "COMPLETED" } }),
+    enrollmentQuery,
+  ]);
+
+  // Enrollment events have no subject user, so merge them with user events for one account timeline.
+  const enrollmentEvents = enrollments.flatMap((enrollment) => enrollment.auditEvents);
+  const events = [...user.auditEventsAsSubject, ...enrollmentEvents]
+    .sort((left, right) => right.createdAt.getTime() - left.createdAt.getTime())
+    .slice(0, 16);
+
+  return {
+    ...user,
+    completedOrders,
+    motorcycleCount: user.userMotors.length,
+    events,
+  };
 };
 
 export const updateUserRole = async (data: { userId: number; role: UserRole; actorUserId: number }, db = defaultDb) => {

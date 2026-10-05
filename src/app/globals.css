@@ -133,6 +133,10 @@
   .pos-payment-panel input {
     height: 2.5rem;
   }
+
+  .dashboard-revenue-chart {
+    height: 220px;
+  }
 }
 
 body {

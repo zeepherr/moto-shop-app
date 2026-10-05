@@ -69,7 +69,7 @@ export function RevenueTrendChart({ data }: ChartProps) {
         </div>
       </div>
 
-      <div className="h-[220px] w-full pt-3 sm:h-[280px] sm:pt-4" aria-hidden="true">
+      <div className="dashboard-revenue-chart h-[220px] w-full pt-3 sm:h-[280px] sm:pt-4" aria-hidden="true">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={visibleData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
             <defs>

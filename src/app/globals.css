@@ -137,6 +137,37 @@
     line-height: 1.2;
   }
 
+  .dashboard-page-header {
+    gap: 0.5rem;
+  }
+
+  .dashboard-page-title {
+    font-size: var(--text-2xl);
+  }
+
+  .dashboard-metric-card {
+    padding: 0.75rem;
+  }
+
+  .dashboard-metric-content {
+    margin-top: 0.5rem;
+  }
+
+  .dashboard-metric-value {
+    font-size: var(--text-2xl);
+    line-height: 1.15;
+  }
+
+  .dashboard-metric-details {
+    gap: 0.25rem;
+    margin-top: 0.25rem;
+  }
+
+  .today-operations-header,
+  .today-operations-item {
+    padding-block: 0.625rem;
+  }
+
   .product-discount-setting {
     gap: 0.75rem;
     padding-block: 0.75rem;

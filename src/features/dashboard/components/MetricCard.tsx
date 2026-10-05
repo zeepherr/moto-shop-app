@@ -33,7 +33,7 @@ export const MetricCard: React.FC<MetricCardProps> = ({
   };
 
   const card = (
-    <div className="group relative rounded-2xl border border-border/70 bg-card/60 p-3.5 backdrop-blur-md transition-all duration-200 hover:border-border hover:bg-card/80 sm:p-5">
+    <div className="dashboard-metric-card group relative rounded-2xl border border-border/70 bg-card/60 p-3.5 backdrop-blur-md transition-all duration-200 hover:border-border hover:bg-card/80 sm:p-5">
       <div className="flex items-center justify-between">
         <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
           {label}
@@ -53,12 +53,12 @@ export const MetricCard: React.FC<MetricCardProps> = ({
         </div>
       </div>
 
-      <div className="mt-2 sm:mt-3">
-        <p className="break-words text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+      <div className="dashboard-metric-content mt-2 sm:mt-3">
+        <p className="dashboard-metric-value break-words text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
           {value}
         </p>
 
-        <div className="mt-1.5 flex min-w-0 flex-wrap items-center gap-1.5 sm:mt-2 sm:flex-nowrap sm:gap-2">
+        <div className="dashboard-metric-details mt-1.5 flex min-w-0 flex-wrap items-center gap-1.5 sm:mt-2 sm:flex-nowrap sm:gap-2">
           {trend && (
             <span
               className={cn(

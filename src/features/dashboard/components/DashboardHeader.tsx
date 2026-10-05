@@ -13,10 +13,10 @@ export const DashboardHeader: React.FC = () => {
   }).format(new Date());
 
   return (
-    <div className="flex flex-col gap-3 pb-1 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:pb-2">
+    <div className="dashboard-page-header flex flex-col gap-3 pb-1 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:pb-2">
       <div>
         <p className="mb-1 text-xs font-medium text-muted-foreground">{currentDate}</p>
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+        <h1 className="dashboard-page-title text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
           Workshop Cockpit
         </h1>
         <p className="mt-1 text-xs leading-5 text-muted-foreground sm:mt-0.5 sm:text-sm">

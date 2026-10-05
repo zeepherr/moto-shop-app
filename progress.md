@@ -62,8 +62,8 @@
 ### Follow-up: Laptop Cards Still Too Large (2026-10-05)
 - **User feedback**: The first density pass remained too subtle. The dashboard screenshot shows oversized summary cards still consuming too much of the laptop viewport. Continue with actual card height/type/padding adjustments across shared components, not only utility spacing.
 - **Scope remains**: Laptop viewport only (`min-width: 1024px`, `max-height: 950px`); no mobile or taller desktop styling changes and no application logic changes.
-- **Shared management step**: Strengthen the laptop spacing scale and compact shared page headers and summary cards; commit this separately before page-specific card work.
-- **Dashboard step**: Compact the dashboard metric cards and Today Operations row further; commit as its own page step.
+- **Shared management step**: Strengthen the laptop spacing scale and compact shared page headers and summary cards. Completed and committed as `2429944` (`style(management): densify laptop summary cards`).
+- **Dashboard step**: Compact dashboard metric card padding/value size and Today Operations row spacing, scoped to the laptop media query. TypeScript and `git diff --check` pass. The Impeccable CLI is not installed locally; `npx` could not reach npm registry from the sandbox, so its detector remains unverified for this step. Commit as its own page step.
 
 ### A. Global Shell & Surface System (desktop complete; admin mobile refresh planned)
 - [x] **`AppShell` & Layout**: Responsive container bounded to `max-w-7xl mx-auto` for management screens to eliminate widescreen voids on 1440p/4K monitors.

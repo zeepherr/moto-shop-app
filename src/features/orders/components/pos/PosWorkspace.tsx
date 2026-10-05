@@ -11,12 +11,16 @@ interface PosWorkspaceProps {
   categories: Array<{ id: number; name: string }>;
   products: PosProduct[];
   services: PosService[];
+  onProductAdded?: (imageElement: HTMLImageElement | null) => void;
+  onServiceAdded?: () => void;
 }
 
 export const PosWorkspace: React.FC<PosWorkspaceProps> = ({
   categories = [],
   products = [],
   services = [],
+  onProductAdded,
+  onServiceAdded,
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [mode, setMode] = useState<"PRODUCT" | "SERVICE">("PRODUCT");
@@ -44,6 +48,8 @@ export const PosWorkspace: React.FC<PosWorkspaceProps> = ({
         selectedCategory={selectedCategory}
         products={products}
         services={services}
+        onProductAdded={onProductAdded}
+        onServiceAdded={onServiceAdded}
       />
     </section>
   );

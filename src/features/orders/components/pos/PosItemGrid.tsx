@@ -13,6 +13,8 @@ interface PosItemGridProps {
   selectedCategory: string;
   products: PosProduct[];
   services: PosService[];
+  onProductAdded?: (imageElement: HTMLImageElement | null) => void;
+  onServiceAdded?: () => void;
   isLoading?: boolean;
 }
 
@@ -22,6 +24,8 @@ export const PosItemGrid: React.FC<PosItemGridProps> = ({
   selectedCategory,
   products = [],
   services = [],
+  onProductAdded,
+  onServiceAdded,
   isLoading = false,
 }) => {
   const isProductMode = mode === "PRODUCT";
@@ -78,10 +82,10 @@ export const PosItemGrid: React.FC<PosItemGridProps> = ({
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 sm:gap-2.5">
         {isProductMode
           ? filteredProducts.map((product) => (
-              <PosProductCard key={product.id} product={product} />
+              <PosProductCard key={product.id} product={product} onProductAdded={onProductAdded} />
             ))
           : filteredServices.map((service) => (
-              <PosServiceCard key={service.id} service={service} />
+              <PosServiceCard key={service.id} service={service} onServiceAdded={onServiceAdded} />
             ))}
       </div>
     </PosItemGridShell>

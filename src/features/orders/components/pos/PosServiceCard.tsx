@@ -15,15 +15,16 @@ export interface PosService {
 
 interface PosServiceCardProps {
   service: PosService;
+  onServiceAdded?: () => void;
 }
 
-export const PosServiceCard: React.FC<PosServiceCardProps> = ({ service }) => {
+export const PosServiceCard: React.FC<PosServiceCardProps> = ({ service, onServiceAdded }) => {
   const addItem = usePosStore((store) => store.addItem);
   const price = Number(service.price) || 0;
 
   const handleAddService = () => {
     const cartItem = serviceToCartItem(service);
-    addItem(cartItem);
+    if (addItem(cartItem)) onServiceAdded?.();
   };
 
   return (

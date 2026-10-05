@@ -58,6 +58,7 @@ export function getMoreNavigation(role: UserRole): NavItem[] {
 }
 
 export function getMobileTabs(role: UserRole): NavItem[] {
+  if (role === ROLES.STAFF) return staffNavigation;
   if (role !== ROLES.ADMIN) return [];
 
   const navigation = getNavigation(role);

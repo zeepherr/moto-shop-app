@@ -26,7 +26,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
   const toggleTheme = () => setTheme(isDark ? "light" : "dark");
 
   return (
-    <header className={`absolute inset-x-0 top-0 z-30 h-16 items-center justify-between border-b border-border/70 bg-background px-3 sm:px-6 ${hideOnMobile ? "hidden md:flex" : "flex"}`}>
+    <header className={`absolute inset-x-0 top-0 z-30 h-16 items-center justify-between border-b border-border/70 bg-background px-3 sm:px-6 ${hideOnMobile ? "hidden min-[1536px]:flex" : "flex"}`}>
       <div className="flex min-w-0 items-center gap-3">
         {showMobileMenu && (
           <Button

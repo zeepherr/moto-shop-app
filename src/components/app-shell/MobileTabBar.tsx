@@ -13,17 +13,18 @@ export function MobileTabBar({ user }: { user: AuthUserDTO | null }) {
   const pathname = usePathname();
   const [moreOpen, setMoreOpen] = useState(false);
   const tabs = getMobileTabs(user?.role ?? "ADMIN");
-  const moreItems = getMoreNavigation("ADMIN");
+  const isAdmin = user?.role === "ADMIN";
+  const moreItems = getMoreNavigation(user?.role ?? "ADMIN");
   const moreActive = moreOpen || moreItems.some((item) => isNavItemActive(pathname, item));
 
   return (
     <>
       <nav
         aria-label="Primary"
-        className="fixed inset-x-3 bottom-0 z-40 pb-[calc(env(safe-area-inset-bottom)+0.5rem)] md:hidden"
+        className="fixed inset-x-3 bottom-[calc(env(safe-area-inset-bottom)+0.75rem)] z-40 md:hidden"
       >
-        <div className="relative isolate overflow-visible rounded-[26px] border border-white/45 bg-white/75 text-sidebar-foreground shadow-[0_12px_40px_rgba(15,23,42,0.18)] backdrop-blur-2xl backdrop-saturate-150 before:pointer-events-none before:absolute before:inset-x-7 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-white/90 before:to-transparent before:content-[''] after:pointer-events-none after:absolute after:inset-0 after:rounded-[inherit] after:ring-1 after:ring-inset after:ring-white/25 dark:border-white/15 dark:bg-sidebar/75 dark:after:ring-white/10">
-        <div className="grid h-[68px] grid-cols-5 items-center px-1.5">
+        <div className="relative isolate overflow-visible rounded-full border border-white/55 bg-white/75 text-sidebar-foreground shadow-[0_14px_38px_rgba(15,23,42,0.2),inset_0_1px_0_rgba(255,255,255,0.9)] backdrop-blur-2xl backdrop-saturate-150 after:pointer-events-none after:absolute after:inset-0 after:rounded-[inherit] after:ring-1 after:ring-inset after:ring-white/25 dark:border-white/15 dark:bg-sidebar/80 dark:after:ring-white/10">
+        <div className={`grid h-[64px] items-center px-1.5 ${isAdmin ? "grid-cols-5" : "grid-cols-3"}`}>
           {tabs.map((item) => {
             const Icon = item.icon;
             const active = item.mobile === "more" ? moreActive : isNavItemActive(pathname, item);
@@ -34,7 +35,7 @@ export function MobileTabBar({ user }: { user: AuthUserDTO | null }) {
                   <motion.span
                     layoutId="mobile-tab-indicator"
                     transition={{ type: "spring", stiffness: 420, damping: 32 }}
-                    className="absolute inset-x-1 inset-y-1 rounded-2xl bg-primary shadow-[0_3px_10px_color-mix(in_srgb,var(--primary)_35%,transparent)]"
+                    className="absolute inset-x-1 inset-y-1 rounded-full bg-primary shadow-[0_3px_10px_color-mix(in_srgb,var(--primary)_35%,transparent)]"
                   />
                 )}
                 <Icon className="relative z-10 size-[22px] stroke-[1.8]" />
@@ -51,10 +52,10 @@ export function MobileTabBar({ user }: { user: AuthUserDTO | null }) {
                   type="button"
                   whileTap={{ scale: 0.92 }}
                   onClick={() => setMoreOpen(true)}
-                  aria-label="More admin pages"
+                  aria-label="More pages"
                   aria-haspopup="dialog"
                   aria-expanded={moreOpen}
-                  className={`relative flex w-full min-h-12 flex-col items-center justify-center gap-1 rounded-2xl transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${activeClass}`}
+                  className={`relative flex w-full min-h-12 flex-col items-center justify-center gap-1 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${activeClass}`}
                 >
                   {tabContents}
                 </motion.button>
@@ -66,7 +67,7 @@ export function MobileTabBar({ user }: { user: AuthUserDTO | null }) {
                 <Link
                   href={item.href}
                   aria-current={active ? "page" : undefined}
-                  className={`relative flex w-full min-h-12 flex-col items-center justify-center gap-1 rounded-2xl transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${activeClass}`}
+                  className={`relative flex w-full min-h-12 flex-col items-center justify-center gap-1 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${activeClass}`}
                 >
                   {tabContents}
                 </Link>

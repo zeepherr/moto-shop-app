@@ -2,6 +2,7 @@ import React from "react";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/features/auth/actions/session.action";
 import { ROLES } from "@/features/auth/constants";
+import { AuthMotionShell } from "@/features/auth/components/AuthMotionShell";
 
 function AuthBrand() {
   return (
@@ -21,10 +22,13 @@ export default async function AuthLayout({ children }: { children: React.ReactNo
   }
 
   return (
-    <div className="min-h-dvh bg-background text-foreground">
+    <AuthMotionShell>
+    <div className="relative min-h-dvh overflow-hidden bg-background text-foreground">
       <div className="grid min-h-dvh lg:grid-cols-[minmax(340px,0.88fr)_minmax(0,1.12fr)]">
-        <aside className="hidden flex-col justify-between border-r border-border/70 bg-card px-12 py-12 lg:flex xl:px-20 xl:py-14">
+        <aside className="relative hidden flex-col justify-between overflow-hidden border-r border-border/70 bg-card px-12 py-12 lg:flex xl:px-20 xl:py-14">
           <AuthBrand />
+
+          <div className="auth-atmosphere" aria-hidden="true"><span /><span /><span /></div>
 
           <div className="max-w-md space-y-5">
             <h2 className="text-4xl font-semibold leading-tight tracking-tight text-foreground">
@@ -57,5 +61,6 @@ export default async function AuthLayout({ children }: { children: React.ReactNo
         </div>
       </div>
     </div>
+    </AuthMotionShell>
   );
 }

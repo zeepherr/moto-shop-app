@@ -75,6 +75,15 @@
 - **Verification**: `tsc --noEmit`, focused ESLint, `impeccable detect src --no-advisory` (0 anti-patterns), `git diff --check`, and a route card scan (no card wrappers remain) pass.
 - **Status**: Revised no-card direction implemented across all four routes. The earlier card-based implementation was superseded.
 
+#### OTP motion and theme-responsive auth ambience (2026-10-05)
+- [x] Added a shared pointer-following Action Blue ambient glow to all customer auth routes; it uses the existing light/dark primary token and runs only for fine pointers when reduced motion is not requested.
+- [x] Added a lightweight animated shield, orbit, and lock/check state to customer email verification and admin-assisted enrollment OTP confirmation. Assisted input supports one-time-code autofill and confirms success inline.
+- [x] Replaced both plain OTP fields with a shared six-slot animated input. A single accessible native input preserves keyboard editing, paste, numeric mobile keyboards, and OS one-time-code autofill; slot states respond to typing, focus, invalid code, and success.
+- [x] Removed the OTP route's enclosing card surface while keeping the admin page shell intact. OTP flow, resend rules, redirects, and action behavior remain unchanged.
+- [x] Added a reduced-motion path that removes ambient tracking and decorative loops while preserving verification state feedback.
+- **Motion thesis**: orbiting security signal settles into a verified shield/check after a successful code; cursor light follows the visitor as a quiet Action Blue focus cue. CSS only, no canvas/WebGL or added dependency.
+- **Verification**: `npx tsc --noEmit`, focused ESLint on changed TS/TSX files, bundled Impeccable detector (0 findings), and `git diff --check` pass. The `npx impeccable` form could not reach npm from the sandbox; used the project's local Impeccable launcher. Browser screenshots are unavailable, so responsive/theme behavior was reviewed from token-driven CSS and route composition.
+
 ### B. Admin Management Modules
 - [x] **Admin Dashboard (`/admin`) — operational reporting complete**
   - [x] Baseline: real-data metric cards, recent transactions, inventory alerts, revenue and completed-order drilldowns.

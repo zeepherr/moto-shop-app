@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { verifyOtpAction, resendOtpAction } from "../actions/otp.action";
 import { ROLES } from "../constants";
+import { OtpMotionScene } from "./OtpMotionScene";
+import { OtpCodeInput } from "./OtpCodeInput";
 
 export const VerifyEmailForm: React.FC = () => {
   const router = useRouter();
@@ -29,6 +31,7 @@ export const VerifyEmailForm: React.FC = () => {
   );
   const [cooldown, setCooldown] = useState(deliveryFailed ? 0 : codeSent ? 60 : 0);
   const [showRegisterAgain, setShowRegisterAgain] = useState(false);
+  const [verified, setVerified] = useState(false);
 
   useEffect(() => {
     if (cooldown <= 0) return;
@@ -44,12 +47,14 @@ export const VerifyEmailForm: React.FC = () => {
     startTransition(async () => {
       const res = await verifyOtpAction({ email, code });
       if (!res.success) {
+        setVerified(false);
         setError(res.error || "Verification failed");
         setShowRegisterAgain(res.code === "REGISTRATION_NOT_FOUND");
         return;
       }
 
       setInfo(res.message || "Verified! Redirecting...");
+      setVerified(true);
       const role = (res.data as { role?: string } | undefined)?.role;
       const destination =
         role === ROLES.STAFF ? "/staff/pos" : role === ROLES.ADMIN ? "/admin" : "/member/profile";
@@ -78,6 +83,7 @@ export const VerifyEmailForm: React.FC = () => {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      <OtpMotionScene verified={verified} compact />
       {error && (
         <div role="alert" className="rounded-xl border border-destructive/20 bg-destructive/10 p-3 text-sm text-destructive">
           {error}
@@ -106,19 +112,7 @@ export const VerifyEmailForm: React.FC = () => {
 
       <div className="space-y-1.5">
         <Label htmlFor="code">6-digit Verification Code</Label>
-        <Input
-          id="code"
-          type="text"
-          inputMode="numeric"
-          autoComplete="one-time-code"
-          maxLength={6}
-          placeholder="123456"
-          required
-          className="text-center font-mono tracking-widest text-lg h-12"
-          value={code}
-          onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
-          disabled={isPending}
-        />
+        <OtpCodeInput id="code" value={code} onChange={(value) => { setCode(value); setError(null); }} disabled={isPending} invalid={!!error} verified={verified} />
       </div>
 
       <Button type="submit" className="w-full h-11" disabled={isPending || code.length !== 6}>

@@ -134,6 +134,11 @@
     height: 2.5rem;
   }
 
+  .pos-cart-item button {
+    width: 2.25rem;
+    height: 2.25rem;
+  }
+
   .dashboard-revenue-chart {
     height: 220px;
   }

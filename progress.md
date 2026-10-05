@@ -40,6 +40,11 @@
 
 ## 4. Current Implementation Status (Vault Synchronized)
 
+### Error and Not-Found Pages (2026-10-05)
+- Added a root route error boundary for transient server/network failures, with retry and home recovery actions and no database details exposed to users.
+- Added a branded root not-found page for unknown URLs.
+- Both use the app's theme tokens and shared button styles. TypeScript, focused ESLint, and `git diff --check` pass. Browser simulation of database outage and unknown-route handling remains to be performed.
+
 ### Active Workstream: Laptop Viewport Density Pass (2026-10-05)
 - **User-approved scope**: Review and tighten visual density across the full application, including authentication pages, for laptop-sized usable viewports. Process one page/surface at a time and create a separate commit for each completed step.
 - **Responsive boundary**: Apply styling only to constrained desktop-width viewports (`min-width: 1024px` and `max-height: 950px`), matching the reported screenshot's short usable height. Preserve mobile and taller desktop presentation; use viewport dimensions rather than device detection. Revisit the threshold if in-browser measurements show the screenshot viewport falls outside it.

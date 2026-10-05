@@ -94,7 +94,7 @@ export function RevenueReportCharts(props: RevenueReportChartsProps) {
           <h2 className="text-base font-semibold text-foreground">Revenue over time</h2>
           <p className="mt-1 text-xs text-muted-foreground">Completed sales grouped in Bangkok time</p>
         </div>
-        <div className="mt-4 h-56 sm:mt-5 sm:h-72" aria-hidden="true">
+        <div className="revenue-report-trend mt-4 h-56 sm:mt-5 sm:h-72" aria-hidden="true">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={props.trend} margin={{ left: -12, right: 8 }}>
               <CartesianGrid vertical={false} stroke="var(--border)" strokeOpacity={0.6} />

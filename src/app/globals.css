@@ -137,6 +137,10 @@
   .dashboard-revenue-chart {
     height: 220px;
   }
+
+  .revenue-report-trend {
+    height: 224px;
+  }
 }
 
 body {

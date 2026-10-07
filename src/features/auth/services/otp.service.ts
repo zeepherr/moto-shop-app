@@ -190,6 +190,26 @@ export const sendRegistrationOtpEmail = async (email: string, otp: string): Prom
   });
 };
 
+export const sendEmailChangeOtpEmail = async (email: string, otp: string): Promise<void> => {
+  const transporter = createMailTransporter();
+  const minutes = Math.floor(OTP_TTL_MS / (60 * 1000));
+  const message = renderAccountEmail({
+    preheader: "Confirm the new email address for your HrungMoto administrator account.",
+    title: "Confirm your new email",
+    introduction: "Enter this code in your admin profile to confirm this email address.",
+    code: otp,
+    details: ["Your current email stays active until this code is verified.", "This code expires in " + minutes + " minutes."],
+    note: "If you did not request this change, you can ignore this email. Your account email will not change.",
+  });
+
+  await transporter.sendMail({
+    from: `"HrungMoto" <${config.mail.user}>`,
+    to: email,
+    subject: "Confirm your HrungMoto email change",
+    ...message,
+  });
+};
+
 export const sendRegistrationLinkEmail = async (email: string, registrationUrl: string): Promise<void> => {
   const transporter = createMailTransporter();
   const message = renderAccountEmail({

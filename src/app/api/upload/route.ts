@@ -46,9 +46,19 @@ export async function POST(request: Request) {
     return fail(413, "Image must not exceed 5 MB");
   }
 
+  const purpose = formData.get("purpose");
+  if (purpose !== null && purpose !== "profile") {
+    return fail(400, "Invalid upload purpose");
+  }
+
   try {
     const buffer = Buffer.from(await file.arrayBuffer());
-    const { key, publicUrl } = await uploadImageToR2(buffer, file.name, file.type);
+    const { key, publicUrl } = await uploadImageToR2(
+      buffer,
+      file.name,
+      file.type,
+      purpose === "profile" ? "profiles" : "products",
+    );
     return NextResponse.json({ success: true, data: { key, publicUrl } });
   } catch {
     return fail(500, "Could not upload the image to storage");

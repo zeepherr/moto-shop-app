@@ -13,7 +13,7 @@ async function main() {
   const adminHash = await bcrypt.hash(adminPassword, 12);
   const staffHash = await bcrypt.hash(seedPassword, 12);
 
-  const existingAdmin = await db.user.findUnique({ where: { email: adminEmail } });
+  const existingAdmin = await db.user.findFirst({ where: { role: UserRole.ADMIN } });
   if (!existingAdmin) {
     await db.user.create({
       data: {

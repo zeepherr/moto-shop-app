@@ -1,5 +1,6 @@
 import { db as defaultDb } from "@/lib/db";
 import { UserRole } from "@prisma/client";
+import { deleteProfileImageFromUrl, getR2PublicUrl } from "@/features/products/services/r2.service";
 
 export const searchMembers = async (query: string, limit = 10, db = defaultDb) => {
   const term = query.trim();
@@ -144,4 +145,84 @@ export const getUserAccountProfile = async (userId: number, db = defaultDb) => {
       },
     },
   });
+};
+
+export const getAdminProfile = async (userId: number, db = defaultDb) => {
+  const profile = await db.user.findUnique({
+    where: { id: userId, role: UserRole.ADMIN },
+    select: {
+      id: true,
+      role: true,
+      firstName: true,
+      lastName: true,
+      email: true,
+      phone: true,
+      isActive: true,
+      emailVerifiedAt: true,
+      createdAt: true,
+      emailChangeOtpLastSentAt: true,
+      emailChangeRequest: {
+        select: { newEmail: true, otpExpiresAt: true, otpAttempts: true },
+      },
+      userInfo: { select: { photoUrl: true } },
+    },
+  });
+  if (!profile) return null;
+
+  const now = Date.now();
+  const pendingEmailChange = profile.emailChangeRequest;
+  const emailChangeRequest = pendingEmailChange && pendingEmailChange.otpExpiresAt.getTime() > now
+    ? pendingEmailChange
+    : null;
+  const emailResendCooldownSeconds = profile.emailChangeOtpLastSentAt
+    ? Math.max(0, Math.ceil((profile.emailChangeOtpLastSentAt.getTime() + 60_000 - now) / 1000))
+    : 0;
+
+  return { ...profile, emailChangeRequest, emailResendCooldownSeconds };
+};
+
+export const updateAdminProfile = async (
+  data: { userId: number; firstName: string; lastName: string; phone: string | null; photoKey?: string | null },
+  db = defaultDb,
+) => {
+  const photoUrl = data.photoKey === undefined
+    ? undefined
+    : data.photoKey === null
+      ? null
+      : getR2PublicUrl(data.photoKey);
+
+  const oldPhoto = photoUrl !== undefined
+    ? await db.userInfo.findUnique({ where: { userId: data.userId }, select: { photoUrl: true } })
+    : null;
+
+  await db.$transaction(async (tx) => {
+    await tx.user.update({
+      where: { id: data.userId },
+      data: {
+        firstName: data.firstName,
+        lastName: data.lastName,
+        phone: data.phone,
+      },
+    });
+
+    if (photoUrl !== undefined) {
+      await tx.userInfo.upsert({
+        where: { userId: data.userId },
+        create: { userId: data.userId, photoUrl },
+        update: { photoUrl },
+      });
+    }
+  });
+
+  if (oldPhoto?.photoUrl && photoUrl !== undefined && oldPhoto.photoUrl !== photoUrl) {
+    try { await deleteProfileImageFromUrl(oldPhoto.photoUrl); } catch { /* Keep the database update successful if storage cleanup fails. */ }
+  }
+};
+
+export const deleteAdminProfilePhoto = async (userId: number, db = defaultDb) => {
+  const oldPhoto = await db.userInfo.findUnique({ where: { userId }, select: { photoUrl: true } });
+  if (!oldPhoto?.photoUrl) return;
+
+  await db.userInfo.update({ where: { userId }, data: { photoUrl: null } });
+  try { await deleteProfileImageFromUrl(oldPhoto.photoUrl); } catch { /* The profile is cleared even if storage cleanup fails. */ }
 };

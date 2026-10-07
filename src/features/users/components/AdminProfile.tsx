@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ManagementLayout } from "@/components/management/ManagementLayout";
+import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { deleteAdminProfilePhotoAction, updateAdminProfileAction } from "@/features/users/actions/user.actions";
 import { cancelAdminEmailChangeAction, requestAdminEmailChangeAction, verifyAdminEmailChangeAction } from "@/features/users/actions/email-change.actions";
@@ -228,55 +229,59 @@ export function AdminProfile({ user }: { user: AdminProfileData }) {
   };
 
   return (
-    <ManagementLayout className="max-w-5xl">
-      <header className="border-b border-border/70 pb-5 sm:pb-7">
+    <ManagementLayout className="max-w-5xl !space-y-4 sm:!space-y-6">
+      <header className="border-b border-border/70 pb-4 sm:pb-7">
         <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">Admin profile</h1>
         <p className="mt-1.5 text-sm text-muted-foreground">Your personal details and account security.</p>
       </header>
 
-      <section className="flex flex-col gap-5 border-b border-border/70 py-6 sm:flex-row sm:items-center sm:py-8">
-        <div className="relative flex size-24 shrink-0 items-center justify-center overflow-hidden rounded-full border border-border bg-muted text-muted-foreground">
+      <Card className="overflow-hidden border-border/70 shadow-xs">
+        <CardContent className="p-4 sm:p-6">
+        <section className="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-center sm:gap-5">
+        <div className="relative flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-border bg-muted text-muted-foreground sm:size-24">
           {preview ? <Image src={preview} alt={fullName} fill unoptimized className="object-cover" /> : <UserRound className="size-9" />}
         </div>
         <div className="min-w-0 flex-1">
-          <h2 className="truncate text-xl font-semibold tracking-tight text-foreground">{fullName}</h2>
+          <h2 className="break-words text-xl font-semibold tracking-tight text-foreground sm:truncate">{fullName}</h2>
           <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
             <span>Administrator</span><span aria-hidden="true">·</span><span>Account #{user.id}</span>
             <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${user.isActive ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300" : "bg-muted text-muted-foreground"}`}>{user.isActive ? "Active" : "Inactive"}</span>
           </div>
-          <div className="mt-4 flex flex-wrap items-center gap-2">
-            <Button type="button" variant="outline" size="sm" disabled={profilePending || photoPending} onClick={() => photoInputRef.current?.click()}>
+          <div className="mt-4 flex flex-col items-stretch gap-2 min-[420px]:flex-row min-[420px]:flex-wrap min-[420px]:items-center">
+            <Button type="button" variant="outline" size="sm" className="min-h-10 w-full min-[420px]:w-auto" disabled={profilePending || photoPending} onClick={() => photoInputRef.current?.click()}>
               <Camera className="mr-2 size-4" />Change photo
             </Button>
-            {preview && <Button type="button" variant="ghost" size="sm" disabled={profilePending || photoPending} onClick={() => photo ? removePhoto() : setConfirmPhotoDelete(true)} className="text-destructive">
+            {preview && <Button type="button" variant="ghost" size="sm" className="min-h-10 w-full text-destructive min-[420px]:w-auto" disabled={profilePending || photoPending} onClick={() => photo ? removePhoto() : setConfirmPhotoDelete(true)}>
               <Trash2 className="mr-2 size-4" />{photo ? "Discard photo" : "Delete photo"}
             </Button>}
-            <span className="basis-full text-xs text-muted-foreground">JPEG, PNG, or WebP · max 5 MB</span>
+            <span className="text-xs text-muted-foreground min-[420px]:basis-full">JPEG, PNG, or WebP · max 5 MB</span>
             <Input ref={photoInputRef} id="profile-photo" type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" onChange={(event) => { const file = event.target.files?.[0]; if (file) setCropSource(file); event.currentTarget.value = ""; }} />
           </div>
         </div>
-      </section>
+        </section>
+        </CardContent>
+      </Card>
 
-      <div className="grid gap-10 lg:grid-cols-[minmax(0,1.1fr)_minmax(18rem,0.9fr)] lg:gap-16">
-        <section aria-labelledby="personal-details-heading" className="min-w-0">
+      <div className="grid min-w-0 gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] xl:gap-6">
+        <section aria-labelledby="personal-details-heading" className="min-w-0 rounded-xl border border-border/70 bg-card p-4 shadow-xs sm:p-6">
           <div className="border-b border-border/70 pb-4">
             <h2 id="personal-details-heading" className="text-lg font-semibold tracking-tight text-foreground">Personal details</h2>
             <p className="mt-1 text-sm text-muted-foreground">Update the information used for shop communication.</p>
           </div>
-          <form className="grid gap-x-5 gap-y-5 pt-5 sm:grid-cols-2" onSubmit={(event) => { event.preventDefault(); save(); }}>
+          <form className="grid min-w-0 gap-x-4 gap-y-4 pt-5 sm:grid-cols-2 sm:gap-y-5" onSubmit={(event) => { event.preventDefault(); save(); }}>
             <Field label="First name" value={firstName} onChange={setFirstName} required maxLength={80} />
             <Field label="Last name" value={lastName} onChange={setLastName} required maxLength={80} />
-            <div className="sm:col-span-2">
+            <div className="min-w-0 sm:col-span-2">
               <Label htmlFor="admin-phone">Phone number</Label>
               <Input id="admin-phone" type="tel" autoComplete="tel" maxLength={30} value={phone} onChange={(event) => setPhone(event.target.value)} className="mt-2" />
             </div>
-            <div className="flex justify-start pt-1 sm:col-span-2">
-              <Button type="submit" disabled={profilePending}>{profilePending ? "Saving…" : "Update profile"}</Button>
+            <div className="flex pt-1 sm:col-span-2">
+              <Button type="submit" className="min-h-11 w-full sm:w-auto" disabled={profilePending}>{profilePending ? "Saving…" : "Update profile"}</Button>
             </div>
           </form>
         </section>
 
-        <section aria-labelledby="account-security-heading" className="min-w-0">
+        <section aria-labelledby="account-security-heading" className="min-w-0 rounded-xl border border-border/70 bg-card p-4 shadow-xs sm:p-6">
           <div className="border-b border-border/70 pb-4">
             <h2 id="account-security-heading" className="text-lg font-semibold tracking-tight text-foreground">Account &amp; security</h2>
             <p className="mt-1 text-sm text-muted-foreground">Verify your new address before it becomes your sign-in email.</p>
@@ -286,7 +291,7 @@ export function AdminProfile({ user }: { user: AdminProfileData }) {
               {emailMode === "view" ? (
                 <>
                   <p className="text-sm font-medium text-muted-foreground">Current email</p>
-                  <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="flex min-w-0 flex-col items-start gap-1 min-[420px]:flex-row min-[420px]:items-center min-[420px]:justify-between min-[420px]:gap-3">
                     <p className="min-w-0 break-all text-sm font-medium text-foreground">{currentEmail || "No email on file"}</p>
                     <span className="text-xs text-muted-foreground">{emailVerified ? "Verified" : "Not verified"}</span>
                   </div>
@@ -296,7 +301,7 @@ export function AdminProfile({ user }: { user: AdminProfileData }) {
                   <Label htmlFor="admin-email">New email</Label>
                   <Input id="admin-email" type="email" autoComplete="email" value={email} maxLength={254} onChange={(event) => { setEmail(event.target.value); setEmailError(""); setEmailNotice(""); }} disabled={emailPending} />
                   <p className="text-xs leading-5 text-muted-foreground">Your current email stays active until you verify the new address.</p>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-col gap-2 min-[420px]:flex-row min-[420px]:flex-wrap [&>button]:min-h-10 [&>button]:w-full min-[420px]:[&>button]:w-auto">
                     <Button type="button" size="sm" onClick={requestEmailCode} disabled={emailPending || resendSeconds > 0 || !email.trim() || email.trim().toLowerCase() === currentEmail.toLowerCase()}>{emailPending ? "Sending code…" : resendSeconds > 0 ? `Try again in ${resendSeconds}s` : "Send verification code"}</Button>
                     <Button type="button" size="sm" variant="outline" onClick={cancelEmailEdit} disabled={emailPending}>Cancel</Button>
                   </div>
@@ -318,14 +323,14 @@ export function AdminProfile({ user }: { user: AdminProfileData }) {
                       <p className="text-xs text-muted-foreground">{emailAttemptsRemaining} verification {emailAttemptsRemaining === 1 ? "attempt" : "attempts"} remaining · Code expires in {Math.floor(codeExpiresSeconds / 60)}:{String(codeExpiresSeconds % 60).padStart(2, "0")}</p>
                     </>
                   )}
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-col gap-2 min-[420px]:flex-row min-[420px]:flex-wrap [&>button]:min-h-10 [&>button]:w-full min-[420px]:[&>button]:w-auto">
                     <Button type="button" size="sm" onClick={verifyEmailCode} disabled={emailPending || emailCode.length !== 6 || emailAttemptsRemaining === 0 || codeExpiresSeconds === 0}>{emailPending ? "Checking code…" : "Confirm new email"}</Button>
                     <Button type="button" size="sm" variant="outline" onClick={requestEmailCode} disabled={emailPending || resendSeconds > 0}>{emailPending ? "Sending code…" : resendSeconds > 0 ? `Resend in ${resendSeconds}s` : "Send a new code"}</Button>
                     <Button type="button" size="sm" variant="outline" onClick={cancelEmailChange} disabled={emailPending}>Cancel change</Button>
                   </div>
                 </>
               )}
-              {emailMode === "view" && <Button type="button" size="sm" variant="outline" onClick={beginEmailEdit} disabled={emailPending}>Change email</Button>}
+              {emailMode === "view" && <Button type="button" size="sm" variant="outline" className="min-h-10 w-full min-[420px]:w-auto" onClick={beginEmailEdit} disabled={emailPending}>Change email</Button>}
               {emailError && <p role="alert" className="text-sm text-destructive">{emailError}</p>}
               {emailNotice && <p role="status" className="text-sm text-emerald-700 dark:text-emerald-300">{emailNotice}</p>}
             </div>

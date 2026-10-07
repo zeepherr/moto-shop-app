@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useTransition } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -100,6 +101,12 @@ export const LoginForm: React.FC<{ redirectTo?: string }> = ({ redirectTo }) => 
         placeholder="Enter your password"
         disabled={isPending}
       />
+
+      <div className="-mt-1 flex justify-end">
+        <Link href="/forgot-password" className="text-sm text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+          Forgot password?
+        </Link>
+      </div>
 
       <Button type="submit" className="w-full h-11 text-base" disabled={isPending}>
         {isPending ? "Logging in..." : "Sign in"}

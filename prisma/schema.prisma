@@ -50,6 +50,8 @@ enum UserAuditAction {
   ENROLLMENT_COMPLETED
   USER_ROLE_CHANGED
   USER_EMAIL_CHANGED
+  USER_PASSWORD_CHANGED
+  USER_PASSWORD_RESET
   USER_DEACTIVATED
   USER_REACTIVATED
 }
@@ -94,6 +96,7 @@ model User {
   isActive                 Boolean   @default(true)
   emailVerifiedAt          DateTime?
   emailChangeOtpLastSentAt DateTime?
+  passwordResetOtpLastSentAt DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -108,6 +111,7 @@ model User {
 
   authSessions         AuthSession[]
   emailChangeRequest   EmailChangeRequest?
+  adminPasswordResetRequest AdminPasswordResetRequest?
   auditEventsAsActor   UserAuditEvent[]    @relation("UserAuditActor")
   auditEventsAsSubject UserAuditEvent[]    @relation("UserAuditSubject")
 }
@@ -161,6 +165,21 @@ model EmailChangeRequest {
 
   userId       Int      @unique
   newEmail     String   @unique
+  otpHash      String
+  otpExpiresAt DateTime
+  otpAttempts  Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([otpExpiresAt])
+}
+
+model AdminPasswordResetRequest {
+  id Int @id @default(autoincrement())
+
+  userId       Int      @unique
   otpHash      String
   otpExpiresAt DateTime
   otpAttempts  Int      @default(0)

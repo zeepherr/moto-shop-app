@@ -210,6 +210,37 @@ export const sendEmailChangeOtpEmail = async (email: string, otp: string): Promi
   });
 };
 
+export const sendAdminPasswordOtpEmail = async (
+  email: string,
+  otp: string,
+  purpose: "reset" | "change" = "reset",
+): Promise<void> => {
+  const transporter = createMailTransporter();
+  const minutes = Math.floor(OTP_TTL_MS / (60 * 1000));
+  const isChange = purpose === "change";
+  const message = renderAccountEmail({
+    preheader: isChange
+      ? "A password change was requested for your HrungMoto administrator account."
+      : "A password reset was requested for your HrungMoto administrator account.",
+    title: isChange ? "Confirm your password change" : "Reset your password",
+    introduction: isChange
+      ? "Use this verification code to confirm your password change."
+      : "Use this verification code to set a new password for your administrator account.",
+    code: otp,
+    details: ["This code expires in " + minutes + " minutes."],
+    note: isChange
+      ? "If you did not request this change, ignore this email. Your password will remain unchanged."
+      : "If you did not request a password reset, ignore this email. Your password will remain unchanged.",
+  });
+
+  await transporter.sendMail({
+    from: `"HrungMoto" <${config.mail.user}>`,
+    to: email,
+    subject: isChange ? "Confirm your HrungMoto password change" : "Reset your HrungMoto password",
+    ...message,
+  });
+};
+
 export const sendRegistrationLinkEmail = async (email: string, registrationUrl: string): Promise<void> => {
   const transporter = createMailTransporter();
   const message = renderAccountEmail({

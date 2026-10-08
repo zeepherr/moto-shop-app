@@ -1,8 +1,8 @@
 "use server";
 
+import { UserRole } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/features/auth/actions/session.action";
-import { ROLES } from "@/features/auth/constants";
 import { createAuthSession } from "@/features/auth/services/auth.service";
 import { OTP_RESEND_COOLDOWN_MS, OTP_TTL_MS, MAX_OTP_ATTEMPTS } from "@/features/auth/constants";
 import {
@@ -26,9 +26,11 @@ import {
 } from "@/features/users/services/email-change.service";
 import { db } from "@/lib/db";
 
-export const requestAdminEmailChangeAction = async (input: unknown) => {
+const requestEmailChangeForRole = async (input: unknown, requiredRole: UserRole) => {
   const user = await getCurrentUser();
-  if (!user || user.role !== ROLES.ADMIN) return { success: false, error: "Only administrators can change this email." };
+  if (!user || user.role !== requiredRole) {
+    return { success: false, error: roleEmailError(requiredRole) };
+  }
 
   const parsed = requestAdminEmailChangeSchema.safeParse(input);
   if (!parsed.success) return { success: false, error: parsed.error.issues[0]?.message ?? "Invalid email address." };
@@ -80,9 +82,17 @@ export const requestAdminEmailChangeAction = async (input: unknown) => {
   }
 };
 
-export const cancelAdminEmailChangeAction = async () => {
+export const requestAdminEmailChangeAction = async (input: unknown) =>
+  requestEmailChangeForRole(input, UserRole.ADMIN);
+
+export const requestStaffEmailChangeAction = async (input: unknown) =>
+  requestEmailChangeForRole(input, UserRole.STAFF);
+
+const cancelEmailChangeForRole = async (requiredRole: UserRole) => {
   const user = await getCurrentUser();
-  if (!user || user.role !== ROLES.ADMIN) return { success: false, error: "Only administrators can change this email." };
+  if (!user || user.role !== requiredRole) {
+    return { success: false, error: roleEmailError(requiredRole) };
+  }
   try {
     await removeEmailChangeRequest(user.id);
     return { success: true };
@@ -91,9 +101,14 @@ export const cancelAdminEmailChangeAction = async () => {
   }
 };
 
-export const verifyAdminEmailChangeAction = async (input: unknown) => {
+export const cancelAdminEmailChangeAction = async () => cancelEmailChangeForRole(UserRole.ADMIN);
+export const cancelStaffEmailChangeAction = async () => cancelEmailChangeForRole(UserRole.STAFF);
+
+const verifyEmailChangeForRole = async (input: unknown, requiredRole: UserRole) => {
   const user = await getCurrentUser();
-  if (!user || user.role !== ROLES.ADMIN) return { success: false, error: "Only administrators can change this email." };
+  if (!user || user.role !== requiredRole) {
+    return { success: false, error: roleEmailError(requiredRole) };
+  }
 
   const parsed = verifyAdminEmailChangeSchema.safeParse(input);
   if (!parsed.success) return { success: false, error: parsed.error.issues[0]?.message ?? "Invalid verification code." };
@@ -133,7 +148,18 @@ export const verifyAdminEmailChangeAction = async (input: unknown) => {
   const refreshToken = createRefreshToken();
   await createAuthSession(changedUser.id, hashRefreshToken(refreshToken));
   await setAuthCookies(accessToken, refreshToken);
-  revalidatePath("/admin/profile");
-  revalidatePath("/admin");
+  revalidatePath(requiredRole === UserRole.ADMIN ? "/admin/profile" : "/staff/profile");
+  revalidatePath(requiredRole === UserRole.ADMIN ? "/admin" : "/staff");
   return { success: true, email: changedUser.email, message: "Email address updated and verified." };
 };
+
+export const verifyAdminEmailChangeAction = async (input: unknown) =>
+  verifyEmailChangeForRole(input, UserRole.ADMIN);
+
+export const verifyStaffEmailChangeAction = async (input: unknown) =>
+  verifyEmailChangeForRole(input, UserRole.STAFF);
+
+const roleEmailError = (role: UserRole) =>
+  role === UserRole.ADMIN
+    ? "Only administrators can change this email."
+    : "Only staff can change this email.";

@@ -17,8 +17,8 @@ const fail = (status: number, error: string) =>
  */
 export async function POST(request: Request) {
   const user = await getCurrentUser();
-  if (!user || user.role !== ROLES.ADMIN) {
-    return fail(403, "Only administrators can upload images");
+  if (!user || (user.role !== ROLES.ADMIN && user.role !== ROLES.STAFF)) {
+    return fail(403, "You are not authorized to upload images");
   }
 
   let formData: FormData;
@@ -49,6 +49,9 @@ export async function POST(request: Request) {
   const purpose = formData.get("purpose");
   if (purpose !== null && purpose !== "profile") {
     return fail(400, "Invalid upload purpose");
+  }
+  if (user.role === ROLES.STAFF && purpose !== "profile") {
+    return fail(403, "Staff can only upload profile images");
   }
 
   try {

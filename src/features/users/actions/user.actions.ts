@@ -106,36 +106,45 @@ export const getUserManagementDetailAction = async (userId: number) => {
   }
 };
 
-export const updateAdminProfileAction = async (input: {
-  firstName: string;
-  lastName: string;
-  phone: string;
-  photoKey?: string | null;
-}) => {
+const updateOwnProfileAction = async (input: unknown, requiredRole: UserRole, allowPartial = false) => {
   const user = await getCurrentUser();
-  if (!user || user.role !== ROLES.ADMIN) {
-    return { success: false, error: "Only administrators can update this profile." };
+  if (!user || user.role !== requiredRole) {
+    return {
+      success: false,
+      error: requiredRole === UserRole.ADMIN
+        ? "Only administrators can update this profile."
+        : "Only staff can update this profile.",
+    };
   }
+  if (typeof input !== "object" || input === null) {
+    return { success: false, error: "Invalid profile details." };
+  }
+
+  const values = input as Record<string, unknown>;
   if (
-    !input ||
-    typeof input.firstName !== "string" ||
-    typeof input.lastName !== "string" ||
-    typeof input.phone !== "string" ||
-    (input.photoKey !== undefined && input.photoKey !== null && typeof input.photoKey !== "string")
+    (!allowPartial && (typeof values.firstName !== "string" || typeof values.lastName !== "string" || typeof values.phone !== "string")) ||
+    (values.firstName !== undefined && values.firstName !== null && typeof values.firstName !== "string") ||
+    (values.lastName !== undefined && values.lastName !== null && typeof values.lastName !== "string") ||
+    (values.phone !== undefined && values.phone !== null && typeof values.phone !== "string") ||
+    (values.photoKey !== undefined && values.photoKey !== null && typeof values.photoKey !== "string")
   ) {
     return { success: false, error: "Invalid profile details." };
   }
 
-  const firstName = input.firstName.trim();
-  const lastName = input.lastName.trim();
-  const phone = input.phone.trim();
-  if (!firstName || firstName.length > 80 || !lastName || lastName.length > 80) {
+  const firstName = typeof values.firstName === "string" ? values.firstName.trim() : undefined;
+  const lastName = typeof values.lastName === "string" ? values.lastName.trim() : undefined;
+  const phone = typeof values.phone === "string" ? values.phone.trim() || null : values.phone === null ? null : undefined;
+  if ((firstName !== undefined && (!firstName || firstName.length > 80)) || (lastName !== undefined && (!lastName || lastName.length > 80))) {
     return { success: false, error: "Enter a first and last name (up to 80 characters each)." };
   }
-  if (phone.length > 30) {
+  if (phone && phone.length > 30) {
     return { success: false, error: "Phone number must be 30 characters or fewer." };
   }
-  if (input.photoKey !== undefined && input.photoKey !== null && !/^profiles\/[\w-]+\.(?:jpe?g|png|webp)$/i.test(input.photoKey)) {
+  const photoKey = values.photoKey as string | null | undefined;
+  if (firstName === undefined && lastName === undefined && phone === undefined && photoKey === undefined) {
+    return { success: false, error: "Choose a profile detail to update." };
+  }
+  if (photoKey !== undefined && photoKey !== null && !/^profiles\/[\w-]+\.(?:jpe?g|png|webp)$/i.test(photoKey)) {
     return { success: false, error: "Invalid profile photo." };
   }
 
@@ -144,11 +153,12 @@ export const updateAdminProfileAction = async (input: {
       userId: user.id,
       firstName,
       lastName,
-      phone: phone || null,
-      photoKey: input.photoKey,
+      phone,
+      photoKey,
     });
-    revalidatePath("/admin/profile");
-    revalidatePath("/admin");
+    const profilePath = requiredRole === UserRole.ADMIN ? "/admin/profile" : "/staff/profile";
+    revalidatePath(profilePath);
+    revalidatePath(requiredRole === UserRole.ADMIN ? "/admin" : "/staff");
     return { success: true };
   } catch (err: unknown) {
     const message = (err as Error).message || "Unable to update profile.";
@@ -161,17 +171,38 @@ export const updateAdminProfileAction = async (input: {
   }
 };
 
-export const deleteAdminProfilePhotoAction = async () => {
+export const updateAdminProfileAction = async (input: unknown) =>
+  updateOwnProfileAction(input, UserRole.ADMIN);
+
+export const updateStaffProfileAction = async (input: unknown) =>
+  updateOwnProfileAction(input, UserRole.STAFF, true);
+
+export const updateStaffProfilePhotoAction = async (input: unknown) => {
+  if (typeof input !== "object" || input === null || typeof (input as Record<string, unknown>).photoKey !== "string") {
+    return { success: false, error: "Invalid profile photo." };
+  }
+  return updateOwnProfileAction(input, UserRole.STAFF, true);
+};
+
+const deleteOwnProfilePhotoAction = async (requiredRole: UserRole) => {
   const user = await getCurrentUser();
-  if (!user || user.role !== ROLES.ADMIN) {
-    return { success: false, error: "Only administrators can update this profile." };
+  if (!user || user.role !== requiredRole) {
+    return {
+      success: false,
+      error: requiredRole === UserRole.ADMIN
+        ? "Only administrators can update this profile."
+        : "Only staff can update this profile.",
+    };
   }
   try {
     await deleteAdminProfilePhoto(user.id);
-    revalidatePath("/admin/profile");
-    revalidatePath("/admin");
+    revalidatePath(requiredRole === UserRole.ADMIN ? "/admin/profile" : "/staff/profile");
+    revalidatePath(requiredRole === UserRole.ADMIN ? "/admin" : "/staff");
     return { success: true };
   } catch {
     return { success: false, error: "Could not delete profile photo." };
   }
 };
+
+export const deleteAdminProfilePhotoAction = async () => deleteOwnProfilePhotoAction(UserRole.ADMIN);
+export const deleteStaffProfilePhotoAction = async () => deleteOwnProfilePhotoAction(UserRole.STAFF);

@@ -147,6 +147,43 @@ export const getUserAccountProfile = async (userId: number, db = defaultDb) => {
   });
 };
 
+export const getStaffProfile = async (userId: number, db = defaultDb) => {
+  const profile = await db.user.findUnique({
+    where: { id: userId, role: UserRole.STAFF },
+    select: {
+      id: true,
+      role: true,
+      firstName: true,
+      lastName: true,
+      email: true,
+      phone: true,
+      isActive: true,
+      emailVerifiedAt: true,
+      createdAt: true,
+      emailChangeOtpLastSentAt: true,
+      emailChangeRequest: {
+        select: { newEmail: true, otpExpiresAt: true, otpAttempts: true },
+      },
+      userInfo: { select: { photoUrl: true } },
+    },
+  });
+  if (!profile) return null;
+
+  const now = Date.now();
+  const pendingEmailChange = profile.emailChangeRequest;
+  const emailChangeRequest = pendingEmailChange && pendingEmailChange.otpExpiresAt.getTime() > now
+    ? pendingEmailChange
+    : null;
+  const emailResendCooldownSeconds = profile.emailChangeOtpLastSentAt
+    ? Math.max(0, Math.ceil((profile.emailChangeOtpLastSentAt.getTime() + 60_000 - now) / 1000))
+    : 0;
+  const emailChangeExpiresSeconds = emailChangeRequest
+    ? Math.max(0, Math.ceil((emailChangeRequest.otpExpiresAt.getTime() - now) / 1000))
+    : 0;
+
+  return { ...profile, emailChangeRequest, emailResendCooldownSeconds, emailChangeExpiresSeconds };
+};
+
 export const getAdminProfile = async (userId: number, db = defaultDb) => {
   const profile = await db.user.findUnique({
     where: { id: userId, role: UserRole.ADMIN },
@@ -181,8 +218,8 @@ export const getAdminProfile = async (userId: number, db = defaultDb) => {
   return { ...profile, emailChangeRequest, emailResendCooldownSeconds };
 };
 
-export const updateAdminProfile = async (
-  data: { userId: number; firstName: string; lastName: string; phone: string | null; photoKey?: string | null },
+export const updateUserProfile = async (
+  data: { userId: number; firstName?: string; lastName?: string; phone?: string | null; photoKey?: string | null },
   db = defaultDb,
 ) => {
   const photoUrl = data.photoKey === undefined
@@ -196,14 +233,16 @@ export const updateAdminProfile = async (
     : null;
 
   await db.$transaction(async (tx) => {
-    await tx.user.update({
-      where: { id: data.userId },
-      data: {
-        firstName: data.firstName,
-        lastName: data.lastName,
-        phone: data.phone,
-      },
-    });
+    if (data.firstName !== undefined || data.lastName !== undefined || data.phone !== undefined) {
+      await tx.user.update({
+        where: { id: data.userId },
+        data: {
+          ...(data.firstName !== undefined ? { firstName: data.firstName } : {}),
+          ...(data.lastName !== undefined ? { lastName: data.lastName } : {}),
+          ...(data.phone !== undefined ? { phone: data.phone } : {}),
+        },
+      });
+    }
 
     if (photoUrl !== undefined) {
       await tx.userInfo.upsert({
@@ -219,10 +258,13 @@ export const updateAdminProfile = async (
   }
 };
 
-export const deleteAdminProfilePhoto = async (userId: number, db = defaultDb) => {
+export const deleteUserProfilePhoto = async (userId: number, db = defaultDb) => {
   const oldPhoto = await db.userInfo.findUnique({ where: { userId }, select: { photoUrl: true } });
   if (!oldPhoto?.photoUrl) return;
 
   await db.userInfo.update({ where: { userId }, data: { photoUrl: null } });
   try { await deleteProfileImageFromUrl(oldPhoto.photoUrl); } catch { /* The profile is cleared even if storage cleanup fails. */ }
 };
+
+export const updateAdminProfile = updateUserProfile;
+export const deleteAdminProfilePhoto = deleteUserProfilePhoto;

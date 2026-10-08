@@ -1,25 +1,23 @@
 import type { Metadata } from "next";
-import { StaffServiceCatalog } from "@/features/services/components/StaffServiceCatalog";
-import { findAllServices } from "@/features/services/services/motoService.service";
+import { redirect } from "next/navigation";
+import { getCurrentUser } from "@/features/auth/actions/session.action";
+import { ROLES } from "@/features/auth/constants";
+import { StaffSalesPage } from "@/features/dashboard/components/StaffSalesPage";
+import { getStaffDailySalesForUser } from "@/features/dashboard/services/staff-daily-sales.service";
 
 export const metadata: Metadata = {
-  title: "Service Catalog - HrungMoto",
-  description: "Browse active workshop services and standard rates",
+  title: "Daily Sales - HrungMoto",
+  description: "Review your completed sales for today",
 };
 
 export const dynamic = "force-dynamic";
 
-export default async function StaffServicesPage() {
-  const services = await findAllServices({ isActive: true });
+export default async function StaffSalesRoute() {
+  const user = await getCurrentUser();
+  if (!user) redirect("/login");
+  if (user.role !== ROLES.STAFF) redirect("/unauthorized");
 
-  return (
-    <StaffServiceCatalog
-      services={services.map((service) => ({
-        id: service.id,
-        name: service.name,
-        description: service.description,
-        price: Number(service.price),
-      }))}
-    />
-  );
+  const report = await getStaffDailySalesForUser(user);
+  if (!report) redirect("/unauthorized");
+  return <StaffSalesPage report={report} />;
 }

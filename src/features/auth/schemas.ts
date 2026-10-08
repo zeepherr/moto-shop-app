@@ -41,7 +41,7 @@ export const completeAdminPasswordResetSchema = z
     path: ["confirmPassword"],
   });
 
-export const adminPasswordChangeSchema = z
+export const passwordChangeSchema = z
   .object({
     currentPassword: z.string().min(4, "Enter your current password"),
     password: z.string().min(4, "Password must be at least 4 characters"),
@@ -51,6 +51,8 @@ export const adminPasswordChangeSchema = z
     message: "Passwords do not match",
     path: ["confirmPassword"],
   });
+
+export const adminPasswordChangeSchema = passwordChangeSchema;
 
 export const adminPasswordChangeOtpSchema = z
   .object({

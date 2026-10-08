@@ -210,22 +210,23 @@ export const sendEmailChangeOtpEmail = async (email: string, otp: string): Promi
   });
 };
 
-export const sendAdminPasswordOtpEmail = async (
+export const sendPasswordOtpEmail = async (
   email: string,
   otp: string,
   purpose: "reset" | "change" = "reset",
+  accountType: "administrator" | "staff" = "administrator",
 ): Promise<void> => {
   const transporter = createMailTransporter();
   const minutes = Math.floor(OTP_TTL_MS / (60 * 1000));
   const isChange = purpose === "change";
   const message = renderAccountEmail({
     preheader: isChange
-      ? "A password change was requested for your HrungMoto administrator account."
-      : "A password reset was requested for your HrungMoto administrator account.",
+      ? `A password change was requested for your HrungMoto ${accountType} account.`
+      : `A password reset was requested for your HrungMoto ${accountType} account.`,
     title: isChange ? "Confirm your password change" : "Reset your password",
     introduction: isChange
       ? "Use this verification code to confirm your password change."
-      : "Use this verification code to set a new password for your administrator account.",
+      : `Use this verification code to set a new password for your ${accountType} account.`,
     code: otp,
     details: ["This code expires in " + minutes + " minutes."],
     note: isChange
@@ -240,6 +241,15 @@ export const sendAdminPasswordOtpEmail = async (
     ...message,
   });
 };
+
+export const sendAdminPasswordOtpEmail = async (
+  email: string,
+  otp: string,
+  purpose: "reset" | "change" = "reset",
+) => sendPasswordOtpEmail(email, otp, purpose, "administrator");
+
+export const sendStaffPasswordOtpEmail = async (email: string, otp: string) =>
+  sendPasswordOtpEmail(email, otp, "change", "staff");
 
 export const sendRegistrationLinkEmail = async (email: string, registrationUrl: string): Promise<void> => {
   const transporter = createMailTransporter();

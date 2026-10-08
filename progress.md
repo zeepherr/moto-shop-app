@@ -25,6 +25,14 @@
    - Run `cmd.exe /c "npx impeccable detect src"` to ensure 0 UI anti-patterns.
    - **Never run production build** (`npm run build`).
 
+### Ready for Agent — Staff Sales Analysis and Profile
+- **Status**: Implementation complete; type, lint, UI detector, and diff checks pass. Browser screenshot QA unavailable. See [task handoff](agent_docs/staff-sales-and-profile/TASK.md) and [feature progress](agent_docs/staff-sales-and-profile/PROGRESS.md).
+- **Profile refinement (2026-10-08)**: Staff password fields now follow the Admin profile's Change password disclosure. Photo uploads save independently from personal details, and staff profile updates accept omitted name fields and a nullable/optional phone; blank phone clears the saved number. Phone is labeled optional and unchanged details cannot be resubmitted. TypeScript, focused ESLint, scoped Impeccable detection (0 findings), and `git diff --check` pass.
+- **Password verification refinement (2026-10-08)**: Staff can now choose current password or an OTP sent to the current account email, matching Admin's profile workflow. OTP expiry, resend cooldown, attempt limit, session revocation, current-session restoration, staff-specific email copy, and audit details are implemented. TypeScript, focused ESLint, scoped Impeccable detection (0 findings), and `git diff --check` pass.
+- **Goal**: Replace the Staff Services catalog with authenticated-staff daily completed-sales analysis and redesign Staff Profile to support personal detail, photo, email, and password updates.
+- **Boundaries**: Own staff sales only; Bangkok business day; current-password or current-account-email OTP verification for password changes; preserve and do not modify POS; no schema changes or shop-wide/staff-wide analytics.
+- **Approval**: User approved the final scope on 2026-10-08.
+
 ### Active Workstream: Readability and Maintainability Review
 - **Approved scope**: Implement the three narrow refactor steps from the Phase 1 audit on a new `codex/readability-maintenance-review` branch. Preserve existing workflows and behavior; do not commit.
 - **Step 1 — User Management workspace composition**: Extract People/Enrollment presentation from `UsersPageClient.tsx` while retaining shared state, filters, actions, and confirmation wiring. Preserve default view, counts, shortcuts, action behavior, optimistic updates, refresh, and responsive layouts.

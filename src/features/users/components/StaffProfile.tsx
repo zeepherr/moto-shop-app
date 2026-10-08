@@ -1,138 +1,59 @@
-import {
-  BadgeCheck,
-  CalendarDays,
-  Mail,
-  Phone,
-  ShieldCheck,
-  UserRound,
-  type LucideIcon,
-} from "lucide-react";
-import Image from "next/image";
+import { CalendarDays, ShieldCheck } from "lucide-react";
 import { ManagementLayout } from "@/components/management/ManagementLayout";
-import { PageHeader } from "@/components/management/PageHeader";
-import { Card, CardContent } from "@/components/ui/card";
-
-interface StaffProfileData {
-  id: number;
-  role: string;
-  firstName: string;
-  lastName: string;
-  email: string | null;
-  phone: string | null;
-  isActive: boolean;
-  emailVerifiedAt: string | null;
-  createdAt: string;
-  userInfo: { photoUrl: string | null } | null;
-}
+import { StaffEmailChange } from "./StaffEmailChange";
+import { StaffPasswordChange } from "./StaffPasswordChange";
+import { StaffProfileDetails } from "./StaffProfileDetails";
+import type { StaffProfileData } from "./staff-profile.types";
 
 export function StaffProfile({ user }: { user: StaffProfileData }) {
-  const fullName = `${user.firstName} ${user.lastName}`.trim();
-  const roleLabel = user.role === "ADMIN" ? "Administrator" : "Staff";
-  const joinedAt = new Date(user.createdAt).toLocaleDateString("en-GB", {
+  const joinedAt = new Intl.DateTimeFormat("en-GB", {
     day: "2-digit",
     month: "long",
     year: "numeric",
-  });
+    timeZone: "Asia/Bangkok",
+  }).format(new Date(user.createdAt));
 
   return (
-    <ManagementLayout className="max-w-5xl">
-      <PageHeader
-        title="My Profile"
-        description="Review your identity, contact details, and account access"
-      />
+    <ManagementLayout className="max-w-6xl !space-y-5 sm:!space-y-7">
+      <header className="border-b border-border/70 pb-4 sm:pb-6">
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">My profile</h1>
+        <p className="mt-1 text-sm text-muted-foreground">Manage your personal details and sign-in security.</p>
+      </header>
 
-      <Card className="overflow-hidden border-border/70 shadow-xs">
-        <CardContent className="p-5 sm:p-7">
-          <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
-            <div className="flex size-24 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-muted text-muted-foreground">
-              {user.userInfo?.photoUrl ? (
-                <Image
-                  src={user.userInfo.photoUrl}
-                  alt={fullName}
-                  width={96}
-                  height={96}
-                  unoptimized
-                  className="size-full object-cover"
-                />
-              ) : (
-                <UserRound className="size-11" />
-              )}
-            </div>
+      <div className="grid min-w-0 gap-7 lg:grid-cols-[minmax(0,1.1fr)_minmax(320px,0.9fr)] lg:gap-10">
+        <StaffProfileDetails user={user} />
 
-            <div className="min-w-0 flex-1">
-              <div className="flex flex-wrap items-center gap-2">
-                <h2 className="text-2xl font-semibold tracking-tight text-foreground">
-                  {fullName}
-                </h2>
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary">
-                  <ShieldCheck className="size-3.5" />
-                  {roleLabel}
-                </span>
-              </div>
-              <p className="mt-1 text-sm text-muted-foreground">Account #{user.id}</p>
-              <div className="mt-4 flex flex-wrap gap-2 text-xs">
-                <AccountBadge
-                  icon={BadgeCheck}
-                  label={user.isActive ? "Account active" : "Account inactive"}
-                  positive={user.isActive}
-                />
-                <AccountBadge
-                  icon={Mail}
-                  label={user.emailVerifiedAt ? "Email verified" : "Email not verified"}
-                  positive={Boolean(user.emailVerifiedAt)}
-                />
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+        <div className="min-w-0 divide-y divide-border/70">
+          <StaffEmailChange
+            currentEmail={user.email ?? ""}
+            emailVerified={Boolean(user.emailVerifiedAt)}
+            resendCooldownSeconds={user.emailResendCooldownSeconds}
+            expiresSeconds={user.emailChangeExpiresSeconds}
+            pendingRequest={user.emailChangeRequest}
+          />
+          <StaffPasswordChange currentEmail={user.email ?? ""} />
 
-      <div className="grid gap-5 lg:grid-cols-2">
-        <ProfileSection title="Contact information" description="Details used for shop communication.">
-          <ProfileRow icon={Mail} label="Email" value={user.email} />
-          <ProfileRow icon={Phone} label="Phone" value={user.phone} />
-        </ProfileSection>
-
-        <ProfileSection title="Account details" description="Your role and account history.">
-          <ProfileRow icon={ShieldCheck} label="Role" value={roleLabel} />
-          <ProfileRow icon={CalendarDays} label="Joined" value={joinedAt} />
-        </ProfileSection>
+          <section className="py-6" aria-labelledby="staff-account-details-heading">
+            <h2 id="staff-account-details-heading" className="text-base font-semibold text-foreground">Account details</h2>
+            <dl className="mt-3 divide-y divide-border/60 border-y border-border/60">
+              <DetailRow icon={<ShieldCheck className="size-4" />} label="Role" value="Staff" />
+              <DetailRow icon={<ShieldCheck className="size-4" />} label="Access" value={user.isActive ? "Active" : "Inactive"} />
+              <DetailRow icon={<CalendarDays className="size-4" />} label="Member since" value={joinedAt} />
+              <DetailRow icon={<ShieldCheck className="size-4" />} label="Account number" value={`#${user.id}`} />
+            </dl>
+          </section>
+        </div>
       </div>
     </ManagementLayout>
   );
 }
 
-function ProfileSection({ title, description, children }: { title: string; description: string; children: React.ReactNode }) {
+function DetailRow({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
-    <Card className="border-border/70 shadow-xs">
-      <CardContent className="p-5 sm:p-6">
-        <h3 className="font-semibold text-foreground">{title}</h3>
-        <p className="mt-1 text-sm text-muted-foreground">{description}</p>
-        <div className="mt-5 space-y-4">{children}</div>
-      </CardContent>
-    </Card>
-  );
-}
-
-function ProfileRow({ icon: Icon, label, value }: { icon: LucideIcon; label: string; value: string | null }) {
-  return (
-    <div className="flex items-center gap-3">
-      <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-muted text-muted-foreground">
-        <Icon className="size-4" />
-      </div>
-      <div className="min-w-0">
-        <p className="text-xs text-muted-foreground">{label}</p>
-        <p className="truncate text-sm font-medium text-foreground">{value || "Not provided"}</p>
-      </div>
+    <div className="grid grid-cols-[20px_minmax(0,1fr)_auto] items-center gap-3 py-3">
+      <span className="text-muted-foreground" aria-hidden="true">{icon}</span>
+      <dt className="text-sm text-muted-foreground">{label}</dt>
+      <dd className="text-right text-sm font-medium text-foreground">{value}</dd>
     </div>
-  );
-}
-
-function AccountBadge({ icon: Icon, label, positive }: { icon: LucideIcon; label: string; positive: boolean }) {
-  return (
-    <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 font-medium ${positive ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" : "border-border bg-muted text-muted-foreground"}`}>
-      <Icon className="size-3.5" />
-      {label}
-    </span>
   );
 }

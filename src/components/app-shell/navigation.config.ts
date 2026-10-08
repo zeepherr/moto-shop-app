@@ -6,6 +6,7 @@ import {
   ShoppingCart,
   Settings,
   Tags,
+  TrendingUp,
   User,
   Users,
   Wrench,
@@ -39,7 +40,7 @@ const adminNavigation: NavItem[] = [
 
 const staffNavigation: NavItem[] = [
   { label: "POS", href: "/staff/pos", icon: ShoppingCart, end: true },
-  { label: "Services", href: "/staff/services", icon: Wrench },
+  { label: "Sales", href: "/staff/services", icon: TrendingUp },
   { label: "Profile", href: "/staff/profile", icon: User },
 ];
 

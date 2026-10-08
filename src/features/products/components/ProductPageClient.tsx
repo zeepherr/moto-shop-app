@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo, useTransition } from "react";
+import React, { useState, useMemo, useTransition, useEffect } from "react";
 import { toast } from "sonner";
 import { ManagementLayout } from "@/components/management/ManagementLayout";
 import { PageHeader } from "@/components/management/PageHeader";
@@ -14,6 +14,7 @@ import {
   createProductAction,
   updateProductAction,
   deleteProductAction,
+  searchProductsAction,
 } from "../actions/product.actions";
 import type { ProductDTO } from "../types";
 import type { ProductCategoryDTO } from "@/features/categories/types";
@@ -23,6 +24,8 @@ import { Select } from "@/components/ui/select";
 
 interface ProductPageClientProps {
   initialProducts: ProductDTO[];
+  initialTotalProducts: number;
+  productStats: { total: number; activeCount: number; inactiveCount: number; inStock: number; lowStock: number; outOfStock: number; inventoryValue: number };
   categories: ProductCategoryDTO[];
   initialProductDiscountRate: number;
 }
@@ -31,10 +34,17 @@ type ProductSortKey = "name" | "sellingPrice" | "stockQuantity";
 
 export const ProductPageClient: React.FC<ProductPageClientProps> = ({
   initialProducts,
+  initialTotalProducts,
+  productStats,
   categories,
   initialProductDiscountRate,
 }) => {
   const [products, setProducts] = useState(initialProducts);
+  const [totalProducts, setTotalProducts] = useState(initialTotalProducts);
+  const [filteredTotal, setFilteredTotal] = useState(initialTotalProducts);
+  const [activeCount, setActiveCount] = useState(productStats.activeCount);
+  const [inactiveCount, setInactiveCount] = useState(productStats.inactiveCount);
+  const [page, setPage] = useState(0);
   const [previousInitialProducts, setPreviousInitialProducts] = useState(initialProducts);
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
@@ -57,7 +67,33 @@ export const ProductPageClient: React.FC<ProductPageClientProps> = ({
   if (initialProducts !== previousInitialProducts) {
     setPreviousInitialProducts(initialProducts);
     setProducts(initialProducts);
+    setTotalProducts(initialTotalProducts);
+    setFilteredTotal(initialTotalProducts);
+    setActiveCount(productStats.activeCount);
+    setInactiveCount(productStats.inactiveCount);
+    setPage(0);
   }
+
+  useEffect(() => {
+    const controller = { cancelled: false };
+    const timer = window.setTimeout(async () => {
+      const result = await searchProductsAction({
+        search,
+        categoryId: selectedCategory === "all" ? undefined : Number(selectedCategory),
+        status: status as "all" | "active" | "inactive",
+        skip: page * 50,
+        sortBy: sort.key,
+        sortDirection: sort.direction,
+      });
+      if (!controller.cancelled && result.success) {
+        setProducts(result.data);
+        setFilteredTotal(result.total);
+        setActiveCount(result.activeCount);
+        setInactiveCount(result.inactiveCount);
+      }
+    }, search || selectedCategory !== "all" || status !== "all" || page > 0 ? 250 : 0);
+    return () => { controller.cancelled = true; window.clearTimeout(timer); };
+  }, [search, selectedCategory, status, page, sort, initialProducts]);
 
   const filteredProducts = useMemo(() => {
     const term = search.trim().toLowerCase();
@@ -94,11 +130,11 @@ export const ProductPageClient: React.FC<ProductPageClientProps> = ({
 
   const counts = useMemo(
     () => ({
-      all: products.length,
-      active: products.filter((p) => p.isActive).length,
-      inactive: products.filter((p) => !p.isActive).length,
+      all: totalProducts,
+      active: activeCount,
+      inactive: inactiveCount,
     }),
-    [products]
+    [totalProducts, activeCount, inactiveCount]
   );
 
   const uploadImage = async (file: File): Promise<string | null> => {
@@ -222,26 +258,26 @@ export const ProductPageClient: React.FC<ProductPageClientProps> = ({
         compactOnMobile
         title="Products & Inventory"
         description="Manage stock inventory, pricing, catalog categories, and SKU barcodes"
-        count={products.length}
+        count={totalProducts}
         actionLabel="Add Product"
         onAction={() => setCreateOpen(true)}
       />
 
       <ProductDiscountSetting initialRate={initialProductDiscountRate} />
 
-      <ProductStats products={products} />
+      <ProductStats products={products} stats={productStats} />
 
       <DockedTableCard
         search={search}
-        onSearchChange={setSearch}
+        onSearchChange={(value) => { setSearch(value); setPage(0); }}
         searchPlaceholder="Search product by name, SKU or description..."
         status={status}
-        onStatusChange={setStatus}
+        onStatusChange={(value) => { setStatus(value); setPage(0); }}
         statusCounts={counts}
         filterSlot={
           <Select
             value={selectedCategory}
-            onValueChange={setSelectedCategory}
+            onValueChange={(value) => { setSelectedCategory(value); setPage(0); }}
             options={[
               { value: "all", label: "All Categories" },
               ...categories.map((category) => ({ value: String(category.id), label: category.name })),
@@ -258,9 +294,10 @@ export const ProductPageClient: React.FC<ProductPageClientProps> = ({
           setSearch("");
           setSelectedCategory("all");
           setStatus("all");
+          setPage(0);
         }}
         totalFiltered={filteredProducts.length}
-        totalAll={products.length}
+        totalAll={filteredTotal}
         entityName="products"
       >
         <ProductTable
@@ -287,6 +324,16 @@ export const ProductPageClient: React.FC<ProductPageClientProps> = ({
           }}
         />
       </DockedTableCard>
+
+      {filteredTotal > 50 && (
+        <div className="flex items-center justify-between gap-3">
+          <p className="text-sm text-muted-foreground">Page {page + 1} of {Math.ceil(filteredTotal / 50)}</p>
+          <div className="flex gap-2">
+            <button type="button" className="min-h-10 rounded-lg border px-3 text-sm disabled:opacity-50" disabled={page === 0 || isPending} onClick={() => setPage((current) => Math.max(0, current - 1))}>Previous</button>
+            <button type="button" className="min-h-10 rounded-lg border px-3 text-sm disabled:opacity-50" disabled={(page + 1) * 50 >= filteredTotal || isPending} onClick={() => setPage((current) => current + 1)}>Next</button>
+          </div>
+        </div>
+      )}
 
       <CreateProductDialog
         open={createOpen}

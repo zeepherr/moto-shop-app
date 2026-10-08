@@ -1,5 +1,12 @@
 import { z } from "zod";
 
+export const strongPasswordSchema = z
+  .string()
+  .min(10, "Password must be at least 10 characters")
+  .max(128, "Password must be 128 characters or fewer")
+  .regex(/[A-Za-z]/, "Password must include at least one letter")
+  .regex(/[0-9]/, "Password must include at least one number");
+
 export const registerSchema = z
   .object({
     email: z
@@ -7,8 +14,8 @@ export const registerSchema = z
       .trim()
       .toLowerCase()
       .email("Please enter a valid email address"),
-    password: z.string().min(4, "Password must be at least 4 characters"),
-    confirmPassword: z.string().min(4, "Confirm password is required"),
+    password: strongPasswordSchema,
+    confirmPassword: z.string().min(1, "Confirm password is required").max(128),
   })
   .strict()
   .refine((data) => data.password === data.confirmPassword, {
@@ -22,7 +29,7 @@ export const loginSchema = z.object({
     .trim()
     .toLowerCase()
     .email("Please enter a valid email address"),
-  password: z.string().min(4, "Password must be at least 4 characters"),
+  password: z.string().min(4).max(128),
 });
 
 export const requestAdminPasswordResetSchema = z.object({
@@ -33,8 +40,8 @@ export const completeAdminPasswordResetSchema = z
   .object({
     email: z.string().trim().toLowerCase().email("Please enter a valid email address"),
     code: z.string().regex(/^\d{6}$/, "Verification code must be 6 digits"),
-    password: z.string().min(4, "Password must be at least 4 characters"),
-    confirmPassword: z.string().min(4, "Confirm password is required"),
+    password: strongPasswordSchema,
+    confirmPassword: z.string().min(1, "Confirm password is required").max(128),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords do not match",
@@ -44,8 +51,8 @@ export const completeAdminPasswordResetSchema = z
 export const passwordChangeSchema = z
   .object({
     currentPassword: z.string().min(4, "Enter your current password"),
-    password: z.string().min(4, "Password must be at least 4 characters"),
-    confirmPassword: z.string().min(4, "Confirm password is required"),
+    password: strongPasswordSchema,
+    confirmPassword: z.string().min(1, "Confirm password is required").max(128),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords do not match",
@@ -57,8 +64,8 @@ export const adminPasswordChangeSchema = passwordChangeSchema;
 export const adminPasswordChangeOtpSchema = z
   .object({
     code: z.string().regex(/^\d{6}$/, "Verification code must be 6 digits"),
-    password: z.string().min(4, "Password must be at least 4 characters"),
-    confirmPassword: z.string().min(4, "Confirm password is required"),
+    password: strongPasswordSchema,
+    confirmPassword: z.string().min(1, "Confirm password is required").max(128),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords do not match",
@@ -88,8 +95,8 @@ export const assistedOtpSchema = z.object({
 export const passwordSetupSchema = z
   .object({
     token: z.string().min(32, "Invalid password setup link"),
-    password: z.string().min(4, "Password must be at least 4 characters"),
-    confirmPassword: z.string().min(4, "Confirm password is required"),
+    password: strongPasswordSchema,
+    confirmPassword: z.string().min(1, "Confirm password is required").max(128),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords do not match",

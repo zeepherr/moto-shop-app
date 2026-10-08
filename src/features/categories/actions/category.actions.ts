@@ -1,6 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { getCurrentUser } from "@/features/auth/actions/session.action";
+import { isAdminRole } from "@/features/auth/authorization";
 import {
   createCategorySchema,
   updateCategorySchema,
@@ -15,6 +17,7 @@ import {
 } from "../services/category.service";
 
 export const createCategoryAction = async (input: CreateCategoryInput) => {
+  if (!isAdminRole((await getCurrentUser())?.role)) return { success: false, error: "Only administrators can manage categories." };
   const parsed = createCategorySchema.safeParse(input);
   if (!parsed.success) {
     return { success: false, error: parsed.error.issues[0]?.message || "Invalid input" };
@@ -36,6 +39,7 @@ export const createCategoryAction = async (input: CreateCategoryInput) => {
 };
 
 export const updateCategoryAction = async (id: number, input: UpdateCategoryInput) => {
+  if (!isAdminRole((await getCurrentUser())?.role)) return { success: false, error: "Only administrators can manage categories." };
   const parsed = updateCategorySchema.safeParse(input);
   if (!parsed.success) {
     return { success: false, error: parsed.error.issues[0]?.message || "Invalid input" };
@@ -58,6 +62,7 @@ export const updateCategoryAction = async (id: number, input: UpdateCategoryInpu
 };
 
 export const deleteCategoryAction = async (id: number) => {
+  if (!isAdminRole((await getCurrentUser())?.role)) return { success: false, error: "Only administrators can manage categories." };
   try {
     await deleteCategory(id);
     revalidatePath("/admin/categories");

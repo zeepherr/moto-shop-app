@@ -30,15 +30,16 @@ const issueFreshStaffSession = async (userId: number) => {
   });
   if (!staff) return false;
 
+  const refreshToken = createRefreshToken();
+  const session = await createAuthSession(staff.id, hashRefreshToken(refreshToken));
   const accessToken = await createAccessToken({
+    sessionId: session.id,
     userId: staff.id,
     email: staff.email ?? "",
     role: staff.role,
     firstName: staff.firstName,
     lastName: staff.lastName,
   });
-  const refreshToken = createRefreshToken();
-  await createAuthSession(staff.id, hashRefreshToken(refreshToken));
   await setAuthCookies(accessToken, refreshToken);
   return true;
 };

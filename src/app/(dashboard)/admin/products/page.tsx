@@ -1,6 +1,6 @@
 import React from "react";
 import type { Metadata } from "next";
-import { findAllProducts } from "@/features/products/services/product.service";
+import { findAllProducts, getProductCatalogStats } from "@/features/products/services/product.service";
 import { findAllCategories } from "@/features/categories/services/category.service";
 import { getR2PublicUrl } from "@/features/products/services/r2.service";
 import { ProductPageClient } from "@/features/products/components/ProductPageClient";
@@ -15,10 +15,11 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 
 export default async function AdminProductsPage() {
-  const [rawProducts, rawCategories, productDiscountRate] = await Promise.all([
-    findAllProducts(),
+  const [rawProducts, rawCategories, productDiscountRate, productStats] = await Promise.all([
+    findAllProducts({ take: 50, sortBy: "name", sortDirection: "asc" }),
     findAllCategories({ isActive: true }),
     getProductDiscountRate(),
+    getProductCatalogStats(),
   ]);
 
   const products = rawProducts.map((p) => ({
@@ -48,5 +49,5 @@ export default async function AdminProductsPage() {
     _count: c._count,
   }));
 
-  return <ProductPageClient initialProducts={products} categories={categories} initialProductDiscountRate={productDiscountRate} />;
+  return <ProductPageClient initialProducts={products} initialTotalProducts={productStats.total} productStats={productStats} categories={categories} initialProductDiscountRate={productDiscountRate} />;
 }

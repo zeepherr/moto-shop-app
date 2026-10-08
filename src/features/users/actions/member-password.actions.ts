@@ -24,9 +24,9 @@ async function restoreMemberSession(userId: number) {
   try {
     const member = await db.user.findFirst({ where: { id: userId, role: UserRole.MEMBER, isActive: true }, select: { id: true, email: true, role: true, firstName: true, lastName: true } });
     if (member) {
-      const accessToken = await createAccessToken({ userId: member.id, email: member.email ?? "", role: member.role, firstName: member.firstName, lastName: member.lastName });
       const refreshToken = createRefreshToken();
-      await createAuthSession(member.id, hashRefreshToken(refreshToken));
+      const session = await createAuthSession(member.id, hashRefreshToken(refreshToken));
+      const accessToken = await createAccessToken({ sessionId: session.id, userId: member.id, email: member.email ?? "", role: member.role, firstName: member.firstName, lastName: member.lastName });
       await setAuthCookies(accessToken, refreshToken);
       return true;
     }

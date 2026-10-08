@@ -68,15 +68,16 @@ export const verifyOtpAction = async (input: VerifyEmailInput): Promise<ActionRe
     return { success: false, error: "Verification code is no longer valid. Please request a new code." };
   }
 
+  const refreshToken = createRefreshToken();
+  const session = await createAuthSession(newUser.id, hashRefreshToken(refreshToken));
   const accessToken = await createAccessToken({
+    sessionId: session.id,
     userId: newUser.id,
     email: newUser.email ?? "",
     role: newUser.role,
     firstName: newUser.firstName,
     lastName: newUser.lastName,
   });
-  const refreshToken = createRefreshToken();
-  await createAuthSession(newUser.id, hashRefreshToken(refreshToken));
   await setAuthCookies(accessToken, refreshToken);
 
   return {

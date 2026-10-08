@@ -3,16 +3,17 @@ import { Package, CheckCircle2, AlertTriangle, Coins } from "lucide-react";
 import { QuickStatCard } from "@/components/management/QuickStatCard";
 import type { ProductDTO } from "../types";
 
-export const ProductStats: React.FC<{ products: ProductDTO[] }> = ({
+export const ProductStats: React.FC<{ products: ProductDTO[]; stats?: { total: number; activeCount: number; inactiveCount: number; inStock: number; lowStock: number; outOfStock: number; inventoryValue: number } }> = ({
   products,
+  stats,
 }) => {
-  const total = products.length;
-  const inStock = products.filter((p) => p.stockQuantity > 0).length;
-  const lowStock = products.filter(
+  const total = stats?.total ?? products.length;
+  const inStock = stats?.inStock ?? products.filter((p) => p.stockQuantity > 0).length;
+  const lowStock = stats?.lowStock ?? products.filter(
     (p) => p.stockQuantity > 0 && p.stockQuantity <= 5
   ).length;
-  const outOfStock = products.filter((p) => p.stockQuantity === 0).length;
-  const inventoryValuation = products.reduce(
+  const outOfStock = stats?.outOfStock ?? products.filter((p) => p.stockQuantity === 0).length;
+  const inventoryValuation = stats?.inventoryValue ?? products.reduce(
     (acc, p) => acc + Number(p.sellingPrice) * p.stockQuantity,
     0
   );

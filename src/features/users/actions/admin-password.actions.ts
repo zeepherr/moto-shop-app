@@ -29,15 +29,16 @@ const issueFreshAdminSession = async (userId: number) => {
   });
   if (!admin) return false;
 
+  const refreshToken = createRefreshToken();
+  const session = await createAuthSession(admin.id, hashRefreshToken(refreshToken));
   const accessToken = await createAccessToken({
+    sessionId: session.id,
     userId: admin.id,
     email: admin.email ?? "",
     role: admin.role,
     firstName: admin.firstName,
     lastName: admin.lastName,
   });
-  const refreshToken = createRefreshToken();
-  await createAuthSession(admin.id, hashRefreshToken(refreshToken));
   await setAuthCookies(accessToken, refreshToken);
   return true;
 };
@@ -87,8 +88,8 @@ export const changeAdminPasswordWithCurrentPasswordAction = async (input: unknow
   return {
     success: true,
     message: sessionRestored
-      ? "Password updated. Other devices may remain signed in for up to 15 minutes."
-      : "Password updated. Please sign in again. Other devices may remain signed in for up to 15 minutes.",
+      ? "Password updated. Other devices have been signed out."
+      : "Password updated. Please sign in again on this device. Other devices have been signed out.",
   };
 };
 

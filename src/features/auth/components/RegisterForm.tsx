@@ -81,8 +81,8 @@ export const RegisterForm: React.FC = () => {
         value={formData.password}
         onChange={handleChange}
         autoComplete="new-password"
-        placeholder="At least 4 characters"
-        hint="Use at least 4 characters."
+        placeholder="10+ characters, with a letter and number"
+        hint="Use at least 10 characters, including a letter and a number."
         disabled={isPending}
       />
 

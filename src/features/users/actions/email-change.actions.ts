@@ -142,15 +142,16 @@ const verifyEmailChangeForRole = async (input: unknown, requiredRole: UserRole) 
     };
   }
 
+  const refreshToken = createRefreshToken();
+  const session = await createAuthSession(changedUser.id, hashRefreshToken(refreshToken));
   const accessToken = await createAccessToken({
+    sessionId: session.id,
     userId: changedUser.id,
     email: changedUser.email ?? "",
     role: changedUser.role,
     firstName: changedUser.firstName,
     lastName: changedUser.lastName,
   });
-  const refreshToken = createRefreshToken();
-  await createAuthSession(changedUser.id, hashRefreshToken(refreshToken));
   await setAuthCookies(accessToken, refreshToken);
   revalidatePath(requiredRole === UserRole.ADMIN ? "/admin/profile" : requiredRole === UserRole.STAFF ? "/staff/profile" : "/member/profile");
   if (requiredRole === UserRole.ADMIN) revalidatePath("/admin");

@@ -143,6 +143,18 @@ export const createAuthSession = async (
   });
 };
 
+export const findActiveAuthSession = async (sessionId: number, db = defaultDb) => {
+  return await db.authSession.findFirst({
+    where: { id: sessionId, revokedAt: null, expiresAt: { gt: new Date() } },
+    select: {
+      revokedAt: true,
+      expiresAt: true,
+      userId: true,
+      user: { select: { id: true, email: true, role: true, firstName: true, lastName: true, phone: true, emailVerifiedAt: true, isActive: true } },
+    },
+  });
+};
+
 export const findSessionByRefreshToken = async (
   refreshTokenHash: string,
   db = defaultDb,

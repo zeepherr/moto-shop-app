@@ -1,5 +1,5 @@
 import React from "react";
-import { findAllUsers } from "@/features/users/services/user.service";
+import { countUsers, findAllUsers, getUserRoleCounts } from "@/features/users/services/user.service";
 import { UsersPageClient } from "@/features/users/components/UsersPageClient";
 import { expireStaleEnrollments, findEnrollmentSummaries } from "@/features/auth/services/enrollment.service";
 
@@ -7,7 +7,10 @@ export const dynamic = "force-dynamic";
 
 export default async function AdminUsersPage() {
   await expireStaleEnrollments();
-  const [users, enrollments] = await Promise.all([findAllUsers(), findEnrollmentSummaries()]);
+  const [users, totalUsers, roleCounts, activeUsers, inactiveUsers, enrollments] = await Promise.all([
+    findAllUsers({ take: 50 }), countUsers(), getUserRoleCounts(),
+    countUsers({ isActive: true }), countUsers({ isActive: false }), findEnrollmentSummaries(),
+  ]);
 
   return (
     <UsersPageClient
@@ -25,6 +28,9 @@ export default async function AdminUsersPage() {
         hasProfilePhoto: Boolean(u.userInfo?.photoUrl),
         lastSignedInAt: u.authSessions[0]?.createdAt.toISOString() ?? null,
       }))}
+      initialTotalUsers={totalUsers}
+      initialRoleCounts={roleCounts}
+      initialAccessCounts={{ all: totalUsers, active: activeUsers, inactive: inactiveUsers }}
       initialEnrollments={enrollments.map((enrollment) => ({
         ...enrollment,
         expiresAt: enrollment.expiresAt.toISOString(),

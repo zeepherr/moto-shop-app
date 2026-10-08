@@ -16,6 +16,8 @@ interface PasswordFieldProps {
   required?: boolean;
   disabled?: boolean;
   hint?: string;
+  minLength?: number;
+  maxLength?: number;
 }
 
 export function PasswordField({
@@ -29,8 +31,11 @@ export function PasswordField({
   required = true,
   disabled = false,
   hint,
+  minLength,
+  maxLength = 128,
 }: PasswordFieldProps) {
   const [visible, setVisible] = useState(false);
+  const requiredLength = minLength ?? (label.toLowerCase().includes("current") ? 4 : 10);
 
   return (
     <div className="space-y-2">
@@ -46,6 +51,8 @@ export function PasswordField({
           onChange={onChange}
           disabled={disabled}
           required={required}
+          minLength={requiredLength}
+          maxLength={maxLength}
           className="pr-12 text-base"
         />
         <button
@@ -59,7 +66,7 @@ export function PasswordField({
           {visible ? <EyeOff size={18} aria-hidden="true" /> : <Eye size={18} aria-hidden="true" />}
         </button>
       </div>
-      {hint ? <p className="text-sm leading-relaxed text-muted-foreground">{hint}</p> : null}
+      {hint || requiredLength >= 10 ? <p className="text-sm leading-relaxed text-muted-foreground">{hint || "Use at least 10 characters, including a letter and a number."}</p> : null}
     </div>
   );
 }

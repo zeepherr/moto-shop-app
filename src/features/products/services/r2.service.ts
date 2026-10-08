@@ -1,6 +1,7 @@
 import { S3Client, PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
 import crypto from "node:crypto";
 import { config } from "@/config";
+import type { VerifiedImageType } from "./image-validation";
 
 export const r2Client = new S3Client({
   region: "auto",
@@ -17,8 +18,14 @@ export const getR2PublicUrl = (key: string): string => {
   return `${config.r2.publicUrl}/${key}`;
 };
 
-const buildImageKey = (fileName: string, folder: "products" | "profiles"): string => {
-  const extension = fileName.split(".").pop() || "jpg";
+const IMAGE_EXTENSION: Record<VerifiedImageType, string> = {
+  "image/jpeg": "jpg",
+  "image/png": "png",
+  "image/webp": "webp",
+};
+
+const buildImageKey = (contentType: VerifiedImageType, folder: "products" | "profiles"): string => {
+  const extension = IMAGE_EXTENSION[contentType];
   const uniqueId = crypto.randomUUID().slice(0, 8);
   return `${folder}/${Date.now()}-${uniqueId}.${extension}`;
 };
@@ -27,11 +34,10 @@ const buildImageKey = (fileName: string, folder: "products" | "profiles"): strin
 // what keeps the flow same-origin and free of any bucket CORS configuration.
 export const uploadImageToR2 = async (
   buffer: Buffer,
-  fileName: string,
-  contentType: string,
+  contentType: VerifiedImageType,
   folder: "products" | "profiles" = "products",
 ): Promise<{ key: string; publicUrl: string }> => {
-  const key = buildImageKey(fileName, folder);
+  const key = buildImageKey(contentType, folder);
 
   await r2Client.send(
     new PutObjectCommand({

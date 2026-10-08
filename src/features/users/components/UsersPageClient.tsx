@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { ConfirmActionDialog } from "@/components/ConfirmActionDialog";
@@ -13,7 +13,7 @@ import {
   resendPasswordSetupLinkAction,
   resendSelfServiceRegistrationLinkAction,
 } from "@/features/auth/actions/admin-enrollment-recovery.action";
-import { updateUserAccessAction, updateUserRoleAction } from "../actions/user.actions";
+import { getUsersPageAction, updateUserAccessAction, updateUserRoleAction } from "../actions/user.actions";
 import { EnrollmentDialog } from "./EnrollmentDialog";
 import type { EnrollmentItem } from "./EnrollmentTable";
 import { UserDetailDialog } from "./UserDetailDialog";
@@ -23,6 +23,9 @@ import { UserManagementWorkspace } from "./UserManagementWorkspace";
 
 interface Props {
   initialUsers: UserItem[];
+  initialTotalUsers: number;
+  initialRoleCounts: { admin: number; staff: number; member: number };
+  initialAccessCounts: { all: number; active: number; inactive: number };
   initialEnrollments: EnrollmentItem[];
 }
 
@@ -32,9 +35,15 @@ type EnrollmentDefaults = { email: string; role: "MEMBER" | "STAFF" } | null;
 type PendingRoleChange = { user: UserItem; role: "STAFF" | "MEMBER" } | null;
 type PendingAccessChange = { user: UserItem; isActive: boolean } | null;
 
-export function UsersPageClient({ initialUsers, initialEnrollments }: Props) {
+export function UsersPageClient({ initialUsers, initialTotalUsers, initialRoleCounts, initialAccessCounts, initialEnrollments }: Props) {
   const router = useRouter();
   const [users, setUsers] = useState(initialUsers);
+  const [previousInitialUsers, setPreviousInitialUsers] = useState(initialUsers);
+  const globalTotalUsers = initialTotalUsers;
+  const [totalUsers, setTotalUsers] = useState(initialTotalUsers);
+  const [roleCounts, setRoleCounts] = useState(initialRoleCounts);
+  const [accessCounts, setAccessCounts] = useState(initialAccessCounts);
+  const [page, setPage] = useState(0);
   const [view, setView] = useState<UserView>("people");
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState("ALL");
@@ -48,15 +57,39 @@ export function UsersPageClient({ initialUsers, initialEnrollments }: Props) {
   const [cancelItem, setCancelItem] = useState<EnrollmentItem | null>(null);
   const [restartItem, setRestartItem] = useState<EnrollmentItem | null>(null);
   const [isPending, setIsPending] = useState(false);
+  const [isLoadingUsers, setIsLoadingUsers] = useState(false);
+  const [refreshRevision, setRefreshRevision] = useState(0);
 
-  const stats = useMemo(
-    () => ({
-      admin: users.filter((user) => user.role === "ADMIN").length,
-      staff: users.filter((user) => user.role === "STAFF").length,
-      member: users.filter((user) => user.role === "MEMBER").length,
-    }),
-    [users],
-  );
+  if (initialUsers !== previousInitialUsers) {
+    setPreviousInitialUsers(initialUsers);
+    setUsers(initialUsers);
+    setTotalUsers(initialTotalUsers);
+    setPage(0);
+    setRoleCounts(initialRoleCounts);
+    setAccessCounts(initialAccessCounts);
+  }
+
+  useEffect(() => {
+    let cancelled = false;
+    if (view !== "people") return;
+    const timer = window.setTimeout(async () => {
+      setIsLoadingUsers(true);
+      try {
+        const result = await getUsersPageAction({ search, role: roleFilter, access: accessFilter, page });
+        if (!cancelled && result.success) {
+          setUsers(result.data);
+          setTotalUsers(result.total);
+          setRoleCounts(result.roleCounts);
+          setAccessCounts(result.accessCounts);
+        }
+      } finally {
+        if (!cancelled) setIsLoadingUsers(false);
+      }
+    }, search || roleFilter !== "ALL" || accessFilter !== "all" || page > 0 ? 250 : 0);
+    return () => { cancelled = true; window.clearTimeout(timer); };
+  }, [search, roleFilter, accessFilter, page, view, refreshRevision, initialUsers]);
+
+  const stats = roleCounts;
   const searchTerm = search.trim().toLowerCase();
   const filteredUsers = useMemo(
     () =>
@@ -93,6 +126,7 @@ export function UsersPageClient({ initialUsers, initialEnrollments }: Props) {
     setRoleFilter("ALL");
     setAccessFilter("all");
     setEnrollmentStatus("ALL");
+    setPage(0);
   };
 
   const withPending = async <T,>(work: () => Promise<T>): Promise<T> => {
@@ -131,11 +165,7 @@ export function UsersPageClient({ initialUsers, initialEnrollments }: Props) {
       return;
     }
 
-    setUsers((items) =>
-      items.map((item) =>
-        item.id === roleUser.user.id ? { ...item, role: roleUser.role } : item,
-      ),
-    );
+    setRefreshRevision((revision) => revision + 1);
     setRoleUser(null);
     toast.success("Role updated. Existing sessions were revoked.");
   };
@@ -152,11 +182,7 @@ export function UsersPageClient({ initialUsers, initialEnrollments }: Props) {
       return;
     }
 
-    setUsers((items) =>
-      items.map((item) =>
-        item.id === accessUser.user.id ? { ...item, isActive: accessUser.isActive } : item,
-      ),
-    );
+    setRefreshRevision((revision) => revision + 1);
     setAccessUser(null);
     toast.success(
       accessUser.isActive
@@ -192,7 +218,7 @@ export function UsersPageClient({ initialUsers, initialEnrollments }: Props) {
         compactOnMobile
         title="People"
         description="Create verified shop accounts, keep access current, and resolve enrollment work before customers leave the counter."
-        count={users.length}
+        count={totalUsers}
       >
         <Button
           type="button"
@@ -216,7 +242,7 @@ export function UsersPageClient({ initialUsers, initialEnrollments }: Props) {
       </PageHeader>
 
       <UserStats
-        total={users.length}
+        total={globalTotalUsers}
         adminCount={stats.admin}
         staffCount={stats.staff}
         memberCount={stats.member}
@@ -225,16 +251,15 @@ export function UsersPageClient({ initialUsers, initialEnrollments }: Props) {
       <UserManagementWorkspace
         view={view}
         onViewChange={setView}
-        users={users}
         enrollments={initialEnrollments}
         filteredUsers={filteredUsers}
         filteredEnrollments={filteredEnrollments}
         search={search}
-        onSearchChange={setSearch}
+        onSearchChange={(value) => { setSearch(value); setPage(0); }}
         roleFilter={roleFilter}
-        onRoleFilterChange={setRoleFilter}
+        onRoleFilterChange={(value) => { setRoleFilter(value); setPage(0); }}
         accessFilter={accessFilter}
-        onAccessFilterChange={setAccessFilter}
+        onAccessFilterChange={(value) => { setAccessFilter(value); setPage(0); }}
         enrollmentStatus={enrollmentStatus}
         onEnrollmentStatusChange={setEnrollmentStatus}
         onClearFilters={clearFilters}
@@ -248,6 +273,11 @@ export function UsersPageClient({ initialUsers, initialEnrollments }: Props) {
         onCancelEnrollment={setCancelItem}
         onRestartEnrollment={setRestartItem}
         isPending={isPending}
+        totalPeople={totalUsers}
+        accessCounts={accessCounts}
+        page={page}
+        isLoadingPeople={isLoadingUsers}
+        onPageChange={setPage}
       />
 
       <EnrollmentDialog

@@ -1,6 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { getCurrentUser } from "@/features/auth/actions/session.action";
+import { isAdminRole } from "@/features/auth/authorization";
 import {
   createServiceSchema,
   updateServiceSchema,
@@ -15,6 +17,7 @@ import {
 } from "../services/motoService.service";
 
 export const createServiceAction = async (input: CreateServiceInput) => {
+  if (!isAdminRole((await getCurrentUser())?.role)) return { success: false, error: "Only administrators can manage services." };
   const parsed = createServiceSchema.safeParse(input);
   if (!parsed.success) {
     return { success: false, error: parsed.error.issues[0]?.message || "Invalid input" };
@@ -34,6 +37,7 @@ export const createServiceAction = async (input: CreateServiceInput) => {
 };
 
 export const updateServiceAction = async (id: number, input: UpdateServiceInput) => {
+  if (!isAdminRole((await getCurrentUser())?.role)) return { success: false, error: "Only administrators can manage services." };
   const parsed = updateServiceSchema.safeParse(input);
   if (!parsed.success) {
     return { success: false, error: parsed.error.issues[0]?.message || "Invalid input" };
@@ -55,6 +59,7 @@ export const updateServiceAction = async (id: number, input: UpdateServiceInput)
 };
 
 export const deleteServiceAction = async (id: number) => {
+  if (!isAdminRole((await getCurrentUser())?.role)) return { success: false, error: "Only administrators can manage services." };
   try {
     await deleteService(id);
     revalidateServicePages();

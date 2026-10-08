@@ -7,6 +7,9 @@ import { ROLES } from "@/features/auth/constants";
 import {
   findMemberById,
   searchMembers,
+  countUsers,
+  findAllUsers,
+  getUserRoleCounts,
 } from "../services/user.service";
 import { getUserManagementDetail, updateUserAccess, updateUserRole } from "../services/user-management.service";
 import { deleteAdminProfilePhoto, updateAdminProfile } from "../services/user.service";
@@ -104,6 +107,36 @@ export const getUserManagementDetailAction = async (userId: number) => {
   } catch (err: unknown) {
     return { success: false, error: (err as Error).message || "Unable to load account details." };
   }
+};
+
+export const getUsersPageAction = async (input: { search?: string; role?: string; access?: string; page?: number }) => {
+  const user = await getCurrentUser();
+  if (!user || user.role !== ROLES.ADMIN) return { success: false as const, error: "Unauthorized" };
+  const search = typeof input?.search === "string" ? input.search.trim().slice(0, 100) : "";
+  const role: UserRole | undefined = input?.role === "ADMIN" || input?.role === "STAFF" || input?.role === "MEMBER" ? input.role as UserRole : undefined;
+  const isActive = input?.access === "active" ? true : input?.access === "inactive" ? false : undefined;
+  const page = Math.max(0, Math.floor(Number(input?.page) || 0));
+  const filter = { search, role, isActive };
+  const [users, total, roleCounts, active, inactive] = await Promise.all([
+    findAllUsers({ ...filter, skip: page * 50, take: 50 }),
+    countUsers(filter),
+    getUserRoleCounts(),
+    countUsers({ search, role, isActive: true }),
+    countUsers({ search, role, isActive: false }),
+  ]);
+  return {
+    success: true as const,
+    total,
+    roleCounts,
+    accessCounts: { all: total, active, inactive },
+    data: users.map((u) => ({
+      id: u.id, firstName: u.firstName, lastName: u.lastName, email: u.email, phone: u.phone,
+      role: u.role, isActive: u.isActive, createdAt: u.createdAt.toISOString(),
+      emailVerifiedAt: u.emailVerifiedAt?.toISOString() ?? null,
+      hasProfilePhoto: Boolean(u.userInfo?.photoUrl),
+      lastSignedInAt: u.authSessions[0]?.createdAt.toISOString() ?? null,
+    })),
+  };
 };
 
 const updateOwnProfileAction = async (input: unknown, requiredRole: UserRole, allowPartial = false) => {

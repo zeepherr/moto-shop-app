@@ -13,6 +13,7 @@ import { BestSellers } from "@/features/dashboard/components/BestSellers";
 import { StaffActivity } from "@/features/dashboard/components/StaffActivity";
 import { ManagementLayout } from "@/components/management/ManagementLayout";
 import { DollarSign, ShoppingBag, AlertTriangle, Users } from "lucide-react";
+import { logAuthPerformance, startAuthTimer } from "@/lib/auth-performance";
 
 export const metadata: Metadata = {
   title: "Admin Dashboard - HrungMoto",
@@ -22,7 +23,9 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 
 export default async function AdminDashboardPage() {
+  const dataStartedAt = startAuthTimer();
   const summary = await getDashboardSummary();
+  logAuthPerformance("destination_page_data_ms", dataStartedAt);
   const { trends } = summary;
 
   const toTrend = (change: number | null) =>

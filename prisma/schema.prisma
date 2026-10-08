@@ -168,6 +168,17 @@ model AuthSession {
   @@index([expiresAt])
 }
 
+model LoginAttempt {
+  key             String   @id
+  attemptCount    Int      @default(0)
+  windowStartedAt DateTime @default(now())
+  blockedUntil    DateTime?
+  updatedAt       DateTime @updatedAt
+
+  @@index([blockedUntil])
+  @@index([updatedAt])
+}
+
 model EmailChangeRequest {
   id Int @id @default(autoincrement())
 

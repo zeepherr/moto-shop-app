@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { getCurrentUser } from "@/features/auth/actions/session.action";
 import { AppShell } from "@/components/app-shell/AppShell";
+import { AuthPerfProbe } from "@/components/AuthPerfProbe";
 
 export default async function DashboardLayout({
   children,
@@ -23,6 +24,7 @@ export default async function DashboardLayout({
       workspace="Shop management"
       initialSidebarCollapsed={sidebarCollapsed}
     >
+      <AuthPerfProbe />
       {children}
     </AppShell>
   );

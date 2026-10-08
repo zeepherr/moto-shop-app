@@ -12,7 +12,6 @@ type UserView = "people" | "enrollments";
 interface UserManagementWorkspaceProps {
   view: UserView;
   onViewChange: (view: UserView) => void;
-  users: UserItem[];
   enrollments: EnrollmentItem[];
   filteredUsers: UserItem[];
   filteredEnrollments: EnrollmentItem[];
@@ -35,6 +34,11 @@ interface UserManagementWorkspaceProps {
   onCancelEnrollment: (item: EnrollmentItem) => void;
   onRestartEnrollment: (item: EnrollmentItem) => void;
   isPending: boolean;
+  totalPeople: number;
+  accessCounts: { all: number; active: number; inactive: number };
+  page: number;
+  isLoadingPeople: boolean;
+  onPageChange: (page: number) => void;
 }
 
 interface EnrollmentAttentionProps {
@@ -114,19 +118,15 @@ function UserViewTabs({
 
 export function UserManagementWorkspace(props: UserManagementWorkspaceProps) {
   const {
-    view, onViewChange, users, enrollments, filteredUsers, filteredEnrollments,
+    view, onViewChange, enrollments, filteredUsers, filteredEnrollments,
     search, onSearchChange, roleFilter, onRoleFilterChange, accessFilter,
     onAccessFilterChange, enrollmentStatus, onEnrollmentStatusChange, onClearFilters,
     onViewUser, onRoleChange, onAccessChange, onVerifyEnrollment, onResendOtp,
     onResendRegistrationLink, onResendPasswordLink, onCancelEnrollment,
-    onRestartEnrollment, isPending,
+    onRestartEnrollment, isPending, totalPeople, accessCounts, page, isLoadingPeople, onPageChange,
   } = props;
 
-  const counts = useMemo(() => ({
-    all: users.length,
-    active: users.filter((user) => user.isActive).length,
-    inactive: users.filter((user) => !user.isActive).length,
-  }), [users]);
+  const counts = useMemo(() => accessCounts, [accessCounts]);
   const attention = useMemo(() => ({
     codes: enrollments.filter((item) => item.status === "AWAITING_OTP").length,
     setup: enrollments.filter((item) => item.status === "AWAITING_PASSWORD_SETUP").length,
@@ -134,7 +134,7 @@ export function UserManagementWorkspace(props: UserManagementWorkspaceProps) {
   }), [enrollments]);
   const tableFilter = view === "people" ? roleFilter : enrollmentStatus;
   const filteredCount = view === "people" ? filteredUsers.length : filteredEnrollments.length;
-  const totalCount = view === "people" ? users.length : enrollments.length;
+  const totalCount = view === "people" ? totalPeople : enrollments.length;
   const hasFilters = Boolean(search) || roleFilter !== "ALL" || accessFilter !== "all" || enrollmentStatus !== "ALL";
 
   return (
@@ -179,7 +179,16 @@ export function UserManagementWorkspace(props: UserManagementWorkspaceProps) {
         entityName={view === "people" ? "people" : "enrollments"}
       >
         {view === "people" ? (
-          <UserTable users={filteredUsers} onView={onViewUser} onRoleChange={onRoleChange} onAccessChange={onAccessChange} isPending={isPending} />
+          <>
+            {isLoadingPeople ? <p role="status" className="p-4 text-sm text-muted-foreground">Loading accounts…</p> : <UserTable users={filteredUsers} onView={onViewUser} onRoleChange={onRoleChange} onAccessChange={onAccessChange} isPending={isPending} />}
+            {totalPeople > 50 && <div className="flex items-center justify-between border-t border-border/60 p-3">
+              <p className="text-sm text-muted-foreground">Page {page + 1} of {Math.ceil(totalPeople / 50)}</p>
+              <div className="flex gap-2">
+                <button type="button" className="min-h-10 rounded-lg border px-3 text-sm disabled:opacity-50" disabled={page === 0 || isLoadingPeople} onClick={() => onPageChange(Math.max(0, page - 1))}>Previous</button>
+                <button type="button" className="min-h-10 rounded-lg border px-3 text-sm disabled:opacity-50" disabled={(page + 1) * 50 >= totalPeople || isLoadingPeople} onClick={() => onPageChange(page + 1)}>Next</button>
+              </div>
+            </div>}
+          </>
         ) : (
           <EnrollmentTable
             enrollments={filteredEnrollments}

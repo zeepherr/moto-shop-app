@@ -5,16 +5,19 @@ import { findAllServices } from "@/features/services/services/motoService.servic
 import { getR2PublicUrl } from "@/features/products/services/r2.service";
 import { PosPageClient } from "@/features/orders/components/pos/PosPageClient";
 import { getProductDiscountRate } from "@/features/products/services/discount-setting.service";
+import { logAuthPerformance, startAuthTimer } from "@/lib/auth-performance";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminPosPage() {
+  const dataStartedAt = startAuthTimer();
   const [categories, rawProducts, rawServices, productDiscountRate] = await Promise.all([
     findAllCategories({ isActive: true }),
     findAllProducts({ isActive: true }),
     findAllServices({ isActive: true }),
     getProductDiscountRate(),
   ]);
+  logAuthPerformance("destination_page_data_ms", dataStartedAt);
 
   const products = rawProducts.map((p) => ({
     id: p.id,

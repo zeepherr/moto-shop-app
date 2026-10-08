@@ -10,6 +10,7 @@ import { toast } from "sonner";
 interface PosSearchProps {
   searchTerm: string;
   onSearchChange: (value: string) => void;
+  onSkuLookup: (sku: string) => Promise<import("./PosProductCard").PosProduct | null>;
   products: Array<{
     id: number;
     sku: string;
@@ -23,6 +24,7 @@ interface PosSearchProps {
 export const PosSearch: React.FC<PosSearchProps> = ({
   searchTerm,
   onSearchChange,
+  onSkuLookup,
   products = [],
 }) => {
   const addItem = usePosStore((store) => store.addItem);
@@ -47,15 +49,21 @@ export const PosSearch: React.FC<PosSearchProps> = ({
     return () => window.removeEventListener("keydown", focusScanner);
   }, []);
 
-  const handleSkuSubmit = (event: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleSkuSubmit = async (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key !== "Enter") return;
 
     const value = sku.trim().toLowerCase();
     if (!value) return;
 
-    const product = products.find(
-      (p) => p.sku?.toLowerCase() === value,
-    );
+    let product = products.find((p) => p.sku?.toLowerCase() === value);
+    if (!product) {
+      try {
+        product = await onSkuLookup(sku.trim()) ?? undefined;
+      } catch {
+        toast.error("Could not look up that product. Try again.");
+        return;
+      }
+    }
 
     if (!product) {
       toast.warning("Product not found");

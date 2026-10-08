@@ -1,6 +1,7 @@
 import type { UserRole } from "./constants";
 
 export interface AuthSessionPayload {
+  sessionId: number;
   userId: number;
   email: string;
   role: UserRole;

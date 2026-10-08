@@ -1,6 +1,7 @@
 import { db as defaultDb } from "@/lib/db";
 import { UserRole } from "@prisma/client";
 import { deleteProfileImageFromUrl, getR2PublicUrl } from "@/features/products/services/r2.service";
+import { getBoundedPageWindow } from "@/lib/pagination";
 
 export const searchMembers = async (query: string, limit = 10, db = defaultDb) => {
   const term = query.trim();
@@ -62,8 +63,28 @@ export const findMemberById = async (id: number, db = defaultDb) => {
   };
 };
 
-export const findAllUsers = async (db = defaultDb) => {
+export interface UserListOptions {
+  skip?: number;
+  take?: number;
+  search?: string;
+  role?: UserRole;
+  isActive?: boolean;
+}
+
+export const findAllUsers = async (options: UserListOptions = {}, db = defaultDb) => {
+  const term = options.search?.trim();
+  const page = getBoundedPageWindow(options.skip ?? 0, options.take ?? 50);
   return await db.user.findMany({
+    where: {
+      ...(options.role && { role: options.role }),
+      ...(options.isActive !== undefined && { isActive: options.isActive }),
+      ...(term && { OR: [
+        { firstName: { contains: term, mode: "insensitive" } },
+        { lastName: { contains: term, mode: "insensitive" } },
+        { email: { contains: term, mode: "insensitive" } },
+        { phone: { contains: term } },
+      ] }),
+    },
     select: {
       id: true,
       role: true,
@@ -81,8 +102,34 @@ export const findAllUsers = async (db = defaultDb) => {
         select: { createdAt: true },
       },
     },
-    orderBy: { createdAt: "desc" },
+    orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+    ...page,
   });
+};
+
+export const countUsers = async (options: Omit<UserListOptions, "skip" | "take"> = {}, db = defaultDb) => {
+  const term = options.search?.trim();
+  return await db.user.count({
+    where: {
+      ...(options.role && { role: options.role }),
+      ...(options.isActive !== undefined && { isActive: options.isActive }),
+      ...(term && { OR: [
+        { firstName: { contains: term, mode: "insensitive" } },
+        { lastName: { contains: term, mode: "insensitive" } },
+        { email: { contains: term, mode: "insensitive" } },
+        { phone: { contains: term } },
+      ] }),
+    },
+  });
+};
+
+export const getUserRoleCounts = async (db = defaultDb) => {
+  const groups = await db.user.groupBy({ by: ["role"], _count: { _all: true } });
+  return {
+    admin: groups.find(({ role }) => role === UserRole.ADMIN)?._count._all ?? 0,
+    staff: groups.find(({ role }) => role === UserRole.STAFF)?._count._all ?? 0,
+    member: groups.find(({ role }) => role === UserRole.MEMBER)?._count._all ?? 0,
+  };
 };
 
 export const getUserProfile = async (userId: number, db = defaultDb) => {

@@ -47,7 +47,9 @@ export const LoginForm: React.FC<{ redirectTo?: string }> = ({ redirectTo }) => 
 
     startTransition(async () => {
       try {
+        const actionStartedAt = performance.now();
         const res = await loginAction({ email, password });
+        if (process.env.NODE_ENV === "development") console.info(`[auth-perf] login_action_roundtrip_ms: ${(performance.now() - actionStartedAt).toFixed(1)}ms`);
         if (!res.success) {
           const message = res.error || "Failed to log in";
           setError(message);
@@ -57,8 +59,8 @@ export const LoginForm: React.FC<{ redirectTo?: string }> = ({ redirectTo }) => 
 
         toast.success(`Welcome back, ${(res.data as { firstName?: string })?.firstName || "there"}`);
         const role = (res.data as { role?: string })?.role;
+        window.sessionStorage.setItem("moto-care-login-navigation-start", String(performance.now()));
         router.push(getSafeRoleRedirect(redirectTo, role) ?? getRoleHome(role));
-        router.refresh();
       } catch {
         const message = "Unable to sign in right now. Please try again.";
         setError(message);
@@ -98,6 +100,7 @@ export const LoginForm: React.FC<{ redirectTo?: string }> = ({ redirectTo }) => 
         value={password}
         onChange={(event) => setPassword(event.target.value)}
         autoComplete="current-password"
+        minLength={4}
         placeholder="Enter your password"
         disabled={isPending}
       />

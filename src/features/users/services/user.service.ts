@@ -39,8 +39,9 @@ export const findMemberById = async (id: number, db = defaultDb) => {
       phone: true,
       userMotors: {
         select: {
+          licensePlate: true,
           motor: {
-            select: { id: true, model: true, motorBrand: { select: { name: true } } },
+            select: { id: true, model: true, type: true, motorBrand: { select: { name: true } } },
           },
         },
       },
@@ -53,9 +54,10 @@ export const findMemberById = async (id: number, db = defaultDb) => {
     lastName: member.lastName,
     email: member.email,
     phone: member.phone,
-    vehicles: member.userMotors.map(({ motor }) => ({
+    vehicles: member.userMotors.map(({ motor, licensePlate }) => ({
       id: motor.id,
       label: `${motor.motorBrand.name} ${motor.model}`,
+      licensePlate,
     })),
   };
 };
@@ -123,6 +125,97 @@ export const getUserProfile = async (userId: number, db = defaultDb) => {
     stats: {
       totalVisits: orderStats._count.id || 0,
       totalSpent: Number(orderStats._sum.finalTotal) || 0,
+    },
+  };
+};
+
+export const getMemberPortalProfile = async (userId: number, db = defaultDb) => {
+  const [profile, completedOrderStats] = await Promise.all([db.user.findFirst({
+    where: { id: userId, role: UserRole.MEMBER, isActive: true },
+    select: {
+      id: true,
+      firstName: true,
+      lastName: true,
+      email: true,
+      phone: true,
+      createdAt: true,
+      emailVerifiedAt: true,
+      emailChangeOtpLastSentAt: true,
+      emailChangeRequest: { select: { newEmail: true, otpExpiresAt: true, otpAttempts: true } },
+      userMotors: {
+        orderBy: { createdAt: "desc" },
+        select: {
+          motorId: true,
+          licensePlate: true,
+          motor: { select: { model: true, type: true, motorBrand: { select: { name: true } } } },
+        },
+      },
+      motorSuggestions: {
+        orderBy: { createdAt: "desc" },
+        take: 20,
+        select: { id: true, brandName: true, model: true, type: true, status: true, createdAt: true, reviewNote: true },
+      },
+      memberOrders: {
+        orderBy: { createdAt: "desc" },
+        select: {
+          id: true,
+          orderNumber: true,
+          status: true,
+          createdAt: true,
+          completedAt: true,
+          finalTotal: true,
+          motor: { select: { model: true, motorBrand: { select: { name: true } } } },
+          orderItems: { select: { id: true, itemType: true, itemNameSnapshot: true, quantity: true, lineTotal: true } },
+        },
+      },
+    },
+  }), db.order.aggregate({
+    where: { memberId: userId, status: "COMPLETED" },
+    _count: { id: true },
+    _sum: { finalTotal: true },
+  })]);
+  if (!profile) return null;
+
+  const now = Date.now();
+  const emailChangeRequest = profile.emailChangeRequest && profile.emailChangeRequest.otpExpiresAt.getTime() > now
+    ? { ...profile.emailChangeRequest, otpExpiresAt: profile.emailChangeRequest.otpExpiresAt.toISOString() }
+    : null;
+  const emailResendCooldownSeconds = profile.emailChangeOtpLastSentAt
+    ? Math.max(0, Math.ceil((profile.emailChangeOtpLastSentAt.getTime() + 60_000 - now) / 1000))
+    : 0;
+
+  return {
+    id: profile.id,
+    firstName: profile.firstName,
+    lastName: profile.lastName,
+    email: profile.email,
+    phone: profile.phone,
+    createdAt: profile.createdAt.toISOString(),
+    emailVerifiedAt: profile.emailVerifiedAt?.toISOString() ?? null,
+    emailResendCooldownSeconds,
+    emailChangeExpiresSeconds: emailChangeRequest
+      ? Math.max(0, Math.ceil((new Date(emailChangeRequest.otpExpiresAt).getTime() - now) / 1000))
+      : 0,
+    emailChangeRequest,
+    userMotors: profile.userMotors.map((entry) => ({
+      motorId: entry.motorId,
+      licensePlate: entry.licensePlate,
+      motor: entry.motor,
+    })),
+    motorSuggestions: profile.motorSuggestions.map((entry) => ({
+      ...entry,
+      createdAt: entry.createdAt.toISOString(),
+    })),
+    orders: profile.memberOrders.map((order) => ({
+      ...order,
+      finalTotal: Number(order.finalTotal),
+      createdAt: order.createdAt.toISOString(),
+      completedAt: order.completedAt?.toISOString() ?? null,
+      orderItems: order.orderItems.map((item) => ({ ...item, lineTotal: Number(item.lineTotal) })),
+    })),
+    stats: {
+      totalVisits: completedOrderStats._count.id,
+      totalSpent: Number(completedOrderStats._sum.finalTotal ?? 0),
     },
   };
 };

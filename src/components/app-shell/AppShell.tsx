@@ -48,6 +48,9 @@ export const AppShell: React.FC<AppShellProps> = ({
   }, [isAdmin]);
 
   const role = user?.role ?? ROLES.MEMBER;
+  if (role === ROLES.MEMBER) {
+    return <div className="min-h-dvh bg-background text-foreground"><main className="min-h-dvh">{children}</main></div>;
+  }
   const navigation = getNavigation(role);
   const activeItem = [...navigation, ...getMoreNavigation(role)].find((item) =>
     isNavItemActive(pathname, item),

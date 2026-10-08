@@ -113,7 +113,9 @@ const updateOwnProfileAction = async (input: unknown, requiredRole: UserRole, al
       success: false,
       error: requiredRole === UserRole.ADMIN
         ? "Only administrators can update this profile."
-        : "Only staff can update this profile.",
+        : requiredRole === UserRole.STAFF
+          ? "Only staff can update this profile."
+          : "Only members can update this profile.",
     };
   }
   if (typeof input !== "object" || input === null) {
@@ -156,9 +158,10 @@ const updateOwnProfileAction = async (input: unknown, requiredRole: UserRole, al
       phone,
       photoKey,
     });
-    const profilePath = requiredRole === UserRole.ADMIN ? "/admin/profile" : "/staff/profile";
+    const profilePath = requiredRole === UserRole.ADMIN ? "/admin/profile" : requiredRole === UserRole.STAFF ? "/staff/profile" : "/member/profile";
     revalidatePath(profilePath);
-    revalidatePath(requiredRole === UserRole.ADMIN ? "/admin" : "/staff");
+    if (requiredRole === UserRole.ADMIN) revalidatePath("/admin");
+    if (requiredRole === UserRole.STAFF) revalidatePath("/staff");
     return { success: true };
   } catch (err: unknown) {
     const message = (err as Error).message || "Unable to update profile.";
@@ -176,6 +179,9 @@ export const updateAdminProfileAction = async (input: unknown) =>
 
 export const updateStaffProfileAction = async (input: unknown) =>
   updateOwnProfileAction(input, UserRole.STAFF, true);
+
+export const updateMemberProfileAction = async (input: unknown) =>
+  updateOwnProfileAction(input, UserRole.MEMBER);
 
 export const updateStaffProfilePhotoAction = async (input: unknown) => {
   if (typeof input !== "object" || input === null || typeof (input as Record<string, unknown>).photoKey !== "string") {

@@ -41,6 +41,7 @@ export async function proxy(request: NextRequest) {
 
   if (isMemberPath) {
     if (!userRole) return NextResponse.redirect(new URL(`/login?redirect=${encodeURIComponent(`${pathname}${request.nextUrl.search}`)}`, request.url));
+    if (userRole !== ROLES.MEMBER) return NextResponse.redirect(new URL("/unauthorized", request.url));
   }
 
   return NextResponse.next();

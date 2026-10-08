@@ -2,14 +2,15 @@ import { UserAuditAction, UserRole } from "@prisma/client";
 import { db as defaultDb } from "@/lib/db";
 
 export const changeStaffPasswordWithCurrentPassword = async (
-  data: { userId: number; currentPasswordHash: string; passwordHash: string },
+  data: { userId: number; currentPasswordHash: string; passwordHash: string; role?: UserRole },
   db = defaultDb,
 ) => db.$transaction(async (tx) => {
   const now = new Date();
+  const role = data.role ?? UserRole.STAFF;
   const changed = await tx.user.updateMany({
     where: {
       id: data.userId,
-      role: UserRole.STAFF,
+      role,
       isActive: true,
       password: data.currentPasswordHash,
     },
@@ -27,21 +28,22 @@ export const changeStaffPasswordWithCurrentPassword = async (
       action: UserAuditAction.USER_PASSWORD_CHANGED,
       actorUserId: data.userId,
       subjectUserId: data.userId,
-      detail: "Staff password changed after current-password verification",
+      detail: `${role === UserRole.MEMBER ? "Member" : "Staff"} password changed after current-password verification`,
     },
   });
   return true;
 });
 
 export const claimStaffPasswordChangeOtp = async (
-  data: { userId: number; otpHash: string; otpExpiresAt: Date; cooldownMs: number; now?: Date },
+  data: { userId: number; otpHash: string; otpExpiresAt: Date; cooldownMs: number; now?: Date; role?: UserRole },
   db = defaultDb,
 ) => db.$transaction(async (tx) => {
   const now = data.now ?? new Date();
+  const role = data.role ?? UserRole.STAFF;
   const sendSlot = await tx.user.updateMany({
     where: {
       id: data.userId,
-      role: UserRole.STAFF,
+      role,
       isActive: true,
       OR: [
         { passwordResetOtpLastSentAt: null },
@@ -70,10 +72,11 @@ export const incrementStaffPasswordChangeOtpAttempts = async (userId: number, db
   db.adminPasswordResetRequest.updateMany({ where: { userId, otpAttempts: { lt: 5 } }, data: { otpAttempts: { increment: 1 } } });
 
 export const completeStaffPasswordChangeWithOtp = async (
-  data: { userId: number; otpHash: string; passwordHash: string; now?: Date },
+  data: { userId: number; otpHash: string; passwordHash: string; now?: Date; role?: UserRole },
   db = defaultDb,
 ) => db.$transaction(async (tx) => {
   const now = data.now ?? new Date();
+  const role = data.role ?? UserRole.STAFF;
   const request = await tx.adminPasswordResetRequest.findUnique({ where: { userId: data.userId } });
   if (!request || request.otpHash !== data.otpHash || request.otpExpiresAt <= now || request.otpAttempts >= 5) return false;
 
@@ -83,7 +86,7 @@ export const completeStaffPasswordChangeWithOtp = async (
   if (claim.count !== 1) return false;
 
   const updated = await tx.user.updateMany({
-    where: { id: data.userId, role: UserRole.STAFF, isActive: true },
+    where: { id: data.userId, role, isActive: true },
     data: { password: data.passwordHash, passwordResetOtpLastSentAt: null },
   });
   if (updated.count !== 1) throw new Error("Staff password update was not applied.");
@@ -94,7 +97,7 @@ export const completeStaffPasswordChangeWithOtp = async (
       action: UserAuditAction.USER_PASSWORD_CHANGED,
       actorUserId: data.userId,
       subjectUserId: data.userId,
-      detail: "Staff password changed after email OTP verification",
+      detail: `${role === UserRole.MEMBER ? "Member" : "Staff"} password changed after email OTP verification`,
     },
   });
   return true;

@@ -33,6 +33,14 @@
 - **Boundaries**: Own staff sales only; Bangkok business day; current-password or current-account-email OTP verification for password changes; preserve and do not modify POS; no schema changes or shop-wide/staff-wide analytics.
 - **Approval**: User approved the final scope on 2026-10-08.
 
+### Ready for Agent — Member Profile Portal
+- **Status**: Implementation complete on `codex/member-profile-portal`. See [task handoff](agent_docs/member-profile-portal/TASK.md) and [feature progress](agent_docs/member-profile-portal/PROGRESS.md).
+- **Approved scope (2026-10-08)**: Responsive member-only account center on `/member/profile`; profile name/phone editing; email OTP; current-password or email-OTP password changes; own motorcycles with optional plate; admin-reviewed catalog suggestions; all own order history with completed-only visit/spend totals; read-only motorcycle details for staff/admin.
+- **Boundaries**: No marketing messaging/consent, photo changes, staff approval, order workflow changes, or destructive database operations. Members have one motorcycle association and may replace it with a catalog selection or submit a replacement suggestion for admin review.
+- **Database**: Additive schema applied successfully via Prisma `db push`; read-only diff showed no drops/data rewrites. This also applied additive password-reset structures already used by the existing admin/staff profile code.
+- **Authorization follow-up**: Existing motorcycle brand/model create, update, and delete server actions now require an active Admin session; staff remain read-only even when calling actions directly.
+- **Verification**: TypeScript, focused ESLint, Prisma validation, and `git diff --check` pass. Full Impeccable scan reports four pre-existing email-template typography anti-patterns in `otp.service.ts`; new member interface has no anti-patterns. No production build or seed was run.
+
 ### Active Workstream: Readability and Maintainability Review
 - **Approved scope**: Implement the three narrow refactor steps from the Phase 1 audit on a new `codex/readability-maintenance-review` branch. Preserve existing workflows and behavior; do not commit.
 - **Step 1 — User Management workspace composition**: Extract People/Enrollment presentation from `UsersPageClient.tsx` while retaining shared state, filters, actions, and confirmation wiring. Preserve default view, counts, shortcuts, action behavior, optimistic updates, refresh, and responsive layouts.

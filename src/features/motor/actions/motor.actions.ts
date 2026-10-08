@@ -1,6 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { UserRole } from "@prisma/client";
+import { getCurrentUser } from "@/features/auth/actions/session.action";
 import {
   createMotorBrandSchema,
   updateMotorBrandSchema,
@@ -19,7 +21,13 @@ import {
 } from "../services/motorBrand.service";
 import { createMotor, updateMotor, deleteMotor } from "../services/motor.service";
 
+const requireCatalogAdmin = async () => {
+  const user = await getCurrentUser();
+  return user?.role === UserRole.ADMIN;
+};
+
 export const createBrandAction = async (input: CreateMotorBrandInput) => {
+  if (!(await requireCatalogAdmin())) return { success: false, error: "Only administrators can manage the motorcycle catalog." };
   const parsed = createMotorBrandSchema.safeParse(input);
   if (!parsed.success) {
     return { success: false, error: parsed.error.issues[0]?.message || "Invalid input" };
@@ -37,6 +45,7 @@ export const createBrandAction = async (input: CreateMotorBrandInput) => {
 };
 
 export const updateBrandAction = async (id: number, input: UpdateMotorBrandInput) => {
+  if (!(await requireCatalogAdmin())) return { success: false, error: "Only administrators can manage the motorcycle catalog." };
   const parsed = updateMotorBrandSchema.safeParse(input);
   if (!parsed.success) {
     return { success: false, error: parsed.error.issues[0]?.message || "Invalid input" };
@@ -58,6 +67,7 @@ export const updateBrandAction = async (id: number, input: UpdateMotorBrandInput
 };
 
 export const deleteBrandAction = async (id: number) => {
+  if (!(await requireCatalogAdmin())) return { success: false, error: "Only administrators can manage the motorcycle catalog." };
   try {
     await deleteBrand(id);
     revalidatePath("/admin/motor-brands");
@@ -71,6 +81,7 @@ export const deleteBrandAction = async (id: number) => {
 };
 
 export const createMotorAction = async (input: CreateMotorInput) => {
+  if (!(await requireCatalogAdmin())) return { success: false, error: "Only administrators can manage the motorcycle catalog." };
   const parsed = createMotorSchema.safeParse(input);
   if (!parsed.success) {
     return { success: false, error: parsed.error.issues[0]?.message || "Invalid input" };
@@ -85,6 +96,7 @@ export const createMotorAction = async (input: CreateMotorInput) => {
 };
 
 export const updateMotorAction = async (id: number, input: UpdateMotorInput) => {
+  if (!(await requireCatalogAdmin())) return { success: false, error: "Only administrators can manage the motorcycle catalog." };
   const parsed = updateMotorSchema.safeParse(input);
   if (!parsed.success) {
     return { success: false, error: parsed.error.issues[0]?.message || "Invalid input" };
@@ -99,6 +111,7 @@ export const updateMotorAction = async (id: number, input: UpdateMotorInput) => 
 };
 
 export const deleteMotorAction = async (id: number) => {
+  if (!(await requireCatalogAdmin())) return { success: false, error: "Only administrators can manage the motorcycle catalog." };
   try {
     await deleteMotor(id);
     revalidatePath("/admin/motors");

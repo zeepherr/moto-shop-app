@@ -35,7 +35,7 @@ const requestEmailChangeForRole = async (input: unknown, requiredRole: UserRole)
   const parsed = requestAdminEmailChangeSchema.safeParse(input);
   if (!parsed.success) return { success: false, error: parsed.error.issues[0]?.message ?? "Invalid email address." };
   const email = parsed.data.email;
-  if (email === user.email.toLowerCase()) return { success: false, error: "Enter a different email address." };
+  if (email === (user.email ?? "").toLowerCase()) return { success: false, error: "Enter a different email address." };
 
   const existing = await db.user.findUnique({ where: { email }, select: { id: true } });
   if (existing) return { success: false, error: "That email is already associated with an account." };
@@ -62,7 +62,7 @@ const requestEmailChangeForRole = async (input: unknown, requiredRole: UserRole)
         resendAvailableAt: claim.resendAvailableAt,
       };
     }
-    await sendEmailChangeOtpEmail(email, otp);
+    await sendEmailChangeOtpEmail(email, otp, requiredRole === UserRole.MEMBER ? "member" : requiredRole === UserRole.STAFF ? "staff" : "administrator");
     return {
       success: true,
       message: "A verification code was sent to the new email address.",
@@ -88,6 +88,9 @@ export const requestAdminEmailChangeAction = async (input: unknown) =>
 export const requestStaffEmailChangeAction = async (input: unknown) =>
   requestEmailChangeForRole(input, UserRole.STAFF);
 
+export const requestMemberEmailChangeAction = async (input: unknown) =>
+  requestEmailChangeForRole(input, UserRole.MEMBER);
+
 const cancelEmailChangeForRole = async (requiredRole: UserRole) => {
   const user = await getCurrentUser();
   if (!user || user.role !== requiredRole) {
@@ -103,6 +106,7 @@ const cancelEmailChangeForRole = async (requiredRole: UserRole) => {
 
 export const cancelAdminEmailChangeAction = async () => cancelEmailChangeForRole(UserRole.ADMIN);
 export const cancelStaffEmailChangeAction = async () => cancelEmailChangeForRole(UserRole.STAFF);
+export const cancelMemberEmailChangeAction = async () => cancelEmailChangeForRole(UserRole.MEMBER);
 
 const verifyEmailChangeForRole = async (input: unknown, requiredRole: UserRole) => {
   const user = await getCurrentUser();
@@ -148,8 +152,9 @@ const verifyEmailChangeForRole = async (input: unknown, requiredRole: UserRole) 
   const refreshToken = createRefreshToken();
   await createAuthSession(changedUser.id, hashRefreshToken(refreshToken));
   await setAuthCookies(accessToken, refreshToken);
-  revalidatePath(requiredRole === UserRole.ADMIN ? "/admin/profile" : "/staff/profile");
-  revalidatePath(requiredRole === UserRole.ADMIN ? "/admin" : "/staff");
+  revalidatePath(requiredRole === UserRole.ADMIN ? "/admin/profile" : requiredRole === UserRole.STAFF ? "/staff/profile" : "/member/profile");
+  if (requiredRole === UserRole.ADMIN) revalidatePath("/admin");
+  if (requiredRole === UserRole.STAFF) revalidatePath("/staff");
   return { success: true, email: changedUser.email, message: "Email address updated and verified." };
 };
 
@@ -159,7 +164,12 @@ export const verifyAdminEmailChangeAction = async (input: unknown) =>
 export const verifyStaffEmailChangeAction = async (input: unknown) =>
   verifyEmailChangeForRole(input, UserRole.STAFF);
 
+export const verifyMemberEmailChangeAction = async (input: unknown) =>
+  verifyEmailChangeForRole(input, UserRole.MEMBER);
+
 const roleEmailError = (role: UserRole) =>
   role === UserRole.ADMIN
     ? "Only administrators can change this email."
-    : "Only staff can change this email.";
+    : role === UserRole.STAFF
+      ? "Only staff can change this email."
+      : "Only members can change this email.";

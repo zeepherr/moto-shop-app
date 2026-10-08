@@ -77,6 +77,12 @@ enum OrderItemType {
   SERVICE
 }
 
+enum MotorSuggestionStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 // ======================================================
 // MODELS
 // ======================================================
@@ -93,27 +99,29 @@ model User {
   lastName  String
   password  String
 
-  isActive                 Boolean   @default(true)
-  emailVerifiedAt          DateTime?
-  emailChangeOtpLastSentAt DateTime?
+  isActive                   Boolean   @default(true)
+  emailVerifiedAt            DateTime?
+  emailChangeOtpLastSentAt   DateTime?
   passwordResetOtpLastSentAt DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   // Relations
-  userInfo   UserInfo?
-  userMotors UserMotor[]
+  userInfo                 UserInfo?
+  userMotors               UserMotor[]
+  motorSuggestions         MotorSuggestion[] @relation("MemberMotorSuggestions")
+  reviewedMotorSuggestions MotorSuggestion[] @relation("MotorSuggestionReviewer")
 
   memberOrders    Order[] @relation("MemberOrder")
   saleOrders      Order[] @relation("Sale")
   cancelledOrders Order[] @relation("OrderCanceller")
 
-  authSessions         AuthSession[]
-  emailChangeRequest   EmailChangeRequest?
+  authSessions              AuthSession[]
+  emailChangeRequest        EmailChangeRequest?
   adminPasswordResetRequest AdminPasswordResetRequest?
-  auditEventsAsActor   UserAuditEvent[]    @relation("UserAuditActor")
-  auditEventsAsSubject UserAuditEvent[]    @relation("UserAuditSubject")
+  auditEventsAsActor        UserAuditEvent[]           @relation("UserAuditActor")
+  auditEventsAsSubject      UserAuditEvent[]           @relation("UserAuditSubject")
 }
 
 // SHOP-WIDE SETTINGS
@@ -311,8 +319,9 @@ model Motor {
 model UserMotor {
   id Int @id @default(autoincrement())
 
-  userId  Int
-  motorId Int
+  userId       Int
+  motorId      Int
+  licensePlate String?
 
   createdAt DateTime @default(now())
 
@@ -324,6 +333,29 @@ model UserMotor {
   @@unique([userId, motorId])
   @@index([userId])
   @@index([motorId])
+}
+
+model MotorSuggestion {
+  id Int @id @default(autoincrement())
+
+  userId       Int
+  reviewedById Int?
+  brandName    String
+  model        String
+  type         MotorType
+  licensePlate String?
+  status       MotorSuggestionStatus @default(PENDING)
+  reviewNote   String?
+
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  reviewedAt DateTime?
+
+  user       User  @relation("MemberMotorSuggestions", fields: [userId], references: [id], onDelete: Cascade)
+  reviewedBy User? @relation("MotorSuggestionReviewer", fields: [reviewedById], references: [id], onDelete: SetNull)
+
+  @@index([status, createdAt])
+  @@index([userId, createdAt])
 }
 
 // PRODUCT CATEGORY

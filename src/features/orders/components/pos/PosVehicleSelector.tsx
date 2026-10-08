@@ -24,7 +24,7 @@ export function PosVehicleSelector({ vehicles, selectedMotorId, onVehicleChange 
         className="h-12 w-full rounded-xl border border-input bg-background px-3 text-base text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring"
         options={[
           { value: "", label: "No vehicle selected" },
-          ...vehicles.map((vehicle) => ({ value: String(vehicle.id), label: vehicle.label })),
+          ...vehicles.map((vehicle) => ({ value: String(vehicle.id), label: vehicle.licensePlate ? `${vehicle.label} · ${vehicle.licensePlate}` : vehicle.label })),
         ]}
       />
     </label>

@@ -18,6 +18,7 @@ type Detail = {
   createdAt: string;
   completedOrders: number;
   motorcycleCount: number;
+  motorcycles: Array<{ label: string; type: string; licensePlate: string | null }>;
   events: Array<{
     action: string;
     detail: string | null;
@@ -72,6 +73,7 @@ function UserDetailContent({ userId }: { userId: number }) {
             <div className="rounded-xl border border-border/70 p-3"><Bike className="size-4 text-primary" /><p className="mt-3 text-sm font-semibold text-foreground">{detail.motorcycleCount} motorcycles</p><p className="text-xs text-muted-foreground">Linked to this account</p></div>
           </section>
           <section className="space-y-2 border-y border-border/60 py-4 text-sm"><p className="font-semibold text-foreground">Contact and verification</p><p className="text-muted-foreground">{detail.email || "No email address"}</p><p className="text-muted-foreground">{detail.phone || "No phone number"}</p><p className="text-xs text-muted-foreground">{detail.emailVerifiedAt ? "Email verified" : "Email has not been verified"} · Joined {new Date(detail.createdAt).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}</p></section>
+          {detail.motorcycles.length > 0 && <section className="space-y-2"><p className="text-sm font-semibold text-foreground">Registered motorcycles</p><ul className="divide-y divide-border/60 border-y border-border/60">{detail.motorcycles.map((motor, index) => <li key={`${motor.label}-${index}`} className="flex items-center justify-between gap-3 py-2.5 text-sm"><span className="min-w-0 truncate text-foreground">{motor.label}<span className="ml-2 text-xs text-muted-foreground">{motor.type === "AUTOMATIC" ? "Automatic" : "Manual"}</span></span><span className="shrink-0 text-muted-foreground">{motor.licensePlate || "No plate"}</span></li>)}</ul></section>}
           <section><div className="mb-3 flex items-center gap-2"><History className="size-4 text-primary" /><h3 className="text-sm font-semibold text-foreground">Activity history</h3></div>{detail.events.length ? <ol className="space-y-3">{detail.events.map((event, index) => <li className="border-l border-border pl-3" key={`${event.action}-${event.createdAt}-${index}`}><p className="text-sm font-medium text-foreground">{eventLabel(event.action)}</p><p className="text-xs text-muted-foreground">{event.actor ? `${event.actor.firstName} ${event.actor.lastName}` : "System or account holder"} · {new Date(event.createdAt).toLocaleString("en-GB", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}</p></li>)}</ol> : <p className="text-sm text-muted-foreground">No account events have been recorded yet.</p>}</section>
       </div>}
     </>

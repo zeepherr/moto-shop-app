@@ -3,6 +3,8 @@ import type { Metadata } from "next";
 import { findAllMotors } from "@/features/motor/services/motor.service";
 import { findAllBrands } from "@/features/motor/services/motorBrand.service";
 import { MotorList } from "@/features/motor/components/MotorList";
+import { MotorSuggestionQueue } from "@/features/motor/components/MotorSuggestionQueue";
+import { getPendingMotorSuggestions } from "@/features/motor/services/member-motor.service";
 
 export const metadata: Metadata = {
   title: "Motorcycles - HrungMoto",
@@ -12,9 +14,10 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 
 export default async function AdminMotorsPage() {
-  const [rawMotors, rawBrands] = await Promise.all([
+  const [rawMotors, rawBrands, rawSuggestions] = await Promise.all([
     findAllMotors(),
     findAllBrands({ isActive: true }),
+    getPendingMotorSuggestions(),
   ]);
 
   const motors = rawMotors.map((m) => ({
@@ -37,5 +40,6 @@ export default async function AdminMotorsPage() {
     _count: b._count,
   }));
 
-  return <MotorList initialMotors={motors} brands={brands} />;
+  const suggestions = rawSuggestions.map((suggestion) => ({ ...suggestion, createdAt: suggestion.createdAt.toISOString() }));
+  return <><MotorSuggestionQueue suggestions={suggestions} /><MotorList initialMotors={motors} brands={brands} /></>;
 }

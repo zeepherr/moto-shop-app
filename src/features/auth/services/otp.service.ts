@@ -190,13 +190,13 @@ export const sendRegistrationOtpEmail = async (email: string, otp: string): Prom
   });
 };
 
-export const sendEmailChangeOtpEmail = async (email: string, otp: string): Promise<void> => {
+export const sendEmailChangeOtpEmail = async (email: string, otp: string, accountType: "administrator" | "staff" | "member" = "administrator"): Promise<void> => {
   const transporter = createMailTransporter();
   const minutes = Math.floor(OTP_TTL_MS / (60 * 1000));
   const message = renderAccountEmail({
-    preheader: "Confirm the new email address for your HrungMoto administrator account.",
+    preheader: `Confirm the new email address for your HrungMoto ${accountType} account.`,
     title: "Confirm your new email",
-    introduction: "Enter this code in your admin profile to confirm this email address.",
+    introduction: `Enter this code in your ${accountType} profile to confirm this email address.`,
     code: otp,
     details: ["Your current email stays active until this code is verified.", "This code expires in " + minutes + " minutes."],
     note: "If you did not request this change, you can ignore this email. Your account email will not change.",
@@ -214,7 +214,7 @@ export const sendPasswordOtpEmail = async (
   email: string,
   otp: string,
   purpose: "reset" | "change" = "reset",
-  accountType: "administrator" | "staff" = "administrator",
+  accountType: "administrator" | "staff" | "member" = "administrator",
 ): Promise<void> => {
   const transporter = createMailTransporter();
   const minutes = Math.floor(OTP_TTL_MS / (60 * 1000));
@@ -248,8 +248,8 @@ export const sendAdminPasswordOtpEmail = async (
   purpose: "reset" | "change" = "reset",
 ) => sendPasswordOtpEmail(email, otp, purpose, "administrator");
 
-export const sendStaffPasswordOtpEmail = async (email: string, otp: string) =>
-  sendPasswordOtpEmail(email, otp, "change", "staff");
+export const sendStaffPasswordOtpEmail = async (email: string, otp: string, accountType: "staff" | "member" = "staff") =>
+  sendPasswordOtpEmail(email, otp, "change", accountType);
 
 export const sendRegistrationLinkEmail = async (email: string, registrationUrl: string): Promise<void> => {
   const transporter = createMailTransporter();

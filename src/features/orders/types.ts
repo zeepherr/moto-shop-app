@@ -24,6 +24,7 @@ export interface SelectedMember {
 export interface SelectedMotor {
   id: number;
   label: string;
+  licensePlate?: string | null;
 }
 
 export interface OrderItemDTO {

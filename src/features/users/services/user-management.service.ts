@@ -15,7 +15,13 @@ export const getUserManagementDetail = async (userId: number, db = defaultDb) =>
       emailVerifiedAt: true,
       createdAt: true,
       userInfo: { select: { photoUrl: true } },
-      userMotors: { select: { id: true } },
+      userMotors: {
+        select: {
+          id: true,
+          licensePlate: true,
+          motor: { select: { model: true, type: true, motorBrand: { select: { name: true } } } },
+        },
+      },
       auditEventsAsSubject: {
         orderBy: { createdAt: "desc" },
         take: 12,
@@ -63,6 +69,11 @@ export const getUserManagementDetail = async (userId: number, db = defaultDb) =>
     ...user,
     completedOrders,
     motorcycleCount: user.userMotors.length,
+    motorcycles: user.userMotors.map(({ licensePlate, motor }) => ({
+      label: `${motor.motorBrand.name} ${motor.model}`,
+      type: motor.type,
+      licensePlate,
+    })),
     events,
   };
 };

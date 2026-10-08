@@ -5,7 +5,17 @@ import { PENDING_REGISTRATION_RETENTION_MS } from "../constants";
 export const findUserByEmail = async (email: string, db = defaultDb) => {
   return await db.user.findUnique({
     where: { email },
-    include: { userInfo: true },
+    select: {
+      id: true,
+      email: true,
+      role: true,
+      phone: true,
+      firstName: true,
+      lastName: true,
+      password: true,
+      isActive: true,
+      emailVerifiedAt: true,
+    },
   });
 };
 

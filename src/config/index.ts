@@ -1,10 +1,9 @@
 // Centralized typed configuration
 // Reads process.env once with strict fallbacks so no raw process.env calls are scattered in the codebase
 
-const isProduction = process.env.NODE_ENV === "production";
-
 import { resolveAuthSecret } from "./secrets";
 
+const isProduction = process.env.NODE_ENV === "production";
 const getSecret = (name: "JWT_SECRET" | "OTP_SECRET", developmentFallback: string) =>
   resolveAuthSecret(name, process.env[name], developmentFallback, isProduction);
 
@@ -14,8 +13,12 @@ export const config = {
     directUrl: process.env.DIRECT_URL || "",
   },
   auth: {
-    jwtSecret: getSecret("JWT_SECRET", "default_dev_jwt_secret_change_me_in_env_local"),
-    otpSecret: getSecret("OTP_SECRET", "default_dev_otp_secret"),
+    get jwtSecret() {
+      return getSecret("JWT_SECRET", "default_dev_jwt_secret_change_me_in_env_local");
+    },
+    get otpSecret() {
+      return getSecret("OTP_SECRET", "default_dev_otp_secret");
+    },
     cookieName: "moto_care_session",
     refreshCookieName: "refreshToken",
     accessTokenExpiresIn: "15m",

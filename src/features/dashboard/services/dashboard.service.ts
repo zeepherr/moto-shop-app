@@ -1,6 +1,5 @@
 import { OrderItemType, OrderStatus, PaymentMethod, UserRole } from "@prisma/client";
 import { db as defaultDb } from "@/lib/db";
-import { getMonthlyStaffActivity } from "./staff-activity.service";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const CHART_WINDOW_DAYS = 365;
@@ -56,15 +55,16 @@ export const getDashboardSummary = async (db = defaultDb) => {
   const monthStart = shopDate(parts.year, parts.month, 1);
   const previousMonthStart = shopDate(parts.year, parts.month - 1, 1);
   const chartStart = new Date(now.getTime() - CHART_WINDOW_DAYS * DAY_MS);
-
   const [monthlyOrders, previousPeriod, lowStockCount, outOfStockCount, membersCount,
     newMembersCount, recentOrders, lowStockProducts, pendingOrders, pendingCount,
-    todayCompleted, todayCancelledCount, chartOrders, staffActivity] = await Promise.all([
+    todayCancelledCount, chartOrders] = await Promise.all([
     db.order.findMany({
       where: { status: OrderStatus.COMPLETED, completedAt: { gte: monthStart, lte: now } },
       select: {
+        completedAt: true,
         finalTotal: true,
         paymentMethod: true,
+        handledBy: { select: { id: true, firstName: true, lastName: true, role: true } },
         orderItems: { select: { itemType: true, itemNameSnapshot: true, quantity: true, lineTotal: true } },
       },
     }),
@@ -91,25 +91,33 @@ export const getDashboardSummary = async (db = defaultDb) => {
       select: { id: true, orderNumber: true, createdAt: true, finalTotal: true },
     }),
     db.order.count({ where: { status: OrderStatus.PENDING } }),
-    db.order.aggregate({
-      where: { status: OrderStatus.COMPLETED, completedAt: { gte: todayStart, lte: now } },
-      _sum: { finalTotal: true }, _count: { _all: true },
-    }),
     db.order.count({ where: { status: OrderStatus.CANCELLED, createdAt: { gte: todayStart, lte: now } } }),
     db.order.findMany({
       where: { status: OrderStatus.COMPLETED, completedAt: { gte: chartStart } },
       select: { completedAt: true, finalTotal: true }, orderBy: { completedAt: "asc" },
     }),
-    getMonthlyStaffActivity(monthStart, now, db),
   ]);
 
   const monthlyRevenue = monthlyOrders.reduce((sum, order) => sum + Number(order.finalTotal), 0);
+  let todayCompletedCount = 0;
+  let todayRevenue = 0;
   const salesMix = { products: 0, services: 0 };
   const paymentMix = { cash: { revenue: 0, count: 0 }, qr: { revenue: 0, count: 0 } };
   const ranked = new Map<string, RankedItem & { type: OrderItemType }>();
+  const staffActivityById = new Map<number, {
+    id: number;
+    firstName: string;
+    lastName: string;
+    orderCount: number;
+    handledRevenue: number;
+  }>();
 
   for (const order of monthlyOrders) {
     const total = Number(order.finalTotal);
+    if (order.completedAt && order.completedAt >= todayStart && order.completedAt <= now) {
+      todayCompletedCount += 1;
+      todayRevenue += total;
+    }
     if (order.paymentMethod === PaymentMethod.CASH) {
       paymentMix.cash.revenue += total;
       paymentMix.cash.count += 1;
@@ -117,6 +125,18 @@ export const getDashboardSummary = async (db = defaultDb) => {
     if (order.paymentMethod === PaymentMethod.QR) {
       paymentMix.qr.revenue += total;
       paymentMix.qr.count += 1;
+    }
+    if (order.handledBy.role === UserRole.STAFF) {
+      const activity = staffActivityById.get(order.handledBy.id) ?? {
+        id: order.handledBy.id,
+        firstName: order.handledBy.firstName,
+        lastName: order.handledBy.lastName,
+        orderCount: 0,
+        handledRevenue: 0,
+      };
+      activity.orderCount += 1;
+      activity.handledRevenue += total;
+      staffActivityById.set(activity.id, activity);
     }
     for (const item of order.orderItems) {
       const revenue = Number(item.lineTotal);
@@ -138,7 +158,15 @@ export const getDashboardSummary = async (db = defaultDb) => {
     .slice(0, 5)
     .map(({ name, quantity, revenue }) => ({ name, quantity, revenue }));
   const completedOrdersCount = monthlyOrders.length;
-  const todayRevenue = Number(todayCompleted._sum.finalTotal ?? 0);
+  const staffActivity = Array.from(staffActivityById.values())
+    .map(({ id, firstName, lastName, orderCount, handledRevenue }) => ({
+      id,
+      name: `${firstName} ${lastName}`.trim(),
+      orderCount,
+      handledRevenue,
+      averageOrder: orderCount ? handledRevenue / orderCount : 0,
+    }))
+    .sort((a, b) => b.handledRevenue - a.handledRevenue);
 
   return {
     totalRevenue: monthlyRevenue,
@@ -156,10 +184,10 @@ export const getDashboardSummary = async (db = defaultDb) => {
     },
     today: {
       revenue: todayRevenue,
-      completedCount: todayCompleted._count._all,
+      completedCount: todayCompletedCount,
       pendingCount,
       cancelledCount: todayCancelledCount,
-      averageOrder: todayCompleted._count._all ? todayRevenue / todayCompleted._count._all : 0,
+      averageOrder: todayCompletedCount ? todayRevenue / todayCompletedCount : 0,
     },
     attention: {
       pendingOrders: pendingOrders.map((order) => ({

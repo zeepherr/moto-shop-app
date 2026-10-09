@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo, useTransition, useEffect } from "react";
+import React, { useState, useMemo, useTransition, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { ManagementLayout } from "@/components/management/ManagementLayout";
 import { PageHeader } from "@/components/management/PageHeader";
@@ -53,6 +53,10 @@ export const ProductPageClient: React.FC<ProductPageClientProps> = ({
     key: "name",
     direction: "asc",
   });
+  const defaultSearchKey = JSON.stringify({ search: "", category: "all", status: "all", page: 0, sort: { key: "name", direction: "asc" } });
+  const searchKey = JSON.stringify({ search, category: selectedCategory, status, page, sort });
+  const lastRequestedSearchKey = useRef(defaultSearchKey);
+  const previousSearchProducts = useRef(initialProducts);
 
   const [createOpen, setCreateOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<ProductDTO | null>(null);
@@ -75,8 +79,16 @@ export const ProductPageClient: React.FC<ProductPageClientProps> = ({
   }
 
   useEffect(() => {
+    if (previousSearchProducts.current !== initialProducts) {
+      previousSearchProducts.current = initialProducts;
+      lastRequestedSearchKey.current = defaultSearchKey;
+    }
+    if (lastRequestedSearchKey.current === searchKey) return;
+
     const controller = { cancelled: false };
     const timer = window.setTimeout(async () => {
+      if (lastRequestedSearchKey.current === searchKey) return;
+      lastRequestedSearchKey.current = searchKey;
       const result = await searchProductsAction({
         search,
         categoryId: selectedCategory === "all" ? undefined : Number(selectedCategory),
@@ -93,7 +105,7 @@ export const ProductPageClient: React.FC<ProductPageClientProps> = ({
       }
     }, search || selectedCategory !== "all" || status !== "all" || page > 0 ? 250 : 0);
     return () => { controller.cancelled = true; window.clearTimeout(timer); };
-  }, [search, selectedCategory, status, page, sort, initialProducts]);
+  }, [search, selectedCategory, status, page, sort.key, sort.direction, initialProducts, defaultSearchKey, searchKey]);
 
   const filteredProducts = useMemo(() => {
     const term = search.trim().toLowerCase();
